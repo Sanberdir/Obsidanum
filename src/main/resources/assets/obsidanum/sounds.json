@@ -1,0 +1,110 @@
+{
+  "open_obsidian_door": {
+    "sounds": [
+      {
+        "name": "obsidanum:open_obsidian_door",
+        "stream": true
+      }
+    ]
+  },
+  "obsidian_tablet_active": {
+    "sounds": [
+      {
+        "name": "obsidanum:obsidian_tablet_active",
+        "stream": true
+      }
+    ]
+  },
+  "close_obsidian_door": {
+    "sounds": [
+      {
+        "name": "obsidanum:close_obsidian_door",
+        "stream": true
+      }
+    ]
+  },
+  "lock": {
+    "sounds": [
+      {
+        "name": "obsidanum:lock",
+        "stream": true
+      }
+    ]
+  },
+  "obsidian_totem": {
+    "sounds": [
+      {
+        "name": "obsidanum:obsidian_totem",
+        "stream": true
+      }
+    ]
+  },
+  "flash": {
+    "sounds": [
+      {
+        "name": "obsidanum:flash",
+        "stream": true
+      }
+    ]
+  },
+  "chacram_hit": {
+    "sounds": [
+      {
+        "name": "obsidanum:chakram_hit",
+        "stream": true
+      }
+    ]
+  },
+  "chakram_trowe": {
+    "sounds": [
+      {
+        "name": "obsidanum:chakram_trowe",
+        "stream": true
+      }
+    ]
+  },
+  "obsidian_elemental_ambient": {
+    "sounds": [
+      {
+        "name": "obsidanum:obsidian_elemental_ambient_1",
+        "stream": true
+      },
+      {
+        "name": "obsidanum:obsidian_elemental_ambient_2",
+        "stream": true
+      },
+      {
+        "name": "obsidanum:obsidian_elemental_ambient_3",
+        "stream": true
+      }
+    ]
+  },
+  "obsidian_elemental_hurt": {
+    "sounds": [
+      {
+        "name": "obsidanum:obsidian_elemental_hurt_1",
+        "stream": true
+      },
+      {
+        "name": "obsidanum:obsidian_elemental_hurt_2",
+        "stream": true
+      }
+    ]
+  },
+  "obsidian_elemental_death": {
+    "sounds": [
+      {
+        "name": "obsidanum:obsidian_elemental_death",
+        "stream": true
+      }
+    ]
+  },
+  "rezolv_the_tale_of_the_vanished_order": {
+    "sounds": [
+      {
+        "name": "obsidanum:rezolv_the_tale_of_the_vanished_order",
+        "stream": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "obsidanum:forge_scroll_order",
+  "ingredients": [
+    {
+      "item": "obsidanum:bagell_fuel",
+      "count": 1
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 20
+    },
+    {
+      "item": "minecraft:obsidian",
+      "count": 1
+    }
+  ],
+  "output": {
+    "item": "obsidanum:obsidan_essence",
+    "count": 5
+  }
+}

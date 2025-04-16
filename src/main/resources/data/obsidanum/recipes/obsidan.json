@@ -1,0 +1,21 @@
+{
+  "type": "obsidanum:forge_scroll_order",
+  "ingredients": [
+    {
+      "item": "obsidanum:obsidian_tear",
+      "count": 1
+    },
+    {
+      "item": "minecraft:blaze_powder",
+      "count": 2
+    },
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 12
+    }
+  ],
+  "output": {
+    "item": "obsidanum:obsidan",
+    "count": 1
+  }
+}

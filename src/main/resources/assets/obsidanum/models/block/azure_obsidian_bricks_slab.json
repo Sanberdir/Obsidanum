@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "obsidanum:block/azure_obsidian_bricks",
+    "side": "obsidanum:block/azure_obsidian_bricks",
+    "top": "obsidanum:block/azure_obsidian_bricks"
+  }
+}

@@ -1,0 +1,382 @@
+package net.rezolv.obsidanum.block.custom;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.language.LanguageManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.rezolv.obsidanum.item.ItemsObs;
+import net.rezolv.obsidanum.particle.ParticlesObs;
+import net.rezolv.obsidanum.sound.SoundsObs;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+public class ObsidianTablet extends Block {
+
+    private static final VoxelShape SHAPE_NORTH_SOUTH = Block.box(2.0, 0.0, 6.0, 14.0, 23.0, 10.0);
+    private static final VoxelShape SHAPE_EAST_WEST = Block.box(6.0, 0.0, 2.0, 10.0, 23.0, 14.0);
+    public static final DirectionProperty FACING = DirectionProperty.create("facing", Direction.Plane.HORIZONTAL);
+    public static final BooleanProperty EXPERIENCED = BooleanProperty.create("experienced");
+    public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
+    public static final BooleanProperty ENCHANTER = BooleanProperty.create("enchanter");
+    public BlockState rotate(BlockState state, Rotation rot) {
+        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
+    }
+
+    public BlockState mirror(BlockState state, Mirror mirrorIn) {
+        return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
+    }
+
+    public ObsidianTablet(Properties properties) {
+        super(properties);
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(EXPERIENCED, false)
+                .setValue(ENCHANTER, false)
+                .setValue(ACTIVE, false)); // Устанавливаем начальное состояние блока: активность = false
+
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        Direction direction = state.getValue(FACING);
+        return direction == Direction.NORTH || direction == Direction.SOUTH ? SHAPE_NORTH_SOUTH : SHAPE_EAST_WEST;
+    }
+
+    private static final Random random = new Random();
+
+    @Override
+    public void attack(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
+        super.attack(pState, pLevel, pPos, pPlayer);
+
+        if (!pState.getValue(EXPERIENCED)) {
+            ((Level) pLevel).explode(null, pPos.getX(), pPos.getY(), pPos.getZ(), 3, Level.ExplosionInteraction.TNT);
+
+            int lightningCount = 1 + random.nextInt(6); // Number of lightning bolts (1 to 4)
+            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+            for (int i = 0; i < lightningCount; i++) {
+                final int index = i;
+                long initialDelay = (index == 0 ? random.nextInt(10) : 10) * 50L; // Delay in milliseconds
+                executor.schedule(() -> spawnLightning(pLevel, pPos), initialDelay, TimeUnit.MILLISECONDS);
+                long initialDelay2 = (index == 0 ? random.nextInt(10) : 20) * 50L; // Delay in milliseconds
+                executor.schedule(() -> spawnLightning(pLevel, pPos), initialDelay2, TimeUnit.MILLISECONDS);
+                long initialDelay3 = (index == 0 ? random.nextInt(10) : 25) * 50L; // Delay in milliseconds
+                executor.schedule(() -> spawnLightning(pLevel, pPos), initialDelay3, TimeUnit.MILLISECONDS);
+                long initialDelay4 = (index == 0 ? random.nextInt(10) : 35) * 50L; // Delay in milliseconds
+                executor.schedule(() -> spawnLightning(pLevel, pPos), initialDelay4, TimeUnit.MILLISECONDS);
+            }
+            // Break the block
+            pLevel.setBlock(pPos, Blocks.AIR.defaultBlockState(), 3);
+            // Shutdown executor after all tasks have been scheduled
+            executor.shutdown();
+        }
+    }
+
+
+    private void spawnLightning(Level pLevel, BlockPos pPos) {
+        double offsetX = pPos.getX() + (random.nextDouble() * 12 - 6); // Random x within 5 blocks
+        double offsetY = pPos.getY();
+        double offsetZ = pPos.getZ() + (random.nextDouble() * 12 - 6); // Random z within 5 blocks
+
+        LightningBolt lightning = new LightningBolt(EntityType.LIGHTNING_BOLT, pLevel);
+        lightning.moveTo(offsetX, offsetY, offsetZ);
+        pLevel.addFreshEntity(lightning);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        // Получаем предмет, который будет установлен
+        ItemStack stack = context.getItemInHand();
+
+        // Проверяем, содержит ли предмет теги
+        if (stack.hasTag()) {
+            CompoundTag tag = stack.getTag();
+            int customModelData = tag.getInt("CustomModelData");
+
+            // Проверяем значение тега CustomModelData
+            boolean experienced = customModelData == 1 || customModelData == 2 || customModelData == 3;
+            boolean active = customModelData == 2;
+            boolean enchanter = customModelData == 3;
+
+            // Создаем новое состояние блока с учетом переданных тегов
+            return this.defaultBlockState()
+                    .setValue(FACING, context.getHorizontalDirection().getOpposite())
+                    .setValue(EXPERIENCED, experienced)
+                    .setValue(ENCHANTER, enchanter)
+                    .setValue(ACTIVE, active);
+        }
+
+        // Возвращаем состояние блока по умолчанию, если теги не найдены
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING, EXPERIENCED, ACTIVE, ENCHANTER);
+    }
+
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+        // Call the parent class method first
+        boolean result = super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+
+        // Check if the block should be harvested and the player is not in creative mode
+        if (!player.isCreative() && result && canHarvestBlock(state, level, pos, player)) {
+            ItemStack itemStack = new ItemStack(this.asItem());
+            // Получаем инструмент, который использует игрок
+            ItemStack tool = player.getMainHandItem();
+            boolean hasSilkTouch = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, tool) > 0;
+            // Create a new tag for the item stack
+            CompoundTag compoundTag = new CompoundTag();
+            itemStack.setTag(compoundTag);
+
+            // Set CustomModelData based on the block state
+            if (state.getValue(EXPERIENCED) && state.getValue(ACTIVE) && !state.getValue(ENCHANTER) && hasSilkTouch) {
+                compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+                compoundTag.putBoolean("active", state.getValue(EXPERIENCED));
+
+                itemStack.getOrCreateTag().putInt("CustomModelData", 2);
+            } else if (state.getValue(EXPERIENCED) && !state.getValue(ACTIVE) && !state.getValue(ENCHANTER) && hasSilkTouch) {
+                compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+                itemStack.getOrCreateTag().putInt("CustomModelData", 1);
+            } else if (state.getValue(EXPERIENCED) && state.getValue(ACTIVE) && !state.getValue(ENCHANTER) && !hasSilkTouch) {
+                compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+                itemStack.getOrCreateTag().putInt("CustomModelData", 1);
+            } else if (state.getValue(EXPERIENCED) && !state.getValue(ACTIVE) && !state.getValue(ENCHANTER) && !hasSilkTouch) {
+                compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+                itemStack.getOrCreateTag().putInt("CustomModelData", 1);
+            } else if (state.getValue(EXPERIENCED) && state.getValue(ENCHANTER) && !state.getValue(ACTIVE) && hasSilkTouch) {
+                compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+                compoundTag.putBoolean("enchanter", state.getValue(ENCHANTER));
+
+                itemStack.getOrCreateTag().putInt("CustomModelData", 3);
+            } else if (state.getValue(EXPERIENCED) && !state.getValue(ENCHANTER) && !state.getValue(ACTIVE) && hasSilkTouch) {
+                compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+                itemStack.getOrCreateTag().putInt("CustomModelData", 1);
+            } else if (state.getValue(EXPERIENCED) && state.getValue(ENCHANTER) && !state.getValue(ACTIVE) && !hasSilkTouch) {
+                compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+                itemStack.getOrCreateTag().putInt("CustomModelData", 1);
+            } else if (state.getValue(EXPERIENCED) && !state.getValue(ENCHANTER) && !state.getValue(ACTIVE) && !hasSilkTouch) {
+                compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+                itemStack.getOrCreateTag().putInt("CustomModelData", 1);
+            }
+
+
+            // Drop the item stack
+            popResource(level, pos, itemStack);
+        }
+
+        return result;
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+        ItemStack itemStack = new ItemStack(this.asItem());
+
+        // Создаем новый тег для предмета и присваиваем CustomModelData значение по умолчанию
+        CompoundTag compoundTag = new CompoundTag();
+        itemStack.setTag(compoundTag);
+        itemStack.getOrCreateTag().putInt("CustomModelData", 0);
+        // Устанавливаем CustomModelData на основе состояния блока
+        if (state.getValue(EXPERIENCED) && state.getValue(ACTIVE) && !state.getValue(ENCHANTER)) {
+            compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+            compoundTag.putBoolean("active", state.getValue(ACTIVE));
+            itemStack.getOrCreateTag().putInt("CustomModelData", 2);
+        } else if (state.getValue(EXPERIENCED) && !state.getValue(ACTIVE) && state.getValue(ENCHANTER)) {
+            compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+            compoundTag.putBoolean("enchanter", state.getValue(ENCHANTER));
+
+            itemStack.getOrCreateTag().putInt("CustomModelData", 3);
+        } else if (state.getValue(EXPERIENCED) && !state.getValue(ACTIVE) && !state.getValue(ENCHANTER)) {
+            compoundTag.putBoolean("experienced", state.getValue(EXPERIENCED));
+            itemStack.getOrCreateTag().putInt("CustomModelData", 1);
+        }
+
+        return itemStack;
+    }
+
+
+    @Override
+    public boolean canHarvestBlock(BlockState state, BlockGetter level, BlockPos pos, Player player) {
+        ItemStack tool = player.getMainHandItem();
+        if (tool.getItem() instanceof TieredItem) {
+            TieredItem tieredItem = (TieredItem) tool.getItem();
+            int toolLevel = tieredItem.getTier().getLevel();
+
+            return toolLevel >= 3; // Проверяем, что инструмент имеет уровень добычи 3 (алмазный) или выше
+        }
+        return false;
+    }
+
+    @Override
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!world.isClientSide) {
+            ItemStack itemInHand = player.getItemInHand(hand);
+
+            // Check if player is using the Obsidian Tear and the block is in the correct state
+            if (itemInHand.getItem() == ItemsObs.OBSIDIAN_TEAR.get() && state.getValue(EXPERIENCED) && !state.getValue(ACTIVE) && !state.getValue(ENCHANTER)) {
+                world.setBlock(pos, state.setValue(ACTIVE, true), 3);
+
+                // Play activation sound
+                world.playSound(null, pos, SoundsObs.OBSIDIAN_TABLET_ACTIVE.get(), player.getSoundSource(), 1.0F, 1.0F);
+
+                // Spawn happy villager particles
+                if (world instanceof ServerLevel) {
+                    ServerLevel serverWorld = (ServerLevel) world;
+                    for (int i = 0; i < 10; i++) {
+                        double offsetX = world.random.nextGaussian() * 0.2D;
+                        double offsetY = world.random.nextGaussian() * 0.2D;
+                        double offsetZ = world.random.nextGaussian() * 0.2D;
+                        serverWorld.sendParticles(ParticlesObs.GLINT_PURPLE_PARTICLES.get(), pos.getX() + 0.2D, pos.getY() + 1.0D, pos.getZ() + 0.2D, 5, offsetX, offsetY, offsetZ, 1.0D);
+                    }
+                }
+                // Consume one Obsidian Tear
+                itemInHand.shrink(1);
+                return InteractionResult.SUCCESS;
+            }
+            if (itemInHand.getItem() == ItemsObs.FLAME_BOLT.get() && state.getValue(EXPERIENCED) && !state.getValue(ACTIVE) && !state.getValue(ENCHANTER)) {
+                world.setBlock(pos, state.setValue(ENCHANTER, true), 3);
+
+                // Play activation sound
+                world.playSound(null, pos, SoundsObs.OBSIDIAN_TABLET_ACTIVE.get(), player.getSoundSource(), 1.0F, 1.0F);
+
+                // Spawn happy villager particles
+                if (world instanceof ServerLevel) {
+                    ServerLevel serverWorld = (ServerLevel) world;
+                    for (int i = 0; i < 10; i++) {
+                        double offsetX = world.random.nextGaussian() * 0.2D;
+                        double offsetY = world.random.nextGaussian() * 0.2D;
+                        double offsetZ = world.random.nextGaussian() * 0.2D;
+                        serverWorld.sendParticles(ParticlesObs.GLINT_BLUE_PARTICLES.get(), pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D, 5, offsetX, offsetY, offsetZ, 1.0D);
+                    }
+                }
+                // Consume one Obsidian Tear
+                itemInHand.shrink(1);
+                return InteractionResult.SUCCESS;
+            }
+
+            // Existing interaction logic
+            if (hand == InteractionHand.MAIN_HAND && !state.getValue(EXPERIENCED)) {
+                world.setBlock(pos, state.setValue(EXPERIENCED, true), 3);
+
+                // Spawn lightning bolt
+                LightningBolt lightning = new LightningBolt(EntityType.LIGHTNING_BOLT, world);
+                lightning.moveTo(pos.getX(), pos.getY(), pos.getZ());
+                world.addFreshEntity(lightning);
+
+                // Schedule experience drop
+                if (world instanceof ServerLevel) {
+                    ServerLevel serverWorld = (ServerLevel) world;
+                    serverWorld.scheduleTick(pos, this, 25); // 10 ticks = 0.5 seconds
+                }
+
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        return InteractionResult.PASS;
+    }
+
+    @Override
+    public float getEnchantPowerBonus(BlockState state, LevelReader level, BlockPos pos) {
+        return state.getValue(ACTIVE) ? 6 : 0;
+    }
+
+    @Override
+    public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+        BlockPos blockpos = pos.below();
+        BlockState blockBelow = world.getBlockState(blockpos);
+        return Block.isFaceFull(blockBelow.getCollisionShape(world, blockpos), Direction.UP);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack pStack, @Nullable BlockGetter pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
+        super.appendHoverText(pStack, pLevel, pTooltip, pFlag);
+
+        // Проверка на наличие и значение тега "experienced"
+        if (pStack.hasTag() && pStack.getTag().getBoolean("experienced") && pStack.getTag().getBoolean("active")&& !pStack.getTag().getBoolean("enchanter")) {
+            if (Screen.hasShiftDown()) {
+                pTooltip.add(Component.translatable("obsidanum.press_shift2").withStyle(ChatFormatting.DARK_GRAY));
+                pTooltip.add(Component.translatable("item.obsidian_tablet.description.active").withStyle(ChatFormatting.DARK_GRAY));
+            } else {
+                pTooltip.add(Component.translatable("obsidanum.press_shift").withStyle(ChatFormatting.DARK_GRAY));
+            }
+        } else if (pStack.hasTag() && pStack.getTag().getBoolean("experienced") && !pStack.getTag().getBoolean("active")&& !pStack.getTag().getBoolean("enchanter")) {
+            if (Screen.hasShiftDown()) {
+                pTooltip.add(Component.translatable("obsidanum.press_shift2").withStyle(ChatFormatting.DARK_GRAY));
+                pTooltip.add(Component.translatable("item.obsidian_tablet.description.crashed").withStyle(ChatFormatting.DARK_GRAY));
+            } else {
+                pTooltip.add(Component.translatable("obsidanum.press_shift").withStyle(ChatFormatting.DARK_GRAY));
+            }
+        }
+        else if (pStack.hasTag() && pStack.getTag().getBoolean("experienced") && !pStack.getTag().getBoolean("active")&& pStack.getTag().getBoolean("enchanter")) {
+            if (Screen.hasShiftDown()) {
+                pTooltip.add(Component.translatable("obsidanum.press_shift2").withStyle(ChatFormatting.DARK_GRAY));
+                pTooltip.add(Component.translatable("item.obsidian_tablet.description.enchanter").withStyle(ChatFormatting.DARK_GRAY));
+            } else {
+                pTooltip.add(Component.translatable("obsidanum.press_shift").withStyle(ChatFormatting.DARK_GRAY));
+            }
+        } else {
+            if (Screen.hasShiftDown()) {
+                pTooltip.add(Component.translatable("obsidanum.press_shift2").withStyle(ChatFormatting.DARK_GRAY));
+                pTooltip.add(Component.translatable("item.obsidian_tablet.description.ancient").withStyle(ChatFormatting.DARK_GRAY));
+            } else {
+                pTooltip.add(Component.translatable("obsidanum.press_shift").withStyle(ChatFormatting.DARK_GRAY));
+            }
+        }
+    }
+
+    @Override
+    public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+        super.tick(pState, pLevel, pPos, pRandom);
+        if (pState.getValue(EXPERIENCED)) {
+            // Drop experience
+            ExperienceOrb.award(pLevel, Vec3.atCenterOf(pPos), 1100);
+        }
+    }
+}

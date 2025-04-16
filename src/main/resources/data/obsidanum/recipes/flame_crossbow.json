@@ -1,0 +1,25 @@
+{
+  "type": "obsidanum:forge_scroll_nether",
+  "ingredients": [
+    {
+      "item": "obsidanum:crucible_with_nether_flame",
+      "count": 1
+    },
+    {
+      "item": "minecraft:string",
+      "count": 10
+    },
+    {
+      "item": "minecraft:netherite_ingot",
+      "count": 6
+    },
+    {
+      "item": "obsidanum:obsidan_essence",
+      "count": 12
+    }
+  ],
+  "output": {
+    "item": "obsidanum:flame_crossbow",
+    "count": 1
+  }
+}

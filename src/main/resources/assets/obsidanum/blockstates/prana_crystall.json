@@ -1,0 +1,30 @@
+{
+    "variants": {
+        "facing=down": {
+            "model": "obsidanum:block/prana_crystall",
+            "x": 180
+        },
+        "facing=up": {
+            "model": "obsidanum:block/prana_crystall"
+        },
+        "facing=south": {
+            "model": "obsidanum:block/prana_crystall",
+            "x": 90
+        },
+        "facing=north": {
+            "model": "obsidanum:block/prana_crystall",
+            "x": 90,
+            "y": 180
+        },
+        "facing=east": {
+            "model": "obsidanum:block/prana_crystall",
+            "x": 90,
+            "y": 270
+        },
+        "facing=west": {
+            "model": "obsidanum:block/prana_crystall",
+            "x": 90,
+            "y": 90
+        }
+    }
+}

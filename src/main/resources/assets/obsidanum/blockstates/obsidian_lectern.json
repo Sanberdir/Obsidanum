@@ -1,0 +1,34 @@
+{
+    "variants": {
+        "facing=north,there_book=true": {
+            "model": "obsidanum:block/obsidian_lectern"
+        },
+        "facing=east,there_book=true": {
+            "model": "obsidanum:block/obsidian_lectern",
+            "y": 90
+        },
+        "facing=south,there_book=true": {
+            "model": "obsidanum:block/obsidian_lectern",
+            "y": 180
+        },
+        "facing=west,there_book=true": {
+            "model": "obsidanum:block/obsidian_lectern",
+            "y": 270
+        },
+        "facing=north,there_book=false": {
+            "model": "obsidanum:block/obsidian_lectern_wb"
+        },
+        "facing=east,there_book=false": {
+            "model": "obsidanum:block/obsidian_lectern_wb",
+            "y": 90
+        },
+        "facing=south,there_book=false": {
+            "model": "obsidanum:block/obsidian_lectern_wb",
+            "y": 180
+        },
+        "facing=west,there_book=false": {
+            "model": "obsidanum:block/obsidian_lectern_wb",
+            "y": 270
+        }
+    }
+}

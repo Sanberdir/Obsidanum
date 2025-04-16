@@ -1,0 +1,29 @@
+{
+  "type": "obsidanum:forge_scroll_upgrade",
+  "tool": {
+    "tag": "minecraft:logs"
+  },
+  "tool_types": [
+    "pickaxe",
+    "axe"
+  ],
+  "tool_kinds": [
+    "obsidanum",
+    "netherite"
+  ],
+  "upgrade": "sharpness",
+  "ingredients": [
+    {
+      "tag": "minecraft:planks",
+      "count": 3
+    },
+    {
+      "tag": "minecraft:logs",
+      "count": 3
+    },
+    {
+      "item": "minecraft:blaze_powder",
+      "count": 5
+    }
+  ]
+}

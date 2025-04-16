@@ -1,0 +1,7 @@
+{
+  "processors": [
+    {
+      "processor_type": "obsidanum:waterlogging_fix_processor"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "obsidanum:crucible_with_nether_flame"
+  },
+  "base": {
+    "item": "obsidanum:obsidian_axe"
+  },
+  "result": {
+    "item": "obsidanum:smoldering_obsidian_axe"
+  },
+  "template": {
+    "item": "obsidanum:fiery_infusion_smithing_template"
+  }
+}

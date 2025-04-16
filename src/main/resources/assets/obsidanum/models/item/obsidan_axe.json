@@ -1,0 +1,9 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "obsidanum:item/obsidan_axe"
+  },
+  "overrides": [
+    { "predicate": { "custom_model_data": 1 }, "model": "obsidanum:item/obsidan_axe_activated" }
+  ]
+}

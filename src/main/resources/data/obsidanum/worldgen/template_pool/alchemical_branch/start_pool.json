@@ -1,0 +1,28 @@
+{
+
+  "name": "obsidanum:alchemical_branch/start_pool",
+
+  "fallback": "minecraft:empty",
+
+
+  "elements": [
+    {
+
+
+      "weight": 1,
+      "element": {
+
+
+        "location": "obsidanum:alchemical_branch/ab_enter",
+
+
+        "processors": "obsidanum:waterlogged",
+
+
+        "projection": "rigid",
+
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

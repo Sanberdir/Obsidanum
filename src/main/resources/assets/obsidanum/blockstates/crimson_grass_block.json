@@ -1,0 +1,24 @@
+{
+  "variants": {
+    "snowy=false": [
+      {
+        "model": "obsidanum:block/crimson_grass_block"
+      },
+      {
+        "model": "obsidanum:block/crimson_grass_block",
+        "y": 90
+      },
+      {
+        "model": "obsidanum:block/crimson_grass_block",
+        "y": 180
+      },
+      {
+        "model": "obsidanum:block/crimson_grass_block",
+        "y": 270
+      }
+    ],
+    "snowy=true": {
+      "model": "obsidanum:block/crimson_grass_block_snow"
+    }
+  }
+}

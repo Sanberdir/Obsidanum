@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/tinted_cross",
+  "textures": {
+    "cross": "obsidanum:block/crimson_grass"
+  },"render_type": "cutout"
+}

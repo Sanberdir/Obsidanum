@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "obsidanum:block/alchemical_dirt"
+      },
+      {
+        "model": "obsidanum:block/alchemical_dirt",
+        "y": 90
+      },
+      {
+        "model": "obsidanum:block/alchemical_dirt",
+        "y": 180
+      },
+      {
+        "model": "obsidanum:block/alchemical_dirt",
+        "y": 270
+      }
+    ]
+  }
+}

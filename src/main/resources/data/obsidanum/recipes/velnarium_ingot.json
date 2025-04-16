@@ -1,0 +1,21 @@
+{
+  "type": "obsidanum:forge_scroll_catacombs",
+  "ingredients": [
+    {
+      "item": "obsidanum:velnarium_ore",
+      "count": 3
+    },
+    {
+      "item": "minecraft:blaze_powder",
+      "count": 10
+    },
+    {
+      "item": "obsidanum:obsidan_essence",
+      "count": 7
+    }
+  ],
+  "output": {
+    "item": "obsidanum:velnarium_ingot",
+    "count": 1
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "obsidanum:block/alchemical_dirt",
+    "particle": "obsidanum:block/alchemical_dirt",
+    "side": "obsidanum:block/crimson_grass_block_snow",
+    "top": "obsidanum:block/crimson_grass_block_top"
+  }
+}

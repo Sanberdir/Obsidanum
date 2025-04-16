@@ -1,0 +1,42 @@
+{
+  "type": "obsidanum:generic_structures",
+  "start_pool": "obsidanum:alchemical_branch/start_pool",
+  "size": 20,
+  "max_distance_from_center": 400,
+  "biomes": "#obsidanum:has_structure/alchemical_branch",
+  "step": "surface_structures",
+  "start_height": {
+    "absolute": -18
+  },
+  "adapt_noise": false,
+
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "use_expansion_hack": false,
+  "spawn_overrides": {
+    "creature": {
+      "bounding_box": "piece",
+      "spawns": []
+    },
+    "monster": {
+      "bounding_box": "piece",
+      "spawns": []
+    },
+    "ambient": {
+      "bounding_box": "piece",
+      "spawns": []
+    },
+    "water_creature": {
+      "bounding_box": "piece",
+      "spawns": []
+    },
+    "water_ambient": {
+      "bounding_box": "piece",
+      "spawns": []
+    },
+    "misc": {
+      "bounding_box": "piece",
+      "spawns": []
+    }
+  },
+  "pool_aliases": []
+}

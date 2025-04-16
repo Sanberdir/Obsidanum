@@ -1,0 +1,39 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "obsidanum:tool_icon/pickaxe.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE000"]
+    },
+    {
+      "type": "bitmap",
+      "file": "obsidanum:tool_icon/axe.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE001"]
+    },
+    {
+      "type": "bitmap",
+      "file": "obsidanum:tool_icon/shovel.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE002"]
+    },
+    {
+      "type": "bitmap",
+      "file": "obsidanum:tool_icon/sword.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE003"]
+    },
+    {
+      "type": "bitmap",
+      "file": "obsidanum:tool_icon/hoe.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": ["\uE004"]
+    }
+  ]
+}
