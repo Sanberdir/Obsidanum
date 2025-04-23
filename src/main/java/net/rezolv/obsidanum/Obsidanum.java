@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -22,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.rezolv.obsidanum.block.BlocksObs;
@@ -131,16 +133,25 @@ public class Obsidanum {
 
     }
 
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public void postRenderStage(RenderLevelStageEvent event) {
+        // Проверяем, что код выполняется на клиенте
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS
+                && FMLEnvironment.dist == Dist.CLIENT) { // <-- Добавляем проверку
+            RenderSystem.runAsFancy(() -> PranaCrystallRenderer.renderEntireBatch(
+                    event.getLevelRenderer(),
+                    event.getPoseStack(),
+                    event.getRenderTick(),
+                    event.getCamera(),
+                    event.getPartialTick()
+            ));
+        }
+    }
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
-        @SubscribeEvent
-        public void postRenderStage(RenderLevelStageEvent event) {
 
-            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
-                RenderSystem.runAsFancy(() -> PranaCrystallRenderer.renderEntireBatch(event.getLevelRenderer(), event.getPoseStack(), event.getRenderTick(), event.getCamera(), event.getPartialTick()));
-            }
-        }
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
 

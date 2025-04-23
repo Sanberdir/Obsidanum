@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -13,9 +12,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -25,7 +22,6 @@ import javax.annotation.Nullable;
 
 public class LargeUrn extends HalfTransparentBlock {
     public static final BooleanProperty VOID_URN = BooleanProperty.create("void_urn");
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public static final BooleanProperty TOP_FOUR_BLOCK_URN = BooleanProperty.create("top_four_block_urn");
     public static final BooleanProperty TOP_THREE_BLOCK_URN = BooleanProperty.create("top_three_block_urn");
@@ -44,7 +40,7 @@ public class LargeUrn extends HalfTransparentBlock {
                 .setValue(TOP_THREE_BLOCK_URN,false)
                 .setValue(TOP_TWO_BLOCK_URN,false)
                 .setValue(TOP_ONE_BLOCK_URN,false)
-                .setValue(FACING, Direction.NORTH)
+
                 .setValue(BOTTOM_FOUR_BLOCK_URN,false)
                 .setValue(BOTTOM_THREE_BLOCK_URN,false)
                 .setValue(BOTTOM_TWO_BLOCK_URN,false)
@@ -85,11 +81,6 @@ public class LargeUrn extends HalfTransparentBlock {
     private static final VoxelShape BOTTOM_ONE_SHAPE = Shapes.or(
             box(0, 0, 0, 14, 2, 14),
             box(0, 2, 0, 16, 16, 16));
-
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
-    }
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         if (state.getValue(TOP_FOUR_BLOCK_URN)) {
@@ -133,28 +124,21 @@ public class LargeUrn extends HalfTransparentBlock {
         builder.add(BOTTOM_THREE_BLOCK_URN);
         builder.add(BOTTOM_TWO_BLOCK_URN);
         builder.add(BOTTOM_ONE_BLOCK_URN);
-        builder.add(FACING);
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
         // Проверяем позиции, на которые должен повлиять блок
-        Direction facing = state.getValue(FACING);
-        Direction right = facing.getClockWise();
-        Direction left = facing.getCounterClockWise();
-        Direction back = facing.getOpposite();
-
-// Пример расчёта: pos.offset(1, 0, 0) будет заменён на pos.relative(right)
-// pos.offset(0, 0, 1) — на pos.relative(facing) (или back, в зависимости от желаемого расположения)
         BlockPos[] positionsToCheck = new BlockPos[] {
-                pos.above(),                      // Сверху
-                pos.relative(right),              // Справа (относительно FACING)
-                pos.relative(facing),             // "Спереди" (или "сзади", если логика такова)
-                pos.above().relative(right),      // Сверху и справа
-                pos.above().relative(facing),     // Сверху и "спереди"
-                pos.above().relative(right).relative(facing) // Сверху-диагональ
+                pos.offset(0, 1, 0),   // Сверху
+                pos.offset(1, 0, 0),   // Справа
+                pos.offset(0, 0, 1),   // Сзади
+                pos.offset(1, 1, 0),   // Сверху справа
+                pos.offset(0, 1, 1),   // Сверху сзади
+                pos.offset(1, 1, 1)    // Справа-сзади сверху
         };
+
         for (BlockPos checkPos : positionsToCheck) {
             if (!level.isEmptyBlock(checkPos)) {
                 // Прерываем установку блока, если одна из позиций занята
@@ -256,22 +240,27 @@ public class LargeUrn extends HalfTransparentBlock {
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        // Проверяем все необходимые позиции
+        // Если блок является частью урны (VOID_URN = true), пропускаем проверку окружения
+        if (state.getValue(VOID_URN)) {
+            return true;
+        }
+
+        // Проверка окружения только для основного блока (VOID_URN = false)
         BlockPos[] positionsToCheck = new BlockPos[] {
-                pos.above(),           // Сверху
-                pos.east(),            // Справа
-                pos.south(),           // Спереди
-                pos.south().east(),           // Спереди и справа
-                pos.above().east(),    // Сверху справа
-                pos.above().south(),   // Сверху спереди
-                pos.above().east().south() // Сверху справа спереди
+                pos.above(),
+                pos.east(),
+                pos.south(),
+                pos.south().east(),
+                pos.above().east(),
+                pos.above().south(),
+                pos.above().east().south()
         };
 
         for (BlockPos checkPos : positionsToCheck) {
             if (!level.isEmptyBlock(checkPos)) {
-                return false; // Если хотя бы одна позиция занята, блок не может быть установлен
+                return false;
             }
         }
-        return true; // Все позиции свободны, блок может быть установлен
+        return true;
     }
 }

@@ -404,7 +404,7 @@ public class BlocksObs {
             })));
 
     public static final RegistryObject<Block> LARGE_URN = registerBlock("large_urn",
-            () -> new LargeUrn(BlockBehaviour.Properties.of().noOcclusion().strength(0.2F, 1.0F)
+            () -> new LargeUrnOne(BlockBehaviour.Properties.of().noOcclusion().strength(0.2F, 1.0F)
                     .sound(SoundType.DECORATED_POT_CRACKED).lightLevel((p_152680_) -> {
                         return 5;
                     })));
