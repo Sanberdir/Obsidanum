@@ -1,6 +1,6 @@
 {
 
-  "name": "obsidanum:place_wisdom_2/start_pool",
+  "name": "obsidanum:archaeologists_camp/start_pool",
 
   "fallback": "minecraft:empty",
 
@@ -13,7 +13,7 @@
       "element": {
 
 
-        "location": "obsidanum:place_wisdom_2",
+        "location": "obsidanum:archaeologists_camp",
 
 
         "processors": "minecraft:empty",

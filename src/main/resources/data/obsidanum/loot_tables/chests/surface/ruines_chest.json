@@ -5,13 +5,61 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:apple",
+          "name": "obsidanum:obsidian_shard_arrow",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "min": 1,
-                "max": 12
+                "max": 4
+              }
+            }
+          ],
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "obsidanum:obsidian_shard_inviolability",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ],
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "obsidanum:obsidian_shard_key",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
               }
             }
           ],
@@ -29,8 +77,16 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:honey_bottle",
+          "name": "obsidanum:obsidan_sword",
           "functions": [
+            {
+              "function": "minecraft:set_damage",
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.1,
+                "max": 1
+              }
+            },
             {
               "function": "minecraft:set_count",
               "count": {
@@ -42,7 +98,7 @@
           "conditions": [
             {
               "condition": "minecraft:random_chance",
-              "chance": 0.57
+              "chance": 0.5
             }
           ]
         }
@@ -53,20 +109,20 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:carrot",
+          "name": "obsidanum:obsidian_arrow",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "min": 1,
-                "max": 8
+                "max": 3
               }
             }
           ],
           "conditions": [
             {
               "condition": "minecraft:random_chance",
-              "chance": 0.57
+              "chance": 0.37
             }
           ]
         }
@@ -77,20 +133,20 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:baked_potato",
+          "name": "obsidanum:obsidian_chakram",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "min": 1,
-                "max": 14
+                "max": 5
               }
             }
           ],
           "conditions": [
             {
               "condition": "minecraft:random_chance",
-              "chance": 0.57
+              "chance": 0.6
             }
           ]
         }
@@ -101,12 +157,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:golden_apple",
+          "name": "obsidanum:leaf_live",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
-                "min": 0,
+                "min": 1,
                 "max": 1
               }
             }
@@ -114,7 +170,31 @@
           "conditions": [
             {
               "condition": "minecraft:random_chance",
-              "chance": 0.12
+              "chance": 0.29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "obsidanum:obsidian_key",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ],
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
             }
           ]
         }
@@ -131,14 +211,14 @@
               "function": "minecraft:set_count",
               "count": {
                 "min": 1,
-                "max": 6
+                "max": 10
               }
             }
           ],
           "conditions": [
             {
               "condition": "minecraft:random_chance",
-              "chance": 0.07
+              "chance": 0.44
             }
           ]
         }
@@ -149,72 +229,25 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:bread",
+          "name": "obsidanum:velnarium_ore",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "min": 1,
-                "max": 5
+                "max": 4
               }
             }
           ],
           "conditions": [
             {
               "condition": "minecraft:random_chance",
-              "chance": 0.57
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:flint_and_steel",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 0,
-                "max": 1
-              }
-            }
-          ],
-          "conditions": [
-            {
-              "condition": "minecraft:random_chance",
-              "chance": 0.15
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:campfire",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 0,
-                "max": 1
-              }
-            }
-          ],
-          "conditions": [
-            {
-              "condition": "minecraft:random_chance",
-              "chance": 0.01
+              "chance": 0.44
             }
           ]
         }
       ]
     }
-  ]
+  ],
+  "functions": []
 }

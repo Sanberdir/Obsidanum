@@ -37,10 +37,7 @@ public class SmolderingShovel extends ShovelItem {
     public SmolderingShovel(Tier pTier, float pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
     }
-    @Override
-    public boolean isEnchantable(ItemStack pStack) {
-        return false;
-    }
+
     @Override
     public void appendHoverText(ItemStack itemstack, Level world, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, world, list, flag);

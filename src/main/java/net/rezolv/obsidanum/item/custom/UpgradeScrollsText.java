@@ -1,6 +1,5 @@
 package net.rezolv.obsidanum.item.custom;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.ChatFormatting;

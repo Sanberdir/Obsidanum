@@ -32,10 +32,7 @@ public class SmolderingPickaxe extends PickaxeItem {
     public SmolderingPickaxe(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
     }
-    @Override
-    public boolean isEnchantable(ItemStack pStack) {
-        return false;
-    }
+
     @Override
     public boolean onLeftClickEntity(ItemStack stack, Player player, Entity target) {
         boolean retval = super.onLeftClickEntity(stack, player, target);

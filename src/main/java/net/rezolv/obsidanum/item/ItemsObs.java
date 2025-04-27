@@ -38,6 +38,8 @@ public class ItemsObs {
             () -> new ScrollText(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CATACOMBS_PLAN = ITEMS.register("catacombs_plan",
             () -> new ScrollText(new Item.Properties().stacksTo(1)));
+
+
     public static final RegistryObject<Item> UPGRADE_PLAN = ITEMS.register("upgrade_plan",
             () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
 

@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "obsidanum:chests/alchemy_branch/usual_chest",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "obsidanum:chests/alchemy_branch/rare_chest",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "obsidanum:chests/alchemy_branch/epic_chest",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "obsidanum:chests/alchemy_branch/legendary_chest",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}
