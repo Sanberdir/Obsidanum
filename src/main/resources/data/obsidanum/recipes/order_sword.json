@@ -1,17 +1,21 @@
 {
-  "type": "obsidanum:forge_scroll_catacombs",
-  "ingredients": [
-    {
-      "item": "obsidanum:velnarium_ingot",
-      "count": 2
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
     },
-    {
-      "tag": "minecraft:red_wool",
-      "count": 1
+    "X": {
+      "item": "obsidanum:velnarium_ingot"
     }
+  },
+  "pattern": [
+    "X",
+    "X",
+    "#"
   ],
-  "output": {
-    "item": "obsidanum:order_sword",
-    "count": 1
-  }
+  "result": {
+    "item": "obsidanum:order_sword"
+  },
+  "show_notification": true
 }

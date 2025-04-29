@@ -32,8 +32,8 @@ public class ObsidanAxe extends AxeItem {
     private static final TagKey<Block> MINEABLE_LOGS_TAG = BlockTags.create(new ResourceLocation("minecraft", "logs"));
     private static final TagKey<Block> MINEABLE_LEAVES_TAG = BlockTags.create(new ResourceLocation("minecraft", "leaves"));
 
-    private static final long COOLDOWN_DURATION = 40 * 20; // 40 секунд в тиках
-    private static final long ACTIVATION_DURATION = 5 * 20;  // 5 секунд в тиках
+    private static final long COOLDOWN_DURATION = 25 * 20;
+    private static final long ACTIVATION_DURATION = 5 * 20;
 
     public ObsidanAxe(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
@@ -107,9 +107,16 @@ public class ObsidanAxe extends AxeItem {
     @Override
     public boolean mineBlock(ItemStack stack, Level world, BlockState state, BlockPos pos, LivingEntity entity) {
         if (!world.isClientSide && isActivated(stack) && entity instanceof Player) {
-            // Если блок является обычным стволом, листьями или незерским стволом – выполняем цепное разрушение
-            if (state.is(MINEABLE_LOGS_TAG) || state.is(MINEABLE_LEAVES_TAG) || isNetherLog(state) || isNetherFungus(state)) {
+            if (state.is(MINEABLE_LOGS_TAG)) {
                 chainBreak(world, pos, (Player) entity, stack, state);
+                deactivate(stack, (Player) entity);
+                return true;
+            } else if (state.is(MINEABLE_LEAVES_TAG)) {
+                breakPlants(world, pos, (Player) entity, stack);
+                deactivate(stack, (Player) entity);
+                return true;
+            } else if (isNetherLog(state) || isNetherFungus(state)) {
+                breakNetherTree(world, pos, (Player) entity, stack);
                 deactivate(stack, (Player) entity);
                 return true;
             }
@@ -117,45 +124,32 @@ public class ObsidanAxe extends AxeItem {
         return super.mineBlock(stack, world, state, pos, entity);
     }
 
-    /**
-     * Определяем, является ли блок незерским стволом (Crimson или Warped)
-     */
     private boolean isNetherLog(BlockState state) {
         return state.getBlock() == Blocks.CRIMSON_STEM || state.getBlock() == Blocks.WARPED_STEM;
     }
 
-    /**
-     * Определяем, является ли блок незерским наростом или светогрибом.
-     */
     private boolean isNetherFungus(BlockState state) {
         return state.getBlock() == Blocks.NETHER_WART_BLOCK ||
                 state.getBlock() == Blocks.WARPED_WART_BLOCK ||
                 state.getBlock() == Blocks.SHROOMLIGHT;
     }
 
-    /**
-     * Для незерских блоков при добыче: разрушаем ВСЁ, что относится к дереву (и ствол, и наросты, и светогриб)
-     */
     private void chainBreak(Level world, BlockPos pos, Player player, ItemStack stack, BlockState state) {
         if (isNetherLog(state) || isNetherFungus(state)) {
             breakNetherTree(world, pos, player, stack);
-        }
-        else if (state.is(MINEABLE_LOGS_TAG)) {
+        } else if (state.is(MINEABLE_LOGS_TAG)) {
             breakTree(world, pos, player, stack);
-        }
-        else if (state.is(MINEABLE_LEAVES_TAG)) {
+        } else if (state.is(MINEABLE_LEAVES_TAG)) {
             breakPlants(world, pos, player, stack);
         }
     }
 
-    /**
-     * Обработка обычных деревьев (сбор ствола и листьев)
-     */
     private void breakTree(Level world, BlockPos startPos, Player player, ItemStack stack) {
         Set<BlockPos> logs = new HashSet<>();
         Set<BlockPos> leaves = new HashSet<>();
+        Block startBlock = world.getBlockState(startPos).getBlock();
 
-        findConnectedBlocks(world, startPos, logs, MINEABLE_LOGS_TAG, 1024);
+        findConnectedBlocks(world, startPos, logs, startBlock, 1024);
 
         for (BlockPos logPos : logs) {
             findLeaves(world, logPos, leaves, 2048);
@@ -165,18 +159,34 @@ public class ObsidanAxe extends AxeItem {
         destroyBlocks(world, leaves, player, stack);
     }
 
-    /**
-     * Обработка незерских деревьев – собираем ВСЕ связанные блоки, относящиеся к дереву (и ствол, и наросты, и светогриб)
-     */
     private void breakNetherTree(Level world, BlockPos startPos, Player player, ItemStack stack) {
         Set<BlockPos> netherBlocks = new HashSet<>();
         findConnectedNetherTreeBlocks(world, startPos, netherBlocks, 2048);
         destroyBlocks(world, netherBlocks, player, stack);
     }
 
-    /**
-     * Рекурсивно ищем связанные незерские блоки (как ствол, так и наросты/светогриб)
-     */
+    private void findConnectedBlocks(Level world, BlockPos pos, Set<BlockPos> result, Block targetBlock, int max) {
+        Deque<BlockPos> queue = new ArrayDeque<>();
+        queue.add(pos);
+
+        while (!queue.isEmpty() && result.size() < max) {
+            BlockPos current = queue.poll();
+            if (result.contains(current)) continue;
+            BlockState state = world.getBlockState(current);
+            if (state.getBlock() == targetBlock) {
+                result.add(current);
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dy = -1; dy <= 1; dy++) {
+                        for (int dz = -1; dz <= 1; dz++) {
+                            if (dx == 0 && dy == 0 && dz == 0) continue;
+                            queue.add(current.offset(dx, dy, dz));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void findConnectedNetherTreeBlocks(Level world, BlockPos pos, Set<BlockPos> result, int max) {
         Deque<BlockPos> queue = new ArrayDeque<>();
         queue.add(pos);
@@ -186,27 +196,6 @@ public class ObsidanAxe extends AxeItem {
             if (result.contains(current)) continue;
             BlockState state = world.getBlockState(current);
             if (isNetherLog(state) || isNetherFungus(state)) {
-                result.add(current);
-                queue.add(current.offset(1, 0, 0));
-                queue.add(current.offset(-1, 0, 0));
-                queue.add(current.offset(0, 0, 1));
-                queue.add(current.offset(0, 0, -1));
-                queue.add(current.offset(0, 1, 0));
-                queue.add(current.offset(0, -1, 0));
-            }
-        }
-    }
-
-    private void findConnectedBlocks(Level world, BlockPos pos, Set<BlockPos> result, TagKey<Block> tag, int max) {
-        Deque<BlockPos> queue = new ArrayDeque<>();
-        queue.add(pos);
-
-        while (!queue.isEmpty() && result.size() < max) {
-            BlockPos current = queue.poll();
-            if (result.contains(current)) continue;
-
-            BlockState state = world.getBlockState(current);
-            if (state.is(tag)) {
                 result.add(current);
                 queue.add(current.offset(1, 0, 0));
                 queue.add(current.offset(-1, 0, 0));

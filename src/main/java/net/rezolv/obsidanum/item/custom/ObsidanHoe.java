@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.rezolv.obsidanum.block.BlocksObs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +84,8 @@ public class ObsidanHoe extends HoeItem {
             Blocks.CAVE_VINES_PLANT.defaultBlockState(),
             Blocks.MOSS_CARPET.defaultBlockState(),
             Blocks.SPORE_BLOSSOM.defaultBlockState(),
-            Blocks.GLOW_LICHEN.defaultBlockState()
+            Blocks.GLOW_LICHEN.defaultBlockState(),
+            BlocksObs.CRIMSON_GRASS.get().defaultBlockState()
     };
 
     @Override
