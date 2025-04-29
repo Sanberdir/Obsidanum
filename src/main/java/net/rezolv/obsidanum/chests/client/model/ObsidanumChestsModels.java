@@ -12,7 +12,8 @@ public class ObsidanumChestsModels {
   public static final ResourceLocation OBSIDIAN_CHEST_LOCATION = new ResourceLocation(Obsidanum.MOD_ID, "model/obsidian/obsidian_chest");
   public static final ResourceLocation RUNIC_OBSIDIAN_CHEST_LOCATION = new ResourceLocation(Obsidanum.MOD_ID, "model/runic_obsidian_chest");
   public static final ResourceLocation VANILLA_CHEST_LOCATION = new ResourceLocation("entity/chest/normal");
-
+  public static final ResourceLocation RUNIC_OBSIDIAN_CHEST_GLOW =
+          new ResourceLocation(Obsidanum.MOD_ID, "model/runic_obsidian_chest_glow");
   public static final ResourceLocation LOOTR_OBSIDIAN_CHEST =
           new ResourceLocation("obsidanum", "model/obsidian/lootr_normal");
   public static final ResourceLocation LOOTR_AZURE_CHEST =
@@ -25,7 +26,6 @@ public class ObsidanumChestsModels {
   private static boolean isLootrLoaded() {
     return ModList.get().isLoaded("lootr"); // Только Forge
   }
-
   public static ResourceLocation chooseChestTexture(ObsidanumChestsTypes type) {
     return getResourceLocation(
             type,

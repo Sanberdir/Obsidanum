@@ -1,5 +1,6 @@
 package net.rezolv.obsidanum.chests.client.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -12,6 +13,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
@@ -22,6 +24,7 @@ import net.minecraft.client.renderer.blockentity.BrightnessCombiner;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -42,6 +45,7 @@ import org.joml.Vector3f;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 @OnlyIn(Dist.CLIENT)
 public class ObsidanumChestRenderer<T extends BlockEntity & LidBlockEntity> implements BlockEntityRenderer<T> {
@@ -123,12 +127,25 @@ public class ObsidanumChestRenderer<T extends BlockEntity & LidBlockEntity> impl
 
       int brightness = neighborCombineResult.<Int2IntFunction>apply(new BrightnessCombiner<>()).applyAsInt(combinedLightIn);
 
-
+      // Основной рендер сундука
       Material material = new Material(Sheets.CHEST_SHEET, ObsidanumChestsModels.chooseChestTexture(chestType));
-
-      VertexConsumer vertexConsumer = material.buffer(bufferSource, RenderType::entityCutout);
-
+      VertexConsumer vertexConsumer = material.buffer(bufferSource,
+              rl -> RenderType.entityCutout(rl));
       this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, openness, brightness, combinedOverlayIn);
+
+      // Эмиссивный рендер для рунического сундука
+      if (chestType == ObsidanumChestsTypes.RUNIC_OBSIDIAN) {
+        // Подготовка материала и буфера
+        Material glowMat = new Material(Sheets.CHEST_SHEET, ObsidanumChestsModels.RUNIC_OBSIDIAN_CHEST_GLOW);
+        if (level != null) {
+          level.getLightEngine().checkBlock(tileEntityIn.getBlockPos());
+        }
+        VertexConsumer glowVc = glowMat.buffer(bufferSource, rl -> RenderType.entityCutout(rl));
+
+        this.render(poseStack, glowVc, lid, lock, bottom, openness, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+
+
+      }
 
       poseStack.popPose();
     }
