@@ -79,7 +79,7 @@ public class LockedRunicChest extends Block {
                 long lootSeed = randomSource.nextLong();
 
                 // Устанавливаем таблицу лута для сундука крепости Незера
-                chestEntity.setLootTable(new ResourceLocation("obsidanum", "chests/alchemy_branch/pool_chests_full"), lootSeed);
+                chestEntity.setLootTable(new ResourceLocation("obsidanum", "chests/alchemists_branch/pools/ab_pool_hard"), lootSeed);
 
                 // Синхронизируем состояние сундука
                 chestEntity.setChanged();
