@@ -1,0 +1,64 @@
+{
+
+  "name": "obsidanum:alchemists_branch/start_pool",
+
+  "fallback": "minecraft:empty",
+
+
+  "elements": [
+    {
+
+
+      "weight": 1,
+      "element": {
+
+
+        "location": "obsidanum:alchemists_branch/ab_enter_v1",
+
+
+        "processors": "obsidanum:waterlogged",
+
+
+        "projection": "rigid",
+
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+
+
+      "weight": 1,
+      "element": {
+
+
+        "location": "obsidanum:alchemists_branch/ab_enter_v2",
+
+
+        "processors": "obsidanum:waterlogged",
+
+
+        "projection": "rigid",
+
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+
+
+      "weight": 1,
+      "element": {
+
+
+        "location": "obsidanum:alchemists_branch/ab_enter_v3",
+
+
+        "processors": "obsidanum:waterlogged",
+
+
+        "projection": "rigid",
+
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "obsidanum:azure_obsidian_chest", "required": false },
+    { "id": "obsidanum:obsidian_chest", "required": false }
+  ]
+}

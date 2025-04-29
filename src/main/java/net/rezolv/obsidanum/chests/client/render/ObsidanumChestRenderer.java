@@ -68,18 +68,18 @@ public class ObsidanumChestRenderer<T extends BlockEntity & LidBlockEntity> impl
     ModelPart modelPart = context.bakeLayer(ObsidanumChestsClientEvents.IRON_CHEST);
 
     this.renderer = context.getBlockEntityRenderDispatcher();
-    this.bottom = modelPart.getChild("iron_bottom");
-    this.lid = modelPart.getChild("iron_lid");
-    this.lock = modelPart.getChild("iron_lock");
+    this.bottom = modelPart.getChild("obsidanum_bottom");
+    this.lid = modelPart.getChild("obsidanum_lid");
+    this.lock = modelPart.getChild("obsidanum_lock");
   }
 
   public static LayerDefinition createBodyLayer() {
     MeshDefinition meshDefinition = new MeshDefinition();
     PartDefinition partDefinition = meshDefinition.getRoot();
 
-    partDefinition.addOrReplaceChild("iron_bottom", CubeListBuilder.create().texOffs(0, 19).addBox(1.0F, 0.0F, 1.0F, 14.0F, 10.0F, 14.0F), PartPose.ZERO);
-    partDefinition.addOrReplaceChild("iron_lid", CubeListBuilder.create().texOffs(0, 0).addBox(1.0F, 0.0F, 0.0F, 14.0F, 5.0F, 14.0F), PartPose.offset(0.0F, 9.0F, 1.0F));
-    partDefinition.addOrReplaceChild("iron_lock", CubeListBuilder.create().texOffs(0, 0).addBox(7.0F, -1.0F, 15.0F, 2.0F, 4.0F, 1.0F), PartPose.offset(0.0F, 8.0F, 0.0F));
+    partDefinition.addOrReplaceChild("obsidanum_bottom", CubeListBuilder.create().texOffs(0, 19).addBox(1.0F, 0.0F, 1.0F, 14.0F, 10.0F, 14.0F), PartPose.ZERO);
+    partDefinition.addOrReplaceChild("obsidanum_lid", CubeListBuilder.create().texOffs(0, 0).addBox(1.0F, 0.0F, 0.0F, 14.0F, 5.0F, 14.0F), PartPose.offset(0.0F, 9.0F, 1.0F));
+    partDefinition.addOrReplaceChild("obsidanum_lock", CubeListBuilder.create().texOffs(0, 0).addBox(7.0F, -1.0F, 15.0F, 2.0F, 4.0F, 1.0F), PartPose.offset(0.0F, 8.0F, 0.0F));
 
     return LayerDefinition.create(meshDefinition, 64, 64);
   }

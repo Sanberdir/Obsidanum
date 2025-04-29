@@ -72,10 +72,18 @@ public class ObsidanShovel extends ShovelItem {
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (isActivated(stack)) {
-            double knockbackY = 4.0; // Подбрасываем цель вверх на 4 блока
-            target.setDeltaMovement(target.getDeltaMovement().x, knockbackY, target.getDeltaMovement().z);
+            // Применяем knockback ко всем сущностям, включая игроков
+            double knockbackY = 4.0;
+            Vec3 motion = target.getDeltaMovement();
+            target.setDeltaMovement(motion.x, knockbackY, motion.z);
+
+            // Немедленно обновляем движение для игроков
+            if (target instanceof Player) {
+                ((Player) target).hurtMarked = true; // Это заставляет сервер обновить движение игрока
+            }
+
             if (attacker instanceof Player) {
-                deactivate(stack, (Player) attacker, attacker.level()); // Деактивируем после удара
+                deactivate(stack, (Player) attacker, attacker.level());
             }
         }
         return super.hurtEnemy(stack, target, attacker);

@@ -1,0 +1,285 @@
+{
+  "name": "obsidanum:alchemists_branch/side_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_corridor_forge",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_corridor",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_end",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_corridor_forge_adapter",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_forge_v1",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_forge_v2",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_forge_v3",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_corridor_boss_adapter",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_lab_boss_room_v1",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_lab_boss_room_v2",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_lab_boss_room_v3",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_splitter_cross_l_forge",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_stairs",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_adapter_v1",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_adapter_v2",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_adapter_v3",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_r_c_v1",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_r_c_v2",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_r_c_v3",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_end_v1",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_end_v2",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_c_garden_corridor_end_v3",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_1_v1",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_1_v2",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_1_v3",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_2_v1",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_2_v2",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_2_v3",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_3_v1",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_3_v2",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "obsidanum:alchemists_branch/ab_garden_room_3_v3",
+        "processors": "obsidanum:waterlogged",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

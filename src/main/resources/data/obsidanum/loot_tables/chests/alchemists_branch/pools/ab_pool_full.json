@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "name": "obsidanum:chests/alchemists_branch/ab_standard/ab_standard_common",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "obsidanum:chests/alchemists_branch/ab_standard/ab_standard_rare",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "obsidanum:chests/alchemists_branch/ab_standard/ab_standard_epic",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "obsidanum:chests/alchemists_branch/ab_standard/ab_standard_legendary",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}
