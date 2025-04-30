@@ -19,16 +19,24 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public class ObsidanSword extends SwordItem {
-    @Override
-    public boolean isEnchantable(ItemStack pStack) {
-        return false;
-    }
-    private static final long COOLDOWN_DURATION = 80 * 20; // 80 seconds in ticks
-    private static final long ACTIVATION_DURATION = 5 * 20; // 5 seconds in ticks
+    // NBT теги
+    private static final String ACTIVATED_TAG = "Activated";
+    private static final String LAST_ACTIVATION_TAG = "LastActivationTime";
+    private static final String COOLDOWN_END_TAG = "CooldownEndTime";
+    private static final String CUSTOM_MODEL_TAG = "CustomModelData";
+
+    public static final long COOLDOWN_DURATION = 80 * 20; // 80 секунд
+    private static final long ACTIVATION_DURATION = 5 * 20; // 5 секунд
 
     public ObsidanSword(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
     }
+
+    @Override
+    public boolean isEnchantable(ItemStack pStack) {
+        return false;
+    }
+
     @Override
     public void appendHoverText(ItemStack itemstack, Level world, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, world, list, flag);
@@ -39,32 +47,28 @@ public class ObsidanSword extends SwordItem {
             list.add(Component.translatable("obsidanum.press_shift").withStyle(ChatFormatting.DARK_GRAY));
         }
     }
-    public boolean isActivated(ItemStack stack) {
-        return stack.getOrCreateTag().getBoolean("Activated");
-    }
-
-    private long getLastActivationTime(ItemStack stack) {
-        return stack.getOrCreateTag().getLong("LastActivationTime");
-    }
-
-    private void setLastActivationTime(ItemStack stack, long time) {
-        stack.getOrCreateTag().putLong("LastActivationTime", time);
-    }
 
     @Override
     public void onCraftedBy(ItemStack stack, Level world, Player player) {
         super.onCraftedBy(stack, world, player);
-        // Установка значений по умолчанию
-        stack.getOrCreateTag().putBoolean("Activated", false);
-        stack.getOrCreateTag().putLong("LastActivationTime", 0);
+        stack.getOrCreateTag().putBoolean(ACTIVATED_TAG, false);
+        stack.getOrCreateTag().putLong(LAST_ACTIVATION_TAG, 0);
+        stack.getOrCreateTag().putLong(COOLDOWN_END_TAG, 0);
     }
 
     @Override
     public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
 
-        if (!world.isClientSide && isActivated(stack) && world.getGameTime() - getLastActivationTime(stack) >= ACTIVATION_DURATION) {
-            deactivate(stack, (Player) entity); // Передаем stack и player в метод деактивации
+        if (!world.isClientSide && isActivated(stack)) {
+            long currentTime = world.getGameTime();
+            long lastActivationTime = getLastActivationTime(stack);
+
+            if (currentTime - lastActivationTime >= ACTIVATION_DURATION) {
+                if (entity instanceof Player) {
+                    deactivate(stack, (Player) entity, currentTime);
+                }
+            }
         }
     }
 
@@ -73,49 +77,60 @@ public class ObsidanSword extends SwordItem {
         ItemStack stack = playerIn.getItemInHand(handIn);
         long currentTime = worldIn.getGameTime();
 
-        if (!isActivated(stack) && currentTime - getLastActivationTime(stack) >= COOLDOWN_DURATION) {
+        if (!isActivated(stack) && currentTime >= getCooldownEndTime(stack)) {
             if (!worldIn.isClientSide) {
-                activate(stack); // Передаем stack в метод активации
-                setLastActivationTime(stack, currentTime);
+                activate(stack, currentTime);
             }
             return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
-        } else {
-            return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
         }
-    }
-
-    public void activate(ItemStack stack) {
-        stack.getOrCreateTag().putBoolean("Activated", true);
-        // Обновляем данные модели
-        stack.getOrCreateTag().putInt("CustomModelData", 1);
+        return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
     }
 
     @Override
     public boolean onLeftClickEntity(ItemStack stack, Player player, Entity entity) {
-        if (!player.isLocalPlayer()) {
-            if (entity instanceof LivingEntity) {
-                LivingEntity livingEntity = (LivingEntity) entity;
-                if (stack.getItem() instanceof ObsidanSword) {
-                    ObsidanSword sword = (ObsidanSword) stack.getItem();
-                    if (sword.isActivated(stack)) {
-                        float baseDamage = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                        float additionalDamage = 4f;
+        if (!player.isLocalPlayer() && entity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
+            if (isActivated(stack)) {
+                float baseDamage = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+                float additionalDamage = 4f;
 
-                        livingEntity.hurt(new DamageSource(player.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.PLAYER_ATTACK)), baseDamage * additionalDamage);
-                        sword.deactivate(stack, player); // Деактивация меча после удара
-                        return true; // Отмена стандартного поведения
-                    }
-                }
+                livingEntity.hurt(new DamageSource(player.getCommandSenderWorld().registryAccess()
+                                .registryOrThrow(Registries.DAMAGE_TYPE)
+                                .getHolderOrThrow(DamageTypes.PLAYER_ATTACK)),
+                        baseDamage * additionalDamage);
+
+                deactivate(stack, player, player.level().getGameTime());
+                return true;
             }
         }
         return super.onLeftClickEntity(stack, player, entity);
     }
 
-    public void deactivate(ItemStack stack, Player player) {
-        stack.getOrCreateTag().putBoolean("Activated", false);
-        // Обновляем данные модели
-        stack.getOrCreateTag().putInt("CustomModelData", 0);
+    private void activate(ItemStack stack, long currentTime) {
+        stack.getOrCreateTag().putBoolean(ACTIVATED_TAG, true);
+        stack.getOrCreateTag().putLong(LAST_ACTIVATION_TAG, currentTime);
+        stack.getOrCreateTag().putInt(CUSTOM_MODEL_TAG, 1);
+    }
 
-        player.getCooldowns().addCooldown(this, (int) COOLDOWN_DURATION);
+    private void deactivate(ItemStack stack, Player player, long currentTime) {
+        stack.getOrCreateTag().putBoolean(ACTIVATED_TAG, false);
+        stack.getOrCreateTag().putInt(CUSTOM_MODEL_TAG, 0);
+        setCooldownEndTime(stack, currentTime + COOLDOWN_DURATION);
+    }
+
+    public boolean isActivated(ItemStack stack) {
+        return stack.getOrCreateTag().getBoolean(ACTIVATED_TAG);
+    }
+
+    private long getLastActivationTime(ItemStack stack) {
+        return stack.getOrCreateTag().getLong(LAST_ACTIVATION_TAG);
+    }
+
+    private long getCooldownEndTime(ItemStack stack) {
+        return stack.getOrCreateTag().getLong(COOLDOWN_END_TAG);
+    }
+
+    private void setCooldownEndTime(ItemStack stack, long time) {
+        stack.getOrCreateTag().putLong(COOLDOWN_END_TAG, time);
     }
 }

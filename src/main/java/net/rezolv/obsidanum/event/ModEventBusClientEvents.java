@@ -1,26 +1,18 @@
 package net.rezolv.obsidanum.event;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.BoatModel;
 import net.minecraft.client.model.ChestBoatModel;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.rezolv.obsidanum.Obsidanum;
-import net.rezolv.obsidanum.block.entity.HammerForgeEntity;
 import net.rezolv.obsidanum.block.entity.ModBlockEntities;
 import net.rezolv.obsidanum.block.entity.renderer.ForgeCrucibleEntityRenderer;
 import net.rezolv.obsidanum.block.entity.renderer.HammerForgeRenderer;
@@ -34,11 +26,20 @@ import net.rezolv.obsidanum.entity.mutated_gart.MutatedGartModel;
 import net.rezolv.obsidanum.entity.obsidian_elemental.ObsidianElementalModel;
 import net.rezolv.obsidanum.item.ItemsObs;
 import net.rezolv.obsidanum.item.custom.*;
+import net.rezolv.obsidanum.item.custom.cooldown_instruments.*;
 import net.rezolv.obsidanum.item.entity.client.ModModelLayersItem;
 import net.rezolv.obsidanum.particle.*;
 
 @Mod.EventBusSubscriber(modid = Obsidanum.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModEventBusClientEvents {
+    @SubscribeEvent
+    public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll("axe_cooldown", CooldownOverlayAxe.COOLDOWN_OVERLAY);
+        event.registerAboveAll("hoe_cooldown", CooldownOverlayHoe.COOLDOWN_OVERLAY);
+        event.registerAboveAll("shovel_cooldown", CooldownOverlayShovel.COOLDOWN_OVERLAY);
+        event.registerAboveAll("sword_cooldown", CooldownOverlaySword.COOLDOWN_OVERLAY);
+        event.registerAboveAll("pickaxe_cooldown", CooldownOverlayPickaxe.COOLDOWN_OVERLAY);
+    }
     @SubscribeEvent
     public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(ModModelLayersItem.OBSIDAN_BOAT_LAYER, BoatModel::createBodyModel);

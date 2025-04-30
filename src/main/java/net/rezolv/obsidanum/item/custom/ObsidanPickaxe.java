@@ -9,33 +9,44 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 
 
 
 public class ObsidanPickaxe extends PickaxeItem {
-    @Override
-    public boolean isEnchantable(ItemStack pStack) {
-        return false;
-    }
-    private static final long COOLDOWN_DURATION = 120 * 20; // 120 секунд в тиках
-    private static final long ACTIVATION_DURATION = 5 * 20; // 5 секунд в тиках
+    // NBT теги
+    private static final String ACTIVATED_TAG = "Activated";
+    private static final String LAST_ACTIVATION_TAG = "LastActivationTime";
+    private static final String COOLDOWN_END_TAG = "CooldownEndTime";
+    private static final String CUSTOM_MODEL_TAG = "CustomModelData";
+
+    public static final long COOLDOWN_DURATION = 120 * 20; // 120 секунд
+    private static final long ACTIVATION_DURATION = 5 * 20; // 5 секунд
+
+    private static final Block[] INSTANT_BREAK_BLOCKS = {
+            Blocks.STONE,
+            Blocks.COBBLESTONE,
+            Blocks.DIORITE,
+            Blocks.GRANITE,
+            Blocks.ANDESITE,
+            Blocks.DEEPSLATE,
+            Blocks.COBBLED_DEEPSLATE
+    };
 
     public ObsidanPickaxe(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
+    }
+
+    @Override
+    public boolean isEnchantable(ItemStack pStack) {
+        return false;
     }
 
     @Override
@@ -44,11 +55,11 @@ public class ObsidanPickaxe extends PickaxeItem {
 
         if (!world.isClientSide && isActivated(stack)) {
             long currentTime = world.getGameTime();
-            long lastActivationTime = stack.getOrCreateTag().getLong("LastActivationTime");
+            long lastActivationTime = getLastActivationTime(stack);
 
             if (currentTime - lastActivationTime >= ACTIVATION_DURATION) {
                 if (entity instanceof Player) {
-                    deactivate(stack, (Player) entity); // Деактивируем кирку после времени активации
+                    deactivate(stack, (Player) entity, currentTime);
                 }
             }
         }
@@ -56,43 +67,37 @@ public class ObsidanPickaxe extends PickaxeItem {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+        ItemStack stack = playerIn.getItemInHand(handIn);
         long currentTime = worldIn.getGameTime();
-        ItemStack itemStack = playerIn.getItemInHand(handIn);
-        long lastActivationTime = itemStack.getOrCreateTag().getLong("LastActivationTime");
 
-        if (!isActivated(itemStack) && currentTime - lastActivationTime >= COOLDOWN_DURATION) {
+        if (!isActivated(stack) && currentTime >= getCooldownEndTime(stack)) {
             if (!worldIn.isClientSide) {
-                activate(itemStack, currentTime);
+                activate(stack, currentTime);
             }
-            return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
-        } else {
-            return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+            return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
         }
+        return new InteractionResultHolder<>(InteractionResult.PASS, stack);
     }
 
     @Override
-    public boolean mineBlock(ItemStack pStack, Level pLevel, BlockState pState, BlockPos pPos, LivingEntity pEntityLiving) {
-        if (!pLevel.isClientSide && isActivated(pStack)) {
-            Block block = pState.getBlock();
+    public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity entity) {
+        if (!level.isClientSide && isActivated(stack)) {
+            Block block = state.getBlock();
 
             if (isInstantBreakBlock(block)) {
-                // Немедленно разрушаем блок
-                pLevel.destroyBlock(pPos, false);
+                level.destroyBlock(pos, false);
 
-                // Шанс выпадения алмаза
-                if (pLevel.random.nextFloat() < 0.2f) {
+                if (level.random.nextFloat() < 0.2f) {
                     ItemStack diamond = new ItemStack(Items.DIAMOND);
-                    Block.popResource(pLevel, pPos, diamond);
+                    Block.popResource(level, pos, diamond);
                 }
 
-                // Деактивируем кирку после разрушения блока
-                if (pEntityLiving instanceof Player) {
-                    deactivate(pStack, (Player) pEntityLiving);
+                if (entity instanceof Player) {
+                    deactivate(stack, (Player) entity, level.getGameTime());
                 }
             }
         }
-
-        return super.mineBlock(pStack, pLevel, pState, pPos, pEntityLiving);
+        return super.mineBlock(stack, level, state, pos, entity);
     }
 
     @Override
@@ -106,32 +111,33 @@ public class ObsidanPickaxe extends PickaxeItem {
         }
     }
 
-    public void activate(ItemStack stack, long currentTime) {
-        stack.getOrCreateTag().putBoolean("Activated", true);
-        stack.getOrCreateTag().putLong("LastActivationTime", currentTime);
-        stack.getOrCreateTag().putInt("CustomModelData", 1); // Обновляем модель на активированную
+    private void activate(ItemStack stack, long currentTime) {
+        stack.getOrCreateTag().putBoolean(ACTIVATED_TAG, true);
+        stack.getOrCreateTag().putLong(LAST_ACTIVATION_TAG, currentTime);
+        stack.getOrCreateTag().putInt(CUSTOM_MODEL_TAG, 1);
     }
 
-    public void deactivate(ItemStack stack, Player player) {
-        stack.getOrCreateTag().putBoolean("Activated", false);
-        stack.getOrCreateTag().putInt("CustomModelData", 0); // Возвращаем обычную модель
-        player.getCooldowns().addCooldown(this, (int) COOLDOWN_DURATION); // Устанавливаем кулдаун
+    private void deactivate(ItemStack stack, Player player, long currentTime) {
+        stack.getOrCreateTag().putBoolean(ACTIVATED_TAG, false);
+        stack.getOrCreateTag().putInt(CUSTOM_MODEL_TAG, 0);
+        setCooldownEndTime(stack, currentTime + COOLDOWN_DURATION);
     }
 
     public boolean isActivated(ItemStack stack) {
-        return stack.getOrCreateTag().getBoolean("Activated");
+        return stack.getOrCreateTag().getBoolean(ACTIVATED_TAG);
     }
 
-    private static final Block[] INSTANT_BREAK_BLOCKS = {
-            Blocks.STONE,
-            Blocks.COBBLESTONE,
-            Blocks.DIORITE,
-            Blocks.GRANITE,
-            Blocks.ANDESITE,
-            Blocks.DEEPSLATE,
-            Blocks.COBBLED_DEEPSLATE
-            // Добавьте другие блоки по вашему усмотрению
-    };
+    private long getLastActivationTime(ItemStack stack) {
+        return stack.getOrCreateTag().getLong(LAST_ACTIVATION_TAG);
+    }
+
+    private long getCooldownEndTime(ItemStack stack) {
+        return stack.getOrCreateTag().getLong(COOLDOWN_END_TAG);
+    }
+
+    private void setCooldownEndTime(ItemStack stack, long time) {
+        stack.getOrCreateTag().putLong(COOLDOWN_END_TAG, time);
+    }
 
     private boolean isInstantBreakBlock(Block block) {
         for (Block instantBreakBlock : INSTANT_BREAK_BLOCKS) {

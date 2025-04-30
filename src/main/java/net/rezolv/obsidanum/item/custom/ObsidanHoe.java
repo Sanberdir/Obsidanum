@@ -31,36 +31,11 @@ public class ObsidanHoe extends HoeItem {
     public boolean isEnchantable(ItemStack pStack) {
         return false;
     }
-    private static final long COOLDOWN_DURATION = 10 * 20; // 10 seconds in ticks
+    public static final long COOLDOWN_DURATION = 10 * 20; // 10 seconds in ticks
     private static final long ACTIVATION_DURATION = 5 * 20; // 5 seconds in ticks
     private static final String TAG_ACTIVATED = "Activated";
     private static final String TAG_LAST_ACTIVATION_TIME = "LastActivationTime";
-
-    public ObsidanHoe(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
-        super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
-    }
-
-    public boolean isActivated(ItemStack stack) {
-        return stack.getOrCreateTag().getBoolean(TAG_ACTIVATED);
-    }
-
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
-        long currentTime = worldIn.getGameTime();
-        ItemStack itemStack = playerIn.getItemInHand(handIn);
-
-        // Get the last activation time from the item stack
-        long lastActivationTime = itemStack.getOrCreateTag().getLong(TAG_LAST_ACTIVATION_TIME);
-
-        if (!isActivated(itemStack) && currentTime - lastActivationTime >= COOLDOWN_DURATION) {
-            if (!worldIn.isClientSide) {
-                activate(itemStack, currentTime);
-            }
-            return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
-        } else {
-            return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
-        }
-    }
+    private static final String TAG_COOLDOWN_END = "CooldownEndTime";
 
     private static final BlockState[] TARGET_BLOCKS = {
             Blocks.GRASS.defaultBlockState(),
@@ -88,6 +63,28 @@ public class ObsidanHoe extends HoeItem {
             BlocksObs.CRIMSON_GRASS.get().defaultBlockState()
     };
 
+    public ObsidanHoe(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
+        super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
+    }
+
+    public boolean isActivated(ItemStack stack) {
+        return stack.getOrCreateTag().getBoolean(TAG_ACTIVATED);
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+        ItemStack stack = playerIn.getItemInHand(handIn);
+        long currentTime = worldIn.getGameTime();
+
+        if (!isActivated(stack) && currentTime >= getCooldownEnd(stack)) {
+            if (!worldIn.isClientSide) {
+                activate(stack, currentTime);
+            }
+            return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
+        }
+        return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
+    }
+
     @Override
     public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, net.minecraft.world.entity.LivingEntity entity) {
         if (!level.isClientSide && isActivated(stack)) {
@@ -103,7 +100,7 @@ public class ObsidanHoe extends HoeItem {
                             }
                         }
                     }
-                    deactivate(stack, (Player) entity);
+                    deactivate(stack, (Player) entity, level.getGameTime());
                     break;
                 }
             }
@@ -111,6 +108,7 @@ public class ObsidanHoe extends HoeItem {
         return super.mineBlock(stack, level, state, pos, entity);
     }
 
+    @Override
     public void appendHoverText(ItemStack itemstack, Level world, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, world, list, flag);
         if (Screen.hasShiftDown()) {
@@ -123,8 +121,8 @@ public class ObsidanHoe extends HoeItem {
 
     public void activate(ItemStack stack, long currentTime) {
         stack.getOrCreateTag().putBoolean(TAG_ACTIVATED, true);
-        stack.getOrCreateTag().putLong(TAG_LAST_ACTIVATION_TIME, currentTime); // Save the activation time
-        stack.getOrCreateTag().putInt("CustomModelData", 1); // Update model
+        stack.getOrCreateTag().putLong(TAG_LAST_ACTIVATION_TIME, currentTime);
+        stack.getOrCreateTag().putInt("CustomModelData", 1);
     }
 
     @Override
@@ -136,20 +134,29 @@ public class ObsidanHoe extends HoeItem {
 
             if (currentTime - lastActivationTime >= ACTIVATION_DURATION) {
                 if (entity instanceof Player) {
-                    deactivate(stack, (Player) entity);
+                    deactivate(stack, (Player) entity, currentTime);
                 }
             }
         }
     }
 
-    public void deactivate(ItemStack stack, Player player) {
+    public void deactivate(ItemStack stack, Player player, long currentTime) {
         stack.getOrCreateTag().putBoolean(TAG_ACTIVATED, false);
-        stack.getOrCreateTag().putInt("CustomModelData", 0); // Return to default model
-        player.getCooldowns().addCooldown(this, (int) COOLDOWN_DURATION); // Set cooldown
+        stack.getOrCreateTag().putInt("CustomModelData", 0);
+        setCooldownEnd(stack, currentTime + COOLDOWN_DURATION);
+    }
+
+    private long getCooldownEnd(ItemStack stack) {
+        return stack.getOrCreateTag().getLong(TAG_COOLDOWN_END);
+    }
+
+    private void setCooldownEnd(ItemStack stack, long time) {
+        stack.getOrCreateTag().putLong(TAG_COOLDOWN_END, time);
     }
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
+        // Без изменений из оригинального кода
         Level world = context.getLevel();
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();

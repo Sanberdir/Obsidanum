@@ -19,34 +19,61 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 
 public class ObsidanAxe extends AxeItem {
-    @Override
-    public boolean isEnchantable(ItemStack pStack) {
-        return false;
-    }
+    // Константы для NBT-тегов
+    private static final String ACTIVATED_TAG = "Activated";
+    private static final String LAST_ACTIVATION_TAG = "LastActivationTime";
+    private static final String COOLDOWN_END_TAG = "CooldownEndTime";
+    private static final String DURABILITY_LOST_TAG = "DurabilityLost";
+    private static final String CUSTOM_MODEL_DATA_TAG = "CustomModelData";
+
     private static final TagKey<Block> MINEABLE_LOGS_TAG = BlockTags.create(new ResourceLocation("minecraft", "logs"));
     private static final TagKey<Block> MINEABLE_LEAVES_TAG = BlockTags.create(new ResourceLocation("minecraft", "leaves"));
 
-    private static final long COOLDOWN_DURATION = 25 * 20;
-    private static final long ACTIVATION_DURATION = 5 * 20;
+    public static final long COOLDOWN_DURATION = 25 * 20; // 25 секунд в тиках
+    private static final long ACTIVATION_DURATION = 5 * 20; // 5 секунд в тиках
 
     public ObsidanAxe(Tier pTier, int pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
     }
 
     @Override
+    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+        consumer.accept(new IClientItemExtensions() {
+            public float getCooldownPercent(ItemStack stack, Player player, float partialTicks) {
+                long currentTime = player.level().getGameTime();
+                long cooldownEnd = getCooldownEndTime(stack);
+
+                if (currentTime >= cooldownEnd) return 0.0f;
+
+                long cooldownDuration = COOLDOWN_DURATION;
+                long remaining = cooldownEnd - currentTime;
+                return (float) remaining / (float) cooldownDuration;
+            }
+        });
+    }
+
+
+
+
+
+    @Override
     public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
+
+        // УДАЛЯЕМ запись времени в NBT
         if (!world.isClientSide && isActivated(stack)) {
             long lastActivationTime = getLastActivationTime(stack);
             if (world.getGameTime() - lastActivationTime >= ACTIVATION_DURATION) {
                 if (entity instanceof Player) {
-                    deactivate(stack, (Player) entity);
+                    deactivate(stack, (Player) entity, world.getGameTime());
                 }
             }
         }
@@ -57,10 +84,9 @@ public class ObsidanAxe extends AxeItem {
         ItemStack stack = playerIn.getItemInHand(handIn);
         long currentTime = worldIn.getGameTime();
 
-        if (!isActivated(stack) && currentTime - getLastActivationTime(stack) >= COOLDOWN_DURATION) {
+        if (!isActivated(stack) && currentTime >= getCooldownEndTime(stack)) {
             if (!worldIn.isClientSide) {
-                activate(stack);
-                setLastActivationTime(stack, currentTime);
+                activate(stack, currentTime);
             }
             return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
         } else {
@@ -68,18 +94,45 @@ public class ObsidanAxe extends AxeItem {
         }
     }
 
-    public boolean isActivated(ItemStack stack) {
-        return stack.getOrCreateTag().getBoolean("Activated");
+    // Активация предмета
+    public void activate(ItemStack stack, long currentTime) {
+        stack.getOrCreateTag().putBoolean(ACTIVATED_TAG, true);
+        stack.getOrCreateTag().putInt(CUSTOM_MODEL_DATA_TAG, 1);
+        stack.getOrCreateTag().putBoolean(DURABILITY_LOST_TAG, false);
+        setLastActivationTime(stack, currentTime);
     }
 
+    // Деактивация с установкой кулдауна
+    public void deactivate(ItemStack stack, Player player, long currentTime) {
+        stack.getOrCreateTag().putBoolean(ACTIVATED_TAG, false);
+        stack.getOrCreateTag().putInt(CUSTOM_MODEL_DATA_TAG, 0);
+        stack.getOrCreateTag().putBoolean(DURABILITY_LOST_TAG, false);
+        setCooldownEndTime(stack, currentTime + COOLDOWN_DURATION);
+    }
+
+    // Проверка активации
+    public boolean isActivated(ItemStack stack) {
+        return stack.getOrCreateTag().getBoolean(ACTIVATED_TAG);
+    }
+
+    // Методы для работы с NBT-тегами
     private long getLastActivationTime(ItemStack stack) {
-        return stack.getOrCreateTag().getLong("LastActivationTime");
+        return stack.getOrCreateTag().getLong(LAST_ACTIVATION_TAG);
     }
 
     private void setLastActivationTime(ItemStack stack, long time) {
-        stack.getOrCreateTag().putLong("LastActivationTime", time);
+        stack.getOrCreateTag().putLong(LAST_ACTIVATION_TAG, time);
     }
 
+    private long getCooldownEndTime(ItemStack stack) {
+        return stack.getOrCreateTag().getLong(COOLDOWN_END_TAG);
+    }
+
+    private void setCooldownEndTime(ItemStack stack, long time) {
+        stack.getOrCreateTag().putLong(COOLDOWN_END_TAG, time);
+    }
+
+    // Остальные методы остаются без изменений
     @Override
     public void appendHoverText(ItemStack itemstack, Level world, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, world, list, flag);
@@ -91,33 +144,20 @@ public class ObsidanAxe extends AxeItem {
         }
     }
 
-    public void activate(ItemStack stack) {
-        stack.getOrCreateTag().putBoolean("Activated", true);
-        stack.getOrCreateTag().putInt("CustomModelData", 1);
-        stack.getOrCreateTag().putBoolean("DurabilityLost", false);
-    }
-
-    public void deactivate(ItemStack stack, Player player) {
-        stack.getOrCreateTag().putBoolean("Activated", false);
-        stack.getOrCreateTag().putInt("CustomModelData", 0);
-        stack.getOrCreateTag().putBoolean("DurabilityLost", false);
-        player.getCooldowns().addCooldown(this, (int) COOLDOWN_DURATION);
-    }
-
     @Override
     public boolean mineBlock(ItemStack stack, Level world, BlockState state, BlockPos pos, LivingEntity entity) {
         if (!world.isClientSide && isActivated(stack) && entity instanceof Player) {
             if (state.is(MINEABLE_LOGS_TAG)) {
                 chainBreak(world, pos, (Player) entity, stack, state);
-                deactivate(stack, (Player) entity);
+                deactivate(stack, (Player) entity, world.getGameTime());
                 return true;
             } else if (state.is(MINEABLE_LEAVES_TAG)) {
                 breakPlants(world, pos, (Player) entity, stack);
-                deactivate(stack, (Player) entity);
+                deactivate(stack, (Player) entity, world.getGameTime());
                 return true;
             } else if (isNetherLog(state) || isNetherFungus(state)) {
                 breakNetherTree(world, pos, (Player) entity, stack);
-                deactivate(stack, (Player) entity);
+                deactivate(stack, (Player) entity, world.getGameTime());
                 return true;
             }
         }
@@ -227,13 +267,13 @@ public class ObsidanAxe extends AxeItem {
     }
 
     private void destroyBlocks(Level world, Collection<BlockPos> positions, Player player, ItemStack stack) {
-        boolean durabilityLost = stack.getOrCreateTag().getBoolean("DurabilityLost");
+        boolean durabilityLost = stack.getOrCreateTag().getBoolean(DURABILITY_LOST_TAG);
 
         positions.forEach(p -> {
             if (p.distSqr(player.blockPosition()) < 4096) {
                 world.destroyBlock(p, true);
                 if (!durabilityLost) {
-                    stack.getOrCreateTag().putBoolean("DurabilityLost", true);
+                    stack.getOrCreateTag().putBoolean(DURABILITY_LOST_TAG, true);
                 }
             }
         });
