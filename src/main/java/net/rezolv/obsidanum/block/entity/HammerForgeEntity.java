@@ -17,7 +17,6 @@ public class HammerForgeEntity extends BaseContainerBlockEntity implements World
         super(ModBlockEntities.HAMMER_FORGE.get(), pPos, pBlockState);
 
     }
-
     @Override
     public int[] getSlotsForFace(Direction direction) {
         return new int[0];

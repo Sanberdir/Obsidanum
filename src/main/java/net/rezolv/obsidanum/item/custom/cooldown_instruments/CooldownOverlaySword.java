@@ -32,8 +32,6 @@ public class CooldownOverlaySword {
             if (currentTime < cooldownEnd) {
                 float progress = 1.0f - (float)(cooldownEnd - currentTime) / ObsidanSword.COOLDOWN_DURATION;
                 renderCooldown(guiGraphics, screenWidth, screenHeight, inMain, progress);
-            } else {
-                renderReady(guiGraphics, screenWidth, screenHeight, inMain);
             }
         }
     };
@@ -50,7 +48,7 @@ public class CooldownOverlaySword {
         }
 
         int backgroundColor = 0x00000000; // 25% dark
-        int fillColor = 0xA88A2BE2;      // 50% violet
+        int fillColor = 0x99cccccc;
 
         // фон
         guiGraphics.fill(x, y, x + slotSize, y + slotSize, backgroundColor);
@@ -61,18 +59,4 @@ public class CooldownOverlaySword {
         }
     }
 
-    private static void renderReady(GuiGraphics guiGraphics, int width, int height, boolean inMainHand) {
-        int slotSize = 16;
-        int offset = 3;
-        int x, y = height - 22 + offset;
-        if (inMainHand) {
-            int selected = minecraft.player.getInventory().selected;
-            x = (width / 2) - 91 + selected * 20 + offset;
-        } else {
-            x = (width / 2) + 91 + 2 + offset;
-        }
-
-        int readyColor = 0x4008e8de; // 50% green
-        guiGraphics.fill(x, y, x + slotSize, y + slotSize, readyColor);
-    }
 }

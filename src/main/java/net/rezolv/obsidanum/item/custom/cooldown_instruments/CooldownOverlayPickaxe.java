@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import net.rezolv.obsidanum.item.custom.ObsidanHoe;
 import net.rezolv.obsidanum.item.custom.ObsidanPickaxe;
 import net.rezolv.obsidanum.item.custom.ObsidanPickaxe;
 
@@ -15,29 +16,28 @@ public class CooldownOverlayPickaxe {
 
         ItemStack mainHandItem = minecraft.player.getMainHandItem();
         ItemStack offHandItem = minecraft.player.getOffhandItem();
-        ItemStack pickaxeStack = null;
+        ItemStack hoeStack = null;
         boolean inMain = false;
 
         if (mainHandItem.getItem() instanceof ObsidanPickaxe) {
-            pickaxeStack = mainHandItem;
+            hoeStack = mainHandItem;
             inMain = true;
         } else if (offHandItem.getItem() instanceof ObsidanPickaxe) {
-            pickaxeStack = offHandItem;
+            hoeStack = offHandItem;
             inMain = false;
         }
 
-        if (pickaxeStack != null) {
+        if (hoeStack != null) {
             long currentTime = minecraft.level.getGameTime();
-            long cooldownEnd = pickaxeStack.getOrCreateTag().getLong("CooldownEndTime");
+            long cooldownEnd = hoeStack.getOrCreateTag().getLong("CooldownEndTime");
 
             if (currentTime < cooldownEnd) {
                 float progress = 1.0f - (float)(cooldownEnd - currentTime) / ObsidanPickaxe.COOLDOWN_DURATION;
                 renderCooldown(guiGraphics, screenWidth, screenHeight, inMain, progress);
-            } else {
-                renderReady(guiGraphics, screenWidth, screenHeight, inMain);
             }
         }
     };
+
 
     private static void renderCooldown(GuiGraphics guiGraphics, int width, int height, boolean inMainHand, float progress) {
         int slotSize = 16;
@@ -50,30 +50,18 @@ public class CooldownOverlayPickaxe {
             x = (width / 2) + 91 + 2 + offset;
         }
 
-        int backgroundColor = 0x00000000; // 25% dark
-        int fillColor = 0xA88A2BE2;      // 50% violet
+        int backgroundColor = 0x00000000;
+        int fillColor = 0x99cccccc;
 
-        // фон
+        // Фон (прозрачный)
         guiGraphics.fill(x, y, x + slotSize, y + slotSize, backgroundColor);
-        // вертикальное заполнение сверху вниз
-        if (progress > 0f) {
-            int filled = (int)(slotSize * progress);
-            guiGraphics.fill(x, y, x + slotSize, y + filled, fillColor);
-        }
-    }
 
-    private static void renderReady(GuiGraphics guiGraphics, int width, int height, boolean inMainHand) {
-        int slotSize = 16;
-        int offset = 3;
-        int x, y = height - 22 + offset;
-        if (inMainHand) {
-            int selected = minecraft.player.getInventory().selected;
-            x = (width / 2) - 91 + selected * 20 + offset;
-        } else {
-            x = (width / 2) + 91 + 2 + offset;
-        }
+        // Высота заполнения, оставляем 2 пикселя для полоски прочности
+        int maxFillHeight = slotSize - 2;
+        int filledHeight = (int) (maxFillHeight * progress);
+        int startY = y + (maxFillHeight - filledHeight);
 
-        int readyColor = 0x4008e8de; // 50% green
-        guiGraphics.fill(x, y, x + slotSize, y + slotSize, readyColor);
+        // Рисуем заполнение КД, не затрагивая нижние 2 пикселя
+        guiGraphics.fill(x, startY, x + slotSize, startY + filledHeight, fillColor);
     }
 }
