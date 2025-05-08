@@ -10,6 +10,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.rezolv.obsidanum.block.custom.HammerForge;
 import org.jetbrains.annotations.Nullable;
 
 public class HammerForgeEntity extends BaseContainerBlockEntity implements WorldlyContainer {
@@ -20,6 +21,11 @@ public class HammerForgeEntity extends BaseContainerBlockEntity implements World
     @Override
     public int[] getSlotsForFace(Direction direction) {
         return new int[0];
+    }
+
+    public boolean isPowered() {
+        if (this.level == null) return false;
+        return this.getBlockState().getValue(HammerForge.POWERED);
     }
 
     @Override

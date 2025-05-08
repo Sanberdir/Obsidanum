@@ -22,8 +22,18 @@ public class HammerForgeModel<T extends Entity> extends HierarchicalModel<T> {
 		this.main = root.getChild("main");
 		this.group = this.main.getChild("group");
 		this.bone = this.main.getChild("bone");
+		this.originalGroupY = group.y; // Сохраняем исходное положение Y
+
+	}
+	private final float originalGroupY;
+	public void setGroupYOffset(float yOffset) {
+		// Инвертируем смещение из-за поворота модели
+		group.y = originalGroupY - yOffset; // Минус вместо плюса
 	}
 
+	public void resetGroupY() {
+		group.y = originalGroupY;
+	}
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
@@ -42,7 +52,7 @@ public class HammerForgeModel<T extends Entity> extends HierarchicalModel<T> {
 	}
 
 	@Override
-	public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 	}
 
