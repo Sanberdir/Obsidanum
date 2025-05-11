@@ -36,7 +36,36 @@ public class HammerForgeRenderer implements BlockEntityRenderer<HammerForgeEntit
     public HammerForgeRenderer(BlockEntityRendererProvider.Context context) {
         this.model = new HammerForgeModel<>(context.bakeLayer(HammerForgeModel.LAYER_LOCATION));
     }
-
+    public static final AnimationDefinition down_move = AnimationDefinition.Builder.withLength(1.4167F)
+            .addAnimation("group", new AnimationChannel(AnimationChannel.Targets.POSITION,
+                    new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.0833F, KeyframeAnimations.posVec(0.0F, -3.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.1667F, KeyframeAnimations.posVec(0.0F, -5.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.25F, KeyframeAnimations.posVec(0.0F, -7.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.3333F, KeyframeAnimations.posVec(0.0F, -9.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.4167F, KeyframeAnimations.posVec(0.0F, -12.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.5833F, KeyframeAnimations.posVec(0.0F, -10.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.7917F, KeyframeAnimations.posVec(0.0F, -8.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(1.0F, KeyframeAnimations.posVec(0.0F, -6.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(1.125F, KeyframeAnimations.posVec(0.0F, -3.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(1.2917F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+            ))
+            .addAnimation("bone", new AnimationChannel(AnimationChannel.Targets.POSITION,
+                    new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.25F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+            ))
+            .addAnimation("inner", new AnimationChannel(AnimationChannel.Targets.POSITION,
+                    new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.0833F, KeyframeAnimations.posVec(0.0F, -1.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.1667F, KeyframeAnimations.posVec(0.0F, -2.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.25F, KeyframeAnimations.posVec(0.0F, -3.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.3333F, KeyframeAnimations.posVec(0.0F, -4.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.5833F, KeyframeAnimations.posVec(0.0F, -3.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.7917F, KeyframeAnimations.posVec(0.0F, -2.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(1.0F, KeyframeAnimations.posVec(0.0F, -1.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(1.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+            ))
+            .build();
     @Override
     public void render(HammerForgeEntity blockEntity, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
@@ -47,7 +76,6 @@ public class HammerForgeRenderer implements BlockEntityRenderer<HammerForgeEntit
 
         AnimationState state = animationStates.computeIfAbsent(blockEntity, k -> new AnimationState());
         boolean isPowered = blockEntity.isPowered();
-        float yOffset = 0.0F;
 
         if (isPowered && !state.wasPowered) {
             state.startTime = Minecraft.getInstance().level.getGameTime();
@@ -57,22 +85,23 @@ public class HammerForgeRenderer implements BlockEntityRenderer<HammerForgeEntit
             long elapsedTicks = Minecraft.getInstance().level.getGameTime() - state.startTime;
             float elapsedSeconds = (elapsedTicks + partialTick) / 20.0F;
 
-            if (elapsedSeconds < HammerForgeAnimation.down_move.lengthInSeconds()) {
-                yOffset = calculateYOffset(elapsedSeconds);
+            if (elapsedSeconds < down_move.lengthInSeconds()) {
+                model.applyAnimation(elapsedSeconds);
+            } else {
+                model.resetPositions();
             }
+        } else {
+            model.resetPositions();
         }
 
-        // Обновляем состояние питания для следующего кадра
         state.wasPowered = isPowered;
-
-        // Применяем смещение с инверсией из-за поворота модели
-        model.setGroupYOffset(-yOffset);
 
         VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.entitySolid(TEXTURE));
         model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
 
         poseStack.popPose();
     }
+
 
     private float calculateYOffset(float elapsedSeconds) {
         if (elapsedSeconds <= 0.0833F) {
