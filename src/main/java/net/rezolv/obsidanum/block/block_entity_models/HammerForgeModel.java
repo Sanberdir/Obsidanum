@@ -3,18 +3,14 @@ package net.rezolv.obsidanum.block.block_entity_models;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.animation.AnimationChannel;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
 
 import static net.rezolv.obsidanum.block.entity.renderer.HammerForgeRenderer.down_move;
 
@@ -70,18 +66,6 @@ public class HammerForgeModel<T extends Entity> extends HierarchicalModel<T> {
 	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
 		main.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
 	}
-
-	public void animate(float animationProgress) {
-		float groupYOffset = -calculateGroupYOffset(animationProgress);
-		float innerYOffset = -calculateInnerYOffset(animationProgress);
-
-		System.out.println("Animation progress: " + animationProgress +
-				", Group Y: " + groupYOffset +
-				", Inner Y: " + innerYOffset);
-
-		group.y = originalGroupY + groupYOffset;
-		inner.y = originalInnerY + innerYOffset;
-	}
 	public void resetPositions() {
 		group.y = originalGroupY;
 		inner.y = originalInnerY;
@@ -98,45 +82,27 @@ public class HammerForgeModel<T extends Entity> extends HierarchicalModel<T> {
 		inner.y = originalInnerY + innerYOffset; // Убрали минус
 	}
 	private float getYOffsetForAnimation(AnimationDefinition animation, float progress, String partName) {
-		// Простая реализация интерполяции между ключевыми кадрами
-		// Замените на более точную, если нужно
 		if (partName.equals("group")) {
-			if (progress < 0.0833F) return 0F;
-			if (progress < 0.1667F) return 3F;
-			if (progress < 0.25F) return 5F;
-			if (progress < 0.3333F) return 7F;
-			if (progress < 0.4167F) return 9F;
-			if (progress < 0.5833F) return 12F;
-			if (progress < 0.7917F) return 10F;
-			if (progress < 1.0F) return 8F;
-			if (progress < 1.125F) return 6F;
-			if (progress < 1.2917F) return 3F;
+			if (progress < 0.0417F) return 0F;
+			if (progress < 0.0833F) return 16F;
+			if (progress < 0.125F) return 15.8F;
+			if (progress < 0.1667F) return 16F;
+			if (progress < 0.5F) return 16F;
+			if (progress < 0.75F) return 13F;
+			if (progress < 1.0F) return 0F;
+			if (progress < 1.5F) return 0F;
 			return 0F;
 		} else if (partName.equals("inner")) {
-			if (progress < 0.0833F) return 0F;
-			if (progress < 0.1667F) return 1F;
-			if (progress < 0.25F) return 2F;
-			if (progress < 0.3333F) return 3F;
-			if (progress < 0.5833F) return 4F;
-			if (progress < 0.7917F) return 3F;
-			if (progress < 1.0F) return 2F;
-			if (progress < 1.125F) return 1F;
+			if (progress < 0) return 0F;
+			if (progress < 0.0833F) return 4F;
+			if (progress < 0.5F) return 4F;
+			if (progress < 0.75F) return 3F;
+			if (progress < 1.0F) return 0F;
+			if (progress < 1.5F) return 0F;
 			return 0F;
 		}
 		return 0F;
 	}
-	private float calculateGroupYOffset(float progress) {
-		// Реализуйте логику расчета смещения для group
-		// Например:
-		return -12.0F * progress; // Простой пример
-	}
-
-	private float calculateInnerYOffset(float progress) {
-		// Реализуйте логику расчета смещения для inner
-		// Например:
-		return -4.0F * progress; // Простой пример
-	}
-
 	@Override
 	public ModelPart root() {
 		return main;

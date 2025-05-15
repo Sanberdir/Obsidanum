@@ -231,6 +231,12 @@ public class CreativeTabObs extends CreativeModeTab {
                         pOutput.accept(ItemsObs.FLAME_BOLT.get());
                         pOutput.accept(ItemsObs.NETHERITE_BOLT.get());
                         pOutput.accept(ItemsObs.LEAF_LIVE.get());
+                        pOutput.accept(ItemsObs.NETHER_PLAN.get());
+                        pOutput.accept(ItemsObs.ORDER_PLAN.get());
+                        pOutput.accept(ItemsObs.CATACOMBS_PLAN.get());
+                        pOutput.accept(ItemsObs.UN_CATACOMBS_SCROLL.get());
+                        pOutput.accept(ItemsObs.UN_NETHER_SCROLL.get());
+                        pOutput.accept(ItemsObs.UN_ORDER_SCROLL.get());
                         pOutput.accept(ItemsObs.OBSIDAN.get());
                         pOutput.accept(ItemsObs.RAW_MEET_BEETLE.get());
                         pOutput.accept(ItemsObs.COCKED_MEET_BEETLE.get());
