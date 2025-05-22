@@ -15,6 +15,14 @@
       }
     ]
   },
+  "learn": {
+    "sounds": [
+      {
+        "name": "obsidanum:learn",
+        "stream": true
+      }
+    ]
+  },
   "close_obsidian_door": {
     "sounds": [
       {

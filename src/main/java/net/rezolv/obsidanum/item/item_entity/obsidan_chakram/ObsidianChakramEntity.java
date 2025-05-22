@@ -67,22 +67,18 @@ public class ObsidianChakramEntity extends ThrowableItemProjectile {
     public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
         super.shoot(x, y, z, velocity, inaccuracy);
 
-        // Обновляем углы при запуске
+        // Рассчитываем базовые углы по направлению движения
         Vec3 motion = new Vec3(x, y, z).normalize();
         float yaw = (float) Math.toDegrees(Math.atan2(motion.x, motion.z));
         float pitch = (float) Math.toDegrees(Math.asin(motion.y));
 
-        // Корректируем ориентацию для вертикального броска
-        if (Math.abs(motion.y) > 0.9) { // Если игрок смотрит почти вертикально
-            yaw += 90.0F; // Поворачиваем чакрам на 90 градусов, чтобы он был ребром
-        }
-
+        // Всегда устанавливаем ориентацию ребром
         this.setYRot(yaw);
         this.setXRot(pitch);
         this.yRotO = yaw;
         this.xRotO = pitch;
 
-        // Сохраняем ориентацию в синхронизированных данных
+        // Сохраняем ориентацию
         this.getEntityData().set(STOPPED_YAW, yaw);
         this.getEntityData().set(STOPPED_PITCH, pitch);
     }

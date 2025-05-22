@@ -51,7 +51,7 @@ public class HammerForge extends BaseEntityBlock {
         if (!state.getValue(POWERED) && shouldBePowered) {
             // Ставим powered = true и планируем одиночный тик через 15 тиков
             level.setBlock(pos, state.setValue(POWERED, true), Block.UPDATE_ALL);
-            level.scheduleTick(pos, this, 15);
+            level.scheduleTick(pos, this, 2);
         }
         // Если упали обратно в false — просто обновляем состояние
         else if (state.getValue(POWERED) && !shouldBePowered) {

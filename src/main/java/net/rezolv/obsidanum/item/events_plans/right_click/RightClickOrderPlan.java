@@ -3,6 +3,7 @@ package net.rezolv.obsidanum.item.events_plans.right_click;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -12,7 +13,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.item.ItemsObs;
 import net.rezolv.obsidanum.recipes.ForgeScrollOrderRecipe;
-import net.rezolv.obsidanum.recipes.ForgeScrollOrderRecipe;
+import net.rezolv.obsidanum.sound.SoundsObs;
 
 import java.util.List;
 import java.util.Random;
@@ -58,7 +59,19 @@ public class RightClickOrderPlan {
         result.save(resultTag);
         resultList.add(resultTag);
         tag.put("RecipeResult", resultList);
+        // Проигрываем звук колокола
+        level.playSound(null,
+                event.getEntity().getX(),
+                event.getEntity().getY(),
+                event.getEntity().getZ(),
+                SoundsObs.LEARN.get(), // Звук колокола
+                SoundSource.PLAYERS,    // Категория звука (для игроков)
+                1.0F,                  // Громкость (1.0 = 100%)
+                0.8F + RANDOM.nextFloat() * 0.4F); // Высота тона (случайное значение для естественности)
 
+        // Возвращаем успешный результат взаимодействия
+        event.setCancellationResult(InteractionResult.SUCCESS);
+        event.setCanceled(true);
         // Записываем ингредиенты
         ListTag ingredientsList = new ListTag();
         for (JsonObject ingredientJson : randomRecipe.getIngredientJsons()) {

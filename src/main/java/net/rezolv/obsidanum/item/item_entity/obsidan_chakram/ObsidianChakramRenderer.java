@@ -35,21 +35,14 @@ public class ObsidianChakramRenderer extends EntityRenderer<ObsidianChakramEntit
                        PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
 
-        // Получаем сохранённые углы ориентации
-        float yaw = entity.isStopped() ?
-                entity.getStoppedYaw() :
-                entity.getYRot();
+        // Получаем углы ориентации
+        float yaw = entity.isStopped() ? entity.getStoppedYaw() : entity.getYRot();
+        float pitch = entity.isStopped() ? entity.getStoppedPitch() : entity.getXRot();
 
-        float pitch = entity.isStopped() ?
-                entity.getStoppedPitch() :
-                entity.getXRot();
+        // Базовый поворот для ориентации ребром
+        poseStack.mulPose(Axis.YP.rotationDegrees(yaw - 90));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(-pitch));
 
-        // Применяем повороты ориентации
-        poseStack.mulPose(Axis.YP.rotationDegrees(yaw - 90)); // Корректировка для ориентации ребром
-        poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
-        if (Math.abs(entity.getDeltaMovement().y) > 0.9) {
-            poseStack.mulPose(Axis.YP.rotationDegrees(90.0F)); // Дополнительный поворот для вертикального полёта
-        }
         // Вращение в полёте
         if (!entity.isStopped()) {
             float spin = (entity.tickCount + partialTicks) * -45.0F;

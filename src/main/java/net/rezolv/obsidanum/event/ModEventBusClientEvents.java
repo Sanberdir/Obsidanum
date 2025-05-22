@@ -41,6 +41,7 @@ public class ModEventBusClientEvents {
         event.registerAboveAll("sword_cooldown", CooldownOverlaySword.COOLDOWN_OVERLAY);
         event.registerAboveAll("pickaxe_cooldown", CooldownOverlayPickaxe.COOLDOWN_OVERLAY);
     }
+
     @SubscribeEvent
     public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(ModModelLayersItem.OBSIDAN_BOAT_LAYER, BoatModel::createBodyModel);
@@ -92,7 +93,7 @@ public class ModEventBusClientEvents {
         event.registerBlockEntityRenderer(ModBlockEntities.FORGE_CRUCIBLE.get(), ForgeCrucibleEntityRenderer::new);
 
         event.registerBlockEntityRenderer(ModBlockEntities.HAMMER_FORGE.get(), HammerForgeRenderer::new);
-
+        event.registerBlockEntityRenderer(ModBlockEntities.PRANA_CRYSTALL.get(), PranaCrystallRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.OBSIDAN_SIGN.get(), SignRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.OBSIDAN_HANGING_SIGN.get(), HangingSignRenderer::new);
     }

@@ -48,9 +48,9 @@ public class ForgeEventBusEvents {
             float multiplier = 1.0f;
 
             if (amplifier == 0) {
-                multiplier = 1.15f; // +15%
+                multiplier = 1.20f; // +15%
             } else if (amplifier == 1) {
-                multiplier = 6.40f; // +40%
+                multiplier = 1.40f; // +40%
             }
 
             event.setAmount(originalDamage * multiplier);
