@@ -29,7 +29,6 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import net.rezolv.obsidanum.block.BlocksObs;
 import net.rezolv.obsidanum.block.entity.ModBlockEntities;
 import net.rezolv.obsidanum.block.entity.renderer.PranaCrystallRenderer;
-import net.rezolv.obsidanum.block.screens.ObsidanumMenus;
 import net.rezolv.obsidanum.chests.block.entity.ObsidanumChestsBlockEntityTypes;
 import net.rezolv.obsidanum.chests.client.render.ObsidanumChestRenderer;
 import net.rezolv.obsidanum.chests.client.screen.ObsidanumChestScreen;
