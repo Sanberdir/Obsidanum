@@ -24,7 +24,7 @@ public class ConfusionOverlay {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) return;
 
-        MobEffectInstance effect = minecraft.player.getEffect(EffectsObs.FLASH.get());
+        MobEffectInstance effect = minecraft.player.getEffect(EffectsObs.MOROK.get());
         if (effect == null) return;
 
         int amplifier = effect.getAmplifier(); // 0 для уровня I, 1 для уровня II

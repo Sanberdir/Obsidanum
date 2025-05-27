@@ -189,7 +189,7 @@
   "death.attack.obsidian_totem": "%1$s не выдержал тяжёлого возвращения к жизни %2$s через обсидиановый тотем",
   "death.attack.obsidian_totem.player": "Слишком эффектно %2$s вернулся к жизни впечатлив %1$s",
   "effect.obsidanum.inviolability": "Неприкосновенность",
-  "effect.obsidanum.flash": "Морок",
+  "effect.obsidanum.morok": "Морок",
   "effect.obsidanum.protection_arrow": "Защита от стрел",
 
   "entity.obsidanum.mod_chest_boat": "Лодка с сундуком из обсиданового дерева",

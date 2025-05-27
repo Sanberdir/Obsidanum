@@ -2,7 +2,6 @@ package net.rezolv.obsidanum.effect.effects.effect_overlay;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -41,7 +40,7 @@ public class FogEffectHandler {
             // Проверяем, прошло ли 10 секунд для эффекта уровня 2
             if (state.ticksInFog >= SECOND_EFFECT_DELAY && !state.secondEffectGiven) {
                 player.addEffect(new MobEffectInstance(
-                        EffectsObs.FLASH.get(),
+                        EffectsObs.MOROK.get(),
                         EFFECT_DURATION,
                         SECOND_EFFECT_LEVEL,
                         false, // не частицы
@@ -53,7 +52,7 @@ public class FogEffectHandler {
             // Проверяем, прошло ли 5 секунд для эффекта уровня 1 (если еще не давали второй эффект)
             else if (state.ticksInFog >= FIRST_EFFECT_DELAY && !state.firstEffectGiven) {
                 player.addEffect(new MobEffectInstance(
-                        EffectsObs.FLASH.get(),
+                        EffectsObs.MOROK.get(),
                         EFFECT_DURATION,
                         FIRST_EFFECT_LEVEL,
                         false,

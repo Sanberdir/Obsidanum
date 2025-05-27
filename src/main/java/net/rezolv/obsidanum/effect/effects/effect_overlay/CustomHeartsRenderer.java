@@ -39,7 +39,7 @@ public class CustomHeartsRenderer {
                 return; // Не отображаем сердца в креативе или режиме наблюдателя
             }
 
-            MobEffectInstance flashEffect = player.getEffect(EffectsObs.FLASH.get());
+            MobEffectInstance flashEffect = player.getEffect(EffectsObs.MOROK.get());
             if (flashEffect != null) {
                 event.setCanceled(true);
                 drawCustomHearts(

@@ -1,14 +1,8 @@
 package net.rezolv.obsidanum.event;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -41,8 +35,8 @@ public class ForgeEventBusEvents {
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         LivingEntity entity = event.getEntity();
-        if (entity.hasEffect(EffectsObs.FLASH.get())) {
-            int amplifier = entity.getEffect(EffectsObs.FLASH.get()).getAmplifier();
+        if (entity.hasEffect(EffectsObs.MOROK.get())) {
+            int amplifier = entity.getEffect(EffectsObs.MOROK.get()).getAmplifier();
 
             float originalDamage = event.getAmount();
             float multiplier = 1.0f;

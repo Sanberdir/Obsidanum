@@ -5,8 +5,8 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 
 
-public class Confusion extends MobEffect {
-    public Confusion(MobEffectCategory pCategory, int pColor) {
+public class Morok extends MobEffect {
+    public Morok(MobEffectCategory pCategory, int pColor) {
         super(pCategory, pColor);
     }
 

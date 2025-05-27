@@ -29,6 +29,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import net.rezolv.obsidanum.block.BlocksObs;
 import net.rezolv.obsidanum.block.entity.ModBlockEntities;
 import net.rezolv.obsidanum.block.entity.renderer.PranaCrystallRenderer;
+import net.rezolv.obsidanum.block.screens.ObsidanumMenus;
 import net.rezolv.obsidanum.chests.block.entity.ObsidanumChestsBlockEntityTypes;
 import net.rezolv.obsidanum.chests.client.render.ObsidanumChestRenderer;
 import net.rezolv.obsidanum.chests.client.screen.ObsidanumChestScreen;
@@ -92,6 +93,7 @@ public class Obsidanum {
         modEventBus.addListener(this::commonSetup);
         ItemsObs.ITEMS.register(modEventBus);
         BlocksObs.BLOCKS.register(modEventBus);
+        ObsidanumMenus.REGISTRY.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModFluids.register(modEventBus);
         ModFluidTypes.register(modEventBus);
