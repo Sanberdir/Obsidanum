@@ -93,7 +93,6 @@ public class Obsidanum {
         modEventBus.addListener(this::commonSetup);
         ItemsObs.ITEMS.register(modEventBus);
         BlocksObs.BLOCKS.register(modEventBus);
-        ObsidanumMenus.REGISTRY.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModFluids.register(modEventBus);
         ModFluidTypes.register(modEventBus);
