@@ -45,6 +45,7 @@ public class ForgeCrucibleEntity extends BlockEntity implements WorldlyContainer
         Obsidanum.LOGGER.info("Deposited items after {}: {}", action, depositedItems);
     }
 
+
     // Метод для приема данных
     public void receiveScrollData(CompoundTag data) {
         this.receivedScrollData = data.copy();

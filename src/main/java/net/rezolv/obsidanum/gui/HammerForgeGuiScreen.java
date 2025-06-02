@@ -1,6 +1,10 @@
 package net.rezolv.obsidanum.gui;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
@@ -8,6 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.GuiGraphics;
+import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
+
 import java.util.HashMap;
 
 public class HammerForgeGuiScreen extends AbstractContainerScreen<HammerForgeGuiMenu> {
@@ -41,6 +47,42 @@ public class HammerForgeGuiScreen extends AbstractContainerScreen<HammerForgeGui
 		HammerForgeGuiRenderer.renderBackground(guiGraphics, this.leftPos, this.topPos, this.imageWidth, this.imageHeight, TEXTURE);
 		HammerForgeGuiRenderer.renderScrollItem(guiGraphics, this.font, world, x, y, z, leftPos, topPos);
 		HammerForgeGuiRenderer.renderRecipeIngredients(guiGraphics, this.font, menu, world, new BlockPos(x, y, z), leftPos, topPos);
+		renderRecipeResult(guiGraphics, mouseX, mouseY);
+
+	}
+
+	private void renderRecipeResult(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+		ForgeCrucibleEntity blockEntity = menu.getBlockEntity();
+		if (blockEntity == null) return;
+
+		CompoundTag data = blockEntity.getReceivedData();
+		if (!data.contains("RecipeResult", Tag.TAG_LIST)) return;
+
+		ListTag resultList = data.getList("RecipeResult", Tag.TAG_COMPOUND);
+		if (resultList.isEmpty()) return;
+
+		ItemStack resultStack = ItemStack.of(resultList.getCompound(0));
+		if (resultStack.isEmpty()) return;
+
+		// Координаты слота
+		int xPos = leftPos + 79;
+		int yPos = topPos + 26;
+
+		// Сохраняем текущее состояние матрицы
+		guiGraphics.pose().pushPose();
+
+		// Устанавливаем прозрачность 0.7 (70%)
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F);
+
+		// Рисуем предмет с прозрачностью
+		guiGraphics.renderItem(resultStack, xPos, yPos);
+		guiGraphics.renderItemDecorations(font, resultStack, xPos, yPos);
+
+		// Восстанавливаем стандартную прозрачность
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+		// Восстанавливаем состояние матрицы
+		guiGraphics.pose().popPose();
 	}
 
 	@Override
