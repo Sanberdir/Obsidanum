@@ -116,20 +116,7 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
             this.addSlot(new SlotItemHandler(internal, finalI, 35 + i * 18, 73) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    CompoundTag data = getBlockEntity().getReceivedData();
-                    if (!data.contains("Ingredients")) return false;
-
-                    ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
-                    if (finalI >= ingredients.size()) return false;
-
-                    try {
-                        CompoundTag entry = ingredients.getCompound(finalI);
-                        JsonObject json = JsonParser.parseString(entry.getString("IngredientJson")).getAsJsonObject();
-                        ItemStack requiredStack = getStackForIngredient(json);
-                        return ItemStack.isSameItemSameTags(stack, requiredStack);
-                    } catch (Exception e) {
-                        return false;
-                    }
+                    return false; // Output slot can't be manually filled
                 }
             });
         }
