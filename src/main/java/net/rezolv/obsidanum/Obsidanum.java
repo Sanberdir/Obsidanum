@@ -44,6 +44,7 @@ import net.rezolv.obsidanum.event.BlockBreakEventHandler;
 import net.rezolv.obsidanum.event.TotemAnimationMessage;
 import net.rezolv.obsidanum.fluid.ModFluidTypes;
 import net.rezolv.obsidanum.fluid.ModFluids;
+import net.rezolv.obsidanum.gui.ObsidanumMenus;
 import net.rezolv.obsidanum.item.ItemsObs;
 import net.rezolv.obsidanum.item.ModItemProperties;
 import net.rezolv.obsidanum.item.entity.ModEntitiesItem;
@@ -88,6 +89,7 @@ public class Obsidanum {
                 .add();
         ObsidanumFeatureRegistry.DEF_REG.register(modEventBus);
         WDAStructures.DEFERRED_REGISTRY_STRUCTURE.register(modEventBus);
+        ObsidanumMenus.REGISTRY.register(modEventBus);
         ObsidanRecipes.SERIALIZERS.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         ItemsObs.ITEMS.register(modEventBus);

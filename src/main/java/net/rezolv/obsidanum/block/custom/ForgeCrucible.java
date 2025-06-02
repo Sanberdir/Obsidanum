@@ -1,33 +1,31 @@
 package net.rezolv.obsidanum.block.custom;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.rezolv.obsidanum.Obsidanum;
+import net.minecraftforge.network.NetworkHooks;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
-import net.rezolv.obsidanum.block.enum_blocks.ScrollType;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.RecipeByComplete;
 import net.rezolv.obsidanum.block.forge_crucible.update_ingredients.UpdateIngredientsForgeCrucible;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.AddTagsForgeCrucible;
+import net.rezolv.obsidanum.gui.HammerForgeGuiMenu;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -58,6 +56,21 @@ public class ForgeCrucible extends BaseEntityBlock {
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof ForgeCrucibleEntity crucible)) {
             return InteractionResult.PASS;
+        }
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            NetworkHooks.openScreen(serverPlayer, new MenuProvider() {
+                @Override
+                public Component getDisplayName() {
+                    return Component.translatable("container.obsidanum.hammer_forge");
+                }
+
+                @Override
+                public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+                    return new HammerForgeGuiMenu(containerId, playerInventory,
+                            new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(pos));
+                }
+            }, pos);
         }
         return UpdateIngredientsForgeCrucible.handleInteraction(
                 level,

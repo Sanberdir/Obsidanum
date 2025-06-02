@@ -19,6 +19,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.rezolv.obsidanum.Obsidanum;
+import net.rezolv.obsidanum.block.custom.ForgeCrucible;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -94,7 +95,16 @@ public class ForgeCrucibleEntity extends BlockEntity implements WorldlyContainer
         return this.receivedScrollData.copy();
     }
 
-
+    public BlockPos getScrollPosition() {
+        Direction facing = this.getBlockState().getValue(ForgeCrucible.FACING);
+        return switch (facing) {
+            case NORTH -> worldPosition.west();
+            case SOUTH -> worldPosition.east();
+            case EAST -> worldPosition.north();
+            case WEST -> worldPosition.south();
+            default -> null;
+        };
+    }
 
     // Обновлённый метод сохранения
     @Override
@@ -109,6 +119,7 @@ public class ForgeCrucibleEntity extends BlockEntity implements WorldlyContainer
             depositedList.add(itemTag);
         }
         pTag.put("DepositedItems", depositedList);
+
     }
 
     // Обновлённый метод загрузки
@@ -161,6 +172,7 @@ public class ForgeCrucibleEntity extends BlockEntity implements WorldlyContainer
         super.onLoad();
         lazyItemHandler = LazyOptional.of(() -> itemHandler);
     }
+
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();
@@ -191,7 +203,15 @@ public class ForgeCrucibleEntity extends BlockEntity implements WorldlyContainer
     public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
         return true; // Позволяет забирать предметы через любую сторону
     }
-
+    public int getAmountOfItem(ItemStack requiredStack) {
+        int count = 0;
+        for (ItemStack stack : depositedItems) {
+            if (ItemStack.isSameItemSameTags(stack, requiredStack)) {
+                count += stack.getCount();
+            }
+        }
+        return count;
+    }
 
 
     @Nullable
