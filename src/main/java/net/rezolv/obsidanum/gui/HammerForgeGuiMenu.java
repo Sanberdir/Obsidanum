@@ -135,22 +135,7 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
             this.addSlot(new Slot(inv, si, 8 + si * 18, 189));
         }
     }
-    private ItemStack getStackForIngredient(JsonObject json) {
-        if (json.has("item")) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(json.get("item").getAsString()));
-            return new ItemStack(item);
-        } else if (json.has("tag")) {
-            TagKey<Item> tag = TagKey.create(Registries.ITEM,
-                    new ResourceLocation(json.get("tag").getAsString()));
-            return ForgeRegistries.ITEMS.tags()
-                    .getTag(tag)
-                    .stream()
-                    .findFirst()
-                    .map(ItemStack::new)
-                    .orElse(ItemStack.EMPTY);
-        }
-        return ItemStack.EMPTY;
-    }
+
     @Override
     public boolean stillValid(Player player) {
         if (this.bound) {

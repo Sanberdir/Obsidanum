@@ -30,7 +30,31 @@ public class HammerForgeGuiRenderer {
         guiGraphics.blit(texture, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
     }
 
+    public static void renderRecipeResult(GuiGraphics guiGraphics, Font font, ForgeCrucibleEntity blockEntity, int leftPos, int topPos) {
+        if (blockEntity == null) return;
 
+        CompoundTag data = blockEntity.getReceivedData();
+        if (!data.contains("RecipeResult", Tag.TAG_LIST)) return;
+
+        ListTag resultList = data.getList("RecipeResult", Tag.TAG_COMPOUND);
+        if (resultList.isEmpty()) return;
+
+        ItemStack resultStack = ItemStack.of(resultList.getCompound(0));
+        if (resultStack.isEmpty()) return;
+
+        // Координаты слота
+        int xPos = leftPos + 79;
+        int yPos = topPos + 26;
+
+        guiGraphics.pose().pushPose();
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F);
+
+        guiGraphics.renderItem(resultStack, xPos, yPos);
+        guiGraphics.renderItemDecorations(font, resultStack, xPos, yPos); // Теперь font передаётся явно
+
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.pose().popPose();
+    }
     public static void renderScrollItem(GuiGraphics guiGraphics, Font font, Level world, int x, int y, int z, int leftPos, int topPos) {
         BlockEntity blockEntity = world.getBlockEntity(new BlockPos(x, y, z));
         if (!(blockEntity instanceof ForgeCrucibleEntity crucible)) {
