@@ -168,7 +168,7 @@ public class HammerForgeGuiRenderer {
         guiGraphics.pose().popPose();
     }
 
-    private static ItemStack getDisplayStackForIngredient(JsonObject json) {
+    public static ItemStack getDisplayStackForIngredient(JsonObject json) {
         if (json.has("item")) {
             ResourceLocation itemId = new ResourceLocation(json.get("item").getAsString());
             Item item = ForgeRegistries.ITEMS.getValue(itemId);

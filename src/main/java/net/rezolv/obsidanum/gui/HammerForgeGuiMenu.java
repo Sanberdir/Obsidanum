@@ -135,6 +135,55 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
             this.addSlot(new Slot(inv, si, 8 + si * 18, 189));
         }
     }
+    public boolean handleIngredientClick(int slotIndex, ItemStack heldItem, boolean isRightClick) {
+        if (slotIndex < 0 || slotIndex >= 6) return false;
+
+        ForgeCrucibleEntity crucible = getBlockEntity();
+        if (crucible == null) return false;
+
+        CompoundTag data = crucible.getReceivedData();
+        if (!data.contains("Ingredients")) return false;
+
+        ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
+        if (slotIndex >= ingredients.size()) return false;
+
+        CompoundTag ingredientTag = ingredients.getCompound(slotIndex);
+        JsonObject ingredientJson = JsonParser.parseString(ingredientTag.getString("IngredientJson")).getAsJsonObject();
+
+        int currentCount = ingredientJson.has("count") ? ingredientJson.get("count").getAsInt() : 1;
+        int originalCount = ingredientJson.has("originalCount") ? ingredientJson.get("originalCount").getAsInt() : currentCount;
+        ItemStack requiredStack = HammerForgeGuiRenderer.getDisplayStackForIngredient(ingredientJson);
+
+        // Только визуальное изменение счетчика без реального взаимодействия с предметами
+        if (!heldItem.isEmpty()) {
+            if (ItemStack.isSameItemSameTags(heldItem, requiredStack)) {
+                if (currentCount > 0) {
+                    currentCount--;
+                }
+            }
+        } else {
+            if (currentCount < originalCount) {
+                currentCount++;
+            }
+        }
+
+        // Обновляем данные
+        if (!ingredientJson.has("originalCount")) {
+            ingredientJson.addProperty("originalCount", originalCount);
+        }
+        ingredientJson.addProperty("count", currentCount);
+        ingredientTag.putString("IngredientJson", ingredientJson.toString());
+        ingredients.set(slotIndex, ingredientTag);
+        data.put("Ingredients", ingredients);
+
+        crucible.receivedScrollData = data;
+        crucible.setChanged();
+        if (crucible.getLevel() != null) {
+            crucible.getLevel().sendBlockUpdated(crucible.getBlockPos(), crucible.getBlockState(), crucible.getBlockState(), 3);
+        }
+
+        return true;
+    }
 
     @Override
     public boolean stillValid(Player player) {
