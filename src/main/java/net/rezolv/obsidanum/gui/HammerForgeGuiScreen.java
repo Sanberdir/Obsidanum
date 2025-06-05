@@ -41,31 +41,7 @@ public class HammerForgeGuiScreen extends AbstractContainerScreen<HammerForgeGui
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 		this.renderTooltip(guiGraphics, mouseX, mouseY);
 	}
-	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		// Проверяем, что клик внутри области ингредиентов (6 слотов)
-		int slotStartX = this.leftPos + 35;
-		int slotStartY = this.topPos + 73;
-		int slotSize = 18;
 
-		for (int i = 0; i < 6; i++) {
-			int slotX = slotStartX + i * slotSize;
-			int slotY = slotStartY;
-
-			if (mouseX >= slotX && mouseX < slotX + slotSize &&
-					mouseY >= slotY && mouseY < slotY + slotSize) {
-
-				ItemStack heldItem = this.menu.getCarried(); // Предмет в руке
-				boolean isRightClick = button == 1; // ПКМ = уменьшение, ЛКМ = увеличение
-
-				if (this.menu.handleIngredientClick(i, heldItem, isRightClick)) {
-					return true; // Успешно обработали клик
-				}
-			}
-		}
-
-		return super.mouseClicked(mouseX, mouseY, button);
-	}
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
 		HammerForgeGuiRenderer.renderBackground(guiGraphics, this.leftPos, this.topPos, this.imageWidth, this.imageHeight, TEXTURE);

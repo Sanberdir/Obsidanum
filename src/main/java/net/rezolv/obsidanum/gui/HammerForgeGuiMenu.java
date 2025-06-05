@@ -27,6 +27,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 import net.rezolv.obsidanum.block.entity.RightForgeScrollEntity;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +49,7 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
     public final Player entity;
     public int x, y, z;
     private ContainerLevelAccess access = ContainerLevelAccess.NULL;
-    private IItemHandler internal;
+    public IItemHandler internal;
     private final Map<Integer, Slot> customSlots = new HashMap<>();
     private boolean bound = false;
     private Supplier<Boolean> boundItemMatcher = null;
@@ -111,12 +112,26 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         });
 
         for (int i = 0; i < 6; i++) {
-
-            int finalI = i;
-            this.addSlot(new SlotItemHandler(internal, finalI, 35 + i * 18, 73) {
+            int slotIndex = i;
+            this.addSlot(new SlotItemHandler(internal, slotIndex, 35 + i * 18, 73) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    return false; // Output slot can't be manually filled
+                    if (getBlockEntity() == null) return false;
+
+                    CompoundTag data = getBlockEntity().getReceivedData();
+                    if (!data.contains("Ingredients")) return false;
+
+                    ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
+                    if (slotIndex >= ingredients.size()) return false;
+
+                    try {
+                        CompoundTag entry = ingredients.getCompound(slotIndex);
+                        JsonObject json = JsonParser.parseString(entry.getString("IngredientJson")).getAsJsonObject();
+                        return matchesIngredient(stack, json);
+                    } catch (Exception e) {
+                        Obsidanum.LOGGER.error("Error checking ingredient match: {}", e.getMessage());
+                        return false;
+                    }
                 }
             });
         }
@@ -135,54 +150,22 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
             this.addSlot(new Slot(inv, si, 8 + si * 18, 189));
         }
     }
-    public boolean handleIngredientClick(int slotIndex, ItemStack heldItem, boolean isRightClick) {
-        if (slotIndex < 0 || slotIndex >= 6) return false;
 
-        ForgeCrucibleEntity crucible = getBlockEntity();
-        if (crucible == null) return false;
+    private boolean matchesIngredient(ItemStack stack, JsonObject ingredientJson) {
+        if (stack.isEmpty()) return false;
 
-        CompoundTag data = crucible.getReceivedData();
-        if (!data.contains("Ingredients")) return false;
-
-        ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
-        if (slotIndex >= ingredients.size()) return false;
-
-        CompoundTag ingredientTag = ingredients.getCompound(slotIndex);
-        JsonObject ingredientJson = JsonParser.parseString(ingredientTag.getString("IngredientJson")).getAsJsonObject();
-
-        int currentCount = ingredientJson.has("count") ? ingredientJson.get("count").getAsInt() : 1;
-        int originalCount = ingredientJson.has("originalCount") ? ingredientJson.get("originalCount").getAsInt() : currentCount;
-        ItemStack requiredStack = HammerForgeGuiRenderer.getDisplayStackForIngredient(ingredientJson);
-
-        // Только визуальное изменение счетчика без реального взаимодействия с предметами
-        if (!heldItem.isEmpty()) {
-            if (ItemStack.isSameItemSameTags(heldItem, requiredStack)) {
-                if (currentCount > 0) {
-                    currentCount--;
-                }
-            }
-        } else {
-            if (currentCount < originalCount) {
-                currentCount++;
-            }
+        if (ingredientJson.has("item")) {
+            ResourceLocation itemId = new ResourceLocation(ingredientJson.get("item").getAsString());
+            return ForgeRegistries.ITEMS.getValue(itemId) == stack.getItem();
         }
 
-        // Обновляем данные
-        if (!ingredientJson.has("originalCount")) {
-            ingredientJson.addProperty("originalCount", originalCount);
-        }
-        ingredientJson.addProperty("count", currentCount);
-        ingredientTag.putString("IngredientJson", ingredientJson.toString());
-        ingredients.set(slotIndex, ingredientTag);
-        data.put("Ingredients", ingredients);
-
-        crucible.receivedScrollData = data;
-        crucible.setChanged();
-        if (crucible.getLevel() != null) {
-            crucible.getLevel().sendBlockUpdated(crucible.getBlockPos(), crucible.getBlockState(), crucible.getBlockState(), 3);
+        if (ingredientJson.has("tag")) {
+            ResourceLocation tagId = new ResourceLocation(ingredientJson.get("tag").getAsString());
+            TagKey<Item> tag = TagKey.create(Registries.ITEM, tagId);
+            return stack.is(tag);
         }
 
-        return true;
+        return false;
     }
 
     @Override

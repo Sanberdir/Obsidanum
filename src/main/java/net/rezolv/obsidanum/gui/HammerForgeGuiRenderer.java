@@ -2,6 +2,7 @@ package net.rezolv.obsidanum.gui;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -110,38 +111,47 @@ public class HammerForgeGuiRenderer {
         final int slotSize = 18;
         final int maxSlots = 6;
 
-        for (int pass = 0; pass < 2; pass++) {
-            for (int i = 0; i < Math.min(maxSlots, ingredients.size()); i++) {
-                CompoundTag entry = ingredients.getCompound(i);
+        ResourceLocation[] TEXTURES = {
+                new ResourceLocation("obsidanum:textures/gui/hammer_forge_ingredients_no.png"),
+                new ResourceLocation("obsidanum:textures/gui/hammer_forge_ingredients_yes.png")
+        };
 
-                try {
-                    JsonObject json = JsonParser.parseString(entry.getString("IngredientJson")).getAsJsonObject();
-                    int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
-                    ItemStack stack = getDisplayStackForIngredient(json);
-                    if (stack.isEmpty()) continue;
+        for (int i = 0; i < Math.min(maxSlots, ingredients.size()); i++) {
+            CompoundTag entry = ingredients.getCompound(i);
 
-                    int x = startX + i * slotSize;
-                    int y = startY;
-                    ItemStack slotStack = menu.getSlot(i).getItem();
-                    boolean hasItem = !slotStack.isEmpty();
+            try {
+                JsonObject json = JsonParser.parseString(entry.getString("IngredientJson")).getAsJsonObject();
+                int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
+                ItemStack stack = getDisplayStackForIngredient(json);
+                if (stack.isEmpty()) continue;
 
-                    if (pass == 0) {
-                        guiGraphics.pose().pushPose();
-                        if (!hasItem) {
-                            guiGraphics.pose().translate(0, 0, 100);
-                            guiGraphics.setColor(1.0f, 1.0f, 1.0f, 0.7f);
-                        }
-                        guiGraphics.renderItem(hasItem ? slotStack : stack, x, y);
-                        if (!hasItem) {
-                            guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-                            guiGraphics.pose().popPose();
-                        }
-                    } else {
-                        renderCountText(guiGraphics, font, x, y, requiredCount);
-                    }
-                } catch (Exception e) {
-                    Obsidanum.LOGGER.error("Failed to render ingredient: {}", e.getMessage());
+                int x = startX + i * slotSize;
+                int y = startY;
+                ItemStack slotStack = menu.internal.getStackInSlot(i);
+                boolean hasEnough = slotStack.getCount() >= requiredCount;
+                boolean satisfied = crucible.isIngredientSatisfied(i);
+
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0, 0, 100);
+
+                // Анимированная текстура
+                int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                guiGraphics.blit(TEXTURES[hasEnough ? 1 : 0], x, y, 0, frame * 16, 16, 16, 16, 128);
+                RenderSystem.disableBlend();
+
+                guiGraphics.setColor(1.0f, 1.0f, 1.0f, satisfied ? 1.0f : 0.7f);
+                guiGraphics.renderItem(stack, x, y);
+
+                if (!satisfied && slotStack.isEmpty()) {
+                    renderCountText(guiGraphics, font, x, y, requiredCount);
                 }
+
+                guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+                guiGraphics.pose().popPose();
+            } catch (Exception e) {
+                Obsidanum.LOGGER.error("Failed to render ingredient: {}", e.getMessage());
             }
         }
     }

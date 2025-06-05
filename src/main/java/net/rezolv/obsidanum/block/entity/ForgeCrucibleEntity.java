@@ -2,15 +2,20 @@ package net.rezolv.obsidanum.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,6 +23,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.custom.ForgeCrucible;
 import org.jetbrains.annotations.Nullable;
@@ -44,8 +50,34 @@ public class ForgeCrucibleEntity extends BlockEntity implements WorldlyContainer
     public void debugDepositedItems(String action) {
         Obsidanum.LOGGER.info("Deposited items after {}: {}", action, depositedItems);
     }
+    public boolean isIngredientSatisfied(int index) {
+        if (!receivedScrollData.contains("Ingredients", Tag.TAG_LIST)) return false;
+        ListTag ingredientsTag = receivedScrollData.getList("Ingredients", Tag.TAG_COMPOUND);
+        if (index < 0 || index >= ingredientsTag.size()) return false;
 
+        CompoundTag ingredientTag = ingredientsTag.getCompound(index);
+        int requiredCount = ingredientTag.getInt("count");
 
+        if (ingredientTag.contains("item")) {
+            ItemStack required = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ingredientTag.getString("item"))));
+            int actualCount = getAmountOfItem(required);
+            return actualCount >= requiredCount;
+        }
+
+        if (ingredientTag.contains("tag")) {
+            String tagId = ingredientTag.getString("tag");
+            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, new ResourceLocation(tagId));
+            int totalCount = 0;
+            for (ItemStack stack : depositedItems) {
+                if (stack.is(tagKey)) {
+                    totalCount += stack.getCount();
+                }
+            }
+            return totalCount >= requiredCount;
+        }
+
+        return false;
+    }
     // Метод для приема данных
     public void receiveScrollData(CompoundTag data) {
         this.receivedScrollData = data.copy();
