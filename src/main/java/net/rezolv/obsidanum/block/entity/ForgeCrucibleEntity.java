@@ -56,8 +56,6 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
         }
     };
 
-    public NonNullList<ItemStack> stacks = NonNullList.<ItemStack>withSize(9, ItemStack.EMPTY);
-
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     private final LazyOptional<? extends IItemHandler>[] handlers = new LazyOptional[Direction.values().length];
 
@@ -167,25 +165,13 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
     public void saveAdditional(CompoundTag pTag) {
         super.saveAdditional(pTag);
         pTag.put("CrucibleData", receivedScrollData);
-        if (!this.trySaveLootTable(pTag)) {
-            ContainerHelper.saveAllItems(pTag, this.stacks);
-        }
+        pTag.put("Inventory", itemHandler.serializeNBT());
 
         ListTag depositedList = new ListTag();
         for (ItemStack stack : depositedItems) {
-            CompoundTag itemTag = new CompoundTag();
-            stack.save(itemTag);
-            depositedList.add(itemTag);
+            depositedList.add(stack.save(new CompoundTag()));
         }
         pTag.put("DepositedItems", depositedList);
-        ListTag items = new ListTag();
-        for (ItemStack stack : stacks) {
-            CompoundTag tag = new CompoundTag();
-            stack.save(tag);
-            items.add(tag);
-        }
-        pTag.put("Items", items);
-
     }
 
     @Override
@@ -206,20 +192,16 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
         if (pTag.contains("CrucibleData")) {
             receivedScrollData = pTag.getCompound("CrucibleData");
         }
-        if (!this.tryLoadLootTable(pTag))
-            this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(pTag, this.stacks);
-
-        if (pTag.contains("Items", Tag.TAG_LIST)) {
-            ListTag items = pTag.getList("Items", Tag.TAG_COMPOUND);
-            for (int i = 0; i < items.size(); i++) {
-                stacks.set(i, ItemStack.of(items.getCompound(i)));
-            }
+        if (pTag.contains("Inventory")) {
+            itemHandler.deserializeNBT(pTag.getCompound("Inventory"));
         }
+
         depositedItems.clear();
-        ListTag depositedList = pTag.getList("DepositedItems", Tag.TAG_COMPOUND);
-        for (int i = 0; i < depositedList.size(); i++) {
-            depositedItems.add(ItemStack.of(depositedList.getCompound(i)));
+        if (pTag.contains("DepositedItems")) {
+            ListTag depositedList = pTag.getList("DepositedItems", Tag.TAG_COMPOUND);
+            for (int i = 0; i < depositedList.size(); i++) {
+                depositedItems.add(ItemStack.of(depositedList.getCompound(i)));
+            }
         }
     }
 
@@ -304,8 +286,8 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
     }
     public int getAmountOfItem(ItemStack requiredStack) {
         int count = 0;
-        // Используем хранилище вместо depositedItems
-        for (ItemStack stack : stacks) {
+        for (int i = 0; i < itemHandler.getSlots(); i++) {
+            ItemStack stack = itemHandler.getStackInSlot(i);
             if (ItemStack.isSameItemSameTags(stack, requiredStack)) {
                 count += stack.getCount();
             }
@@ -320,31 +302,37 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    @Override
     public int getContainerSize() {
-        return stacks.size(); // Должно быть 9
+        return itemHandler.getSlots(); // Вернет количество слотов (7 в вашем случае)
     }
 
     @Override
     public boolean isEmpty() {
-        for (ItemStack stack : stacks) {
-            if (!stack.isEmpty()) return false;
+        for (int i = 0; i < itemHandler.getSlots(); i++) {
+            if (!itemHandler.getStackInSlot(i).isEmpty()) {
+                return false;
+            }
         }
         return true;
     }
 
     @Override
     public ItemStack getItem(int slot) {
-        return stacks.get(slot);
+        return itemHandler.getStackInSlot(slot);
     }
 
     @Override
     public ItemStack removeItem(int slot, int amount) {
         return itemHandler.extractItem(slot, amount, false);
     }
+
     @Override
     protected NonNullList<ItemStack> getItems() {
-        return this.stacks;
+        NonNullList<ItemStack> items = NonNullList.withSize(itemHandler.getSlots(), ItemStack.EMPTY);
+        for (int i = 0; i < itemHandler.getSlots(); i++) {
+            items.set(i, itemHandler.getStackInSlot(i));
+        }
+        return items;
     }
 
     @Override
@@ -356,7 +344,7 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
 
     @Override
     public void setItem(int slot, ItemStack stack) {
-        stacks.set(slot, stack);
+        itemHandler.setStackInSlot(slot, stack);
         setChanged();
     }
 
@@ -378,9 +366,12 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
         for (LazyOptional<? extends IItemHandler> handler : handlers)
             handler.invalidate();
     }
-    @Override
     protected void setItems(NonNullList<ItemStack> stacks) {
-        this.stacks = stacks;
+        // Убедитесь, что количество слотов совпадает
+        int slotsToCopy = Math.min(stacks.size(), itemHandler.getSlots());
+        for (int i = 0; i < slotsToCopy; i++) {
+            itemHandler.setStackInSlot(i, stacks.get(i));
+        }
     }
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
