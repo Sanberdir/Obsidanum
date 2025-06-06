@@ -29,7 +29,6 @@ import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
-import net.rezolv.obsidanum.block.entity.RightForgeScrollEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -41,6 +40,7 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         super(pMenuType, pContainerId);
         this.world = world;
         this.entity = entity;
+
     }
 
 
@@ -65,60 +65,40 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         super(ObsidanumMenus.HAMMER_FORGE_GUI.get(), id);
         this.entity = inv.player;
         this.world = inv.player.level();
-        this.internal = new ItemStackHandler(0); // Изменено на 0 слотов
 
-        BlockPos pos = null;
-        if (extraData != null) {
-            pos = extraData.readBlockPos();
-            this.x = pos.getX();
-            this.y = pos.getY();
-            this.z = pos.getZ();
-            access = ContainerLevelAccess.create(world, pos);
+        BlockPos pos = extraData.readBlockPos();
+        this.x = pos.getX();
+        this.y = pos.getY();
+        this.z = pos.getZ();
+        this.access = ContainerLevelAccess.create(world, pos);
+
+        // Получаем BlockEntity и его инвентарь
+        ForgeCrucibleEntity blockEntity = (ForgeCrucibleEntity) world.getBlockEntity(pos);
+        if (blockEntity != null) {
+            // Используем реальный инвентарь из BlockEntity
+            this.internal = blockEntity.itemHandler; // Или другой соответствующий IItemHandler
+            this.bound = true;
+        } else {
+            // Fallback на пустой инвентарь, если BlockEntity не найден
+            this.internal = new ItemStackHandler(7);
         }
 
-        if (pos != null) {
-            if (extraData.readableBytes() == 1) { // bound to item
-                byte hand = extraData.readByte();
-                ItemStack itemstack = hand == 0 ? this.entity.getMainHandItem() : this.entity.getOffhandItem();
-                this.boundItemMatcher = () -> itemstack == (hand == 0 ? this.entity.getMainHandItem() : this.entity.getOffhandItem());
-                itemstack.getCapability(ForgeCapabilities.ITEM_HANDLER, null).ifPresent(capability -> {
-                    this.internal = capability;
-                    this.bound = true;
-                });
-            } else if (extraData.readableBytes() > 1) { // bound to entity
-                extraData.readByte(); // drop padding
-                boundEntity = world.getEntity(extraData.readVarInt());
-                if (boundEntity != null)
-                    boundEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).ifPresent(capability -> {
-                        this.internal = capability;
-                        this.bound = true;
-                    });
-            } else { // might be bound to block
-                boundBlockEntity = this.world.getBlockEntity(pos);
-                if (boundBlockEntity != null)
-                    boundBlockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).ifPresent(capability -> {
-                        this.internal = capability;
-                        this.bound = true;
-                    });
-            }
-        }
-
-        this.internal = new ItemStackHandler(7); // Changed to 7 slots (6 input + 1 output)
+        // Создаем слот для вывода (нельзя помещать предметы вручную)
         this.addSlot(new SlotItemHandler(internal, 6, 79, 26) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return false; // Output slot can't be manually filled
+                return false;
             }
         });
 
+        // Создаем слоты для ингредиентов (0-5)
         for (int i = 0; i < 6; i++) {
             int slotIndex = i;
             this.addSlot(new SlotItemHandler(internal, slotIndex, 35 + i * 18, 73) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    if (getBlockEntity() == null) return false;
-
-                    CompoundTag data = getBlockEntity().getReceivedData();
+                    if (blockEntity == null) return false;
+                    CompoundTag data = blockEntity.getReceivedData();
                     if (!data.contains("Ingredients")) return false;
 
                     ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
@@ -136,17 +116,14 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
             });
         }
 
-// Добавляем 3 ряда основного инвентаря (27 слотов)
+        // Добавляем инвентарь игрока
         for (int si = 0; si < 3; ++si) {
             for (int sj = 0; sj < 9; ++sj) {
-
                 this.addSlot(new Slot(inv, sj + (si + 1) * 9, 8 + sj * 18, 131 + si * 18));
             }
         }
 
-// Добавляем слоты горячей панели (9 слотов)
         for (int si = 0; si < 9; ++si) {
-
             this.addSlot(new Slot(inv, si, 8 + si * 18, 189));
         }
     }
@@ -182,31 +159,44 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
     }
 
     @Override
-    public ItemStack quickMoveStack(Player playerIn, int index) {
-        ItemStack itemstack = ItemStack.EMPTY;
+    public ItemStack quickMoveStack(Player player, int index) {
+        ItemStack copiedStack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
-        if (slot != null && slot.hasItem()) {
-            ItemStack itemstack1 = slot.getItem();
-            itemstack = itemstack1.copy();
 
-            // Упрощена логика быстрого перемещения, так как нет специальных слотов
-            if (!this.moveItemStackTo(itemstack1, 0, this.slots.size(), false)) {
-                return ItemStack.EMPTY;
+        if (slot != null && slot.hasItem()) {
+            ItemStack originalStack = slot.getItem();
+            copiedStack = originalStack.copy();
+
+            // Определяем, откуда перемещаем:
+            // Если из инвентаря игрока (слоты 7-42) → пробуем вставить в слоты крафта (0-6)
+            if (index >= 7) {
+                if (!this.moveItemStackTo(originalStack, 0, 6, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+            // Если из слотов крафта (0-6) → перемещаем в инвентарь игрока (7-42)
+            else {
+                if (!this.moveItemStackTo(originalStack, 7, 42, false)) {
+                    return ItemStack.EMPTY;
+                }
             }
 
-            if (itemstack1.getCount() == 0) {
+            // Если весь стек перемещен
+            if (originalStack.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
             } else {
                 slot.setChanged();
             }
 
-            if (itemstack1.getCount() == itemstack.getCount()) {
+            // Если ничего не переместилось
+            if (originalStack.getCount() == copiedStack.getCount()) {
                 return ItemStack.EMPTY;
             }
 
-            slot.onTake(playerIn, itemstack1);
+            slot.onTake(player, originalStack);
         }
-        return itemstack;
+
+        return copiedStack;
     }
 
     @Override
@@ -217,17 +207,7 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
     @Override
     public void removed(Player playerIn) {
         super.removed(playerIn);
-        if (!bound && playerIn instanceof ServerPlayer serverPlayer) {
-            if (!serverPlayer.isAlive() || serverPlayer.hasDisconnected()) {
-                for (int j = 0; j < internal.getSlots(); ++j) {
-                    playerIn.drop(internal.extractItem(j, internal.getStackInSlot(j).getCount(), false), false);
-                }
-            } else {
-                for (int i = 0; i < internal.getSlots(); ++i) {
-                    playerIn.getInventory().placeItemBackInInventory(internal.extractItem(i, internal.getStackInSlot(i).getCount(), false));
-                }
-            }
-        }
+        // Теперь предметы автоматически сохраняются в BlockEntity
     }
 
     @Override
