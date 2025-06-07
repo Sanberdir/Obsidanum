@@ -6,6 +6,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.rezolv.obsidanum.Obsidanum;
+import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.HammerForgeGuiMenu;
 
 public class ObsidanumMenus {
     public static final DeferredRegister<MenuType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.MENU_TYPES, Obsidanum.MOD_ID);

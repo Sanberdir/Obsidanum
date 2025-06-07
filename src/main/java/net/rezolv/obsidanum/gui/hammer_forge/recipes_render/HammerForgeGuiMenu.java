@@ -1,4 +1,4 @@
-package net.rezolv.obsidanum.gui;
+package net.rezolv.obsidanum.gui.hammer_forge.recipes_render;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -27,6 +27,7 @@ import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
+import net.rezolv.obsidanum.gui.ObsidanumMenus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

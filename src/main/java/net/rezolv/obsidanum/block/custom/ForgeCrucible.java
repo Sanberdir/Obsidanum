@@ -24,7 +24,7 @@ import net.minecraftforge.network.NetworkHooks;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.AddTagsForgeCrucible;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRecipe;
-import net.rezolv.obsidanum.gui.HammerForgeGuiMenu;
+import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.HammerForgeGuiMenu;
 import org.jetbrains.annotations.Nullable;
 
 

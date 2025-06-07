@@ -1,4 +1,4 @@
-package net.rezolv.obsidanum.gui;
+package net.rezolv.obsidanum.gui.hammer_forge.recipes_render;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;

@@ -34,7 +34,7 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.custom.ForgeCrucible;
-import net.rezolv.obsidanum.gui.HammerForgeGuiMenu;
+import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.HammerForgeGuiMenu;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -59,10 +59,6 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
     public List<ItemStack> depositedItems = new ArrayList<>(); // Новое поле для хранения истории
 
     // Метод для получения данных
-
-    public void debugDepositedItems(String action) {
-        Obsidanum.LOGGER.info("Deposited items after {}: {}", action, depositedItems);
-    }
     public boolean isIngredientSatisfied(int index) {
         if (!receivedScrollData.contains("Ingredients", Tag.TAG_LIST)) return false;
         ListTag ingredientsTag = receivedScrollData.getList("Ingredients", Tag.TAG_COMPOUND);
@@ -94,38 +90,69 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
     // Метод для приема данных
     public void receiveScrollData(CompoundTag data) {
         this.receivedScrollData = data.copy();
-        this.depositedItems.clear(); // Очищаем при новом рецепте
-        setChanged();
-        if(level != null) {
+
+        // Очищаем слоты ингредиентов при получении пустого рецепта
+        if (!data.contains("Ingredients") || data.getList("Ingredients", Tag.TAG_COMPOUND).isEmpty()) {
+            for (int i = 0; i < 6; i++) {
+                ItemStack stack = itemHandler.getStackInSlot(i);
+                if (!stack.isEmpty()) {
+                    // Выбрасываем предмет
+                    ItemEntity itemEntity = new ItemEntity(
+                            level,
+                            worldPosition.getX() + 0.5,
+                            worldPosition.getY() + 1.0,
+                            worldPosition.getZ() + 0.5,
+                            stack.copy()
+                    );
+                    itemEntity.setDefaultPickUpDelay();
+                    level.addFreshEntity(itemEntity);
+
+                    // Очищаем слот
+                    itemHandler.setStackInSlot(i, ItemStack.EMPTY);
+                }
+            }
+        }
+
+        this.setChanged();
+        if (level != null) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
-        debugDepositedItems("receiveScrollData");
     }
     public void clearCrucibleData() {
         if (level != null && !level.isClientSide()) {
-            // Возвращаем все предметы, выбрасывая их на землю
-            for (ItemStack stack : depositedItems) {
+            // Собираем предметы только из слотов ингредиентов (0-5)
+            List<ItemStack> itemsToDrop = new ArrayList<>();
+            for (int i = 0; i < 6; i++) {
+                ItemStack stack = itemHandler.getStackInSlot(i);
                 if (!stack.isEmpty()) {
-                    // Создаем предмет на земле
-                    ItemEntity itemEntity = new ItemEntity(
-                            level,
-                            worldPosition.getX() + 0.5, worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, // Позиция над тиглем
-                            stack.copy() // Создаем копию стека, чтобы не изменять оригинал
-                    );
-                    itemEntity.setDefaultPickUpDelay(); // Устанавливаем задержку перед подбором
-                    level.addFreshEntity(itemEntity); // Добавляем предмет в мир
+                    itemsToDrop.add(stack.copy());
+                    itemHandler.setStackInSlot(i, ItemStack.EMPTY); // Очищаем слот
                 }
             }
-            depositedItems.clear(); // Очищаем список
+
+            // Выбрасываем предметы в мир
+            for (ItemStack stack : itemsToDrop) {
+                ItemEntity itemEntity = new ItemEntity(
+                        level,
+                        worldPosition.getX() + 0.5,
+                        worldPosition.getY() + 1.0,
+                        worldPosition.getZ() + 0.5,
+                        stack
+                );
+                itemEntity.setDefaultPickUpDelay();
+                level.addFreshEntity(itemEntity);
+            }
         }
 
         this.receivedScrollData = new CompoundTag();
+        this.depositedItems.clear(); // Очищаем историю
         this.setChanged();
 
         if (level != null) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
+
     @Override
     public int getMaxStackSize() {
         return 256;
@@ -136,17 +163,6 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
     // Метод для получения данных
     public CompoundTag getReceivedData() {
         return this.receivedScrollData.copy();
-    }
-
-    public BlockPos getScrollPosition() {
-        Direction facing = this.getBlockState().getValue(ForgeCrucible.FACING);
-        return switch (facing) {
-            case NORTH -> worldPosition.west();
-            case SOUTH -> worldPosition.east();
-            case EAST -> worldPosition.north();
-            case WEST -> worldPosition.south();
-            default -> null;
-        };
     }
 
     // Обновлённый метод сохранения
