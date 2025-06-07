@@ -65,6 +65,12 @@ public class AddTagsForgeCrucible {
                             crucible.setChanged();
                             level.sendBlockUpdated(pos, state, state, 3);
                         }
+                        if (scrollType == ScrollType.NONE) {
+                            Player player = level.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 10, null);
+                            if (player != null) {
+                                crucible.clearCrucibleData(); // Вызов очистки
+                            }
+                        }
                     }
                 }
             }
