@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.item.ItemsObs;
 import net.rezolv.obsidanum.recipes.ForgeScrollNetherRecipe;
+import net.rezolv.obsidanum.recipes.ForgeScrollOrderRecipe;
 import net.rezolv.obsidanum.sound.SoundsObs;
 
 import java.util.List;
@@ -82,7 +83,18 @@ public class RightClickNetherPlan {
             ingredientsList.add(ingredientTag);
         }
         tag.put("Ingredients", ingredientsList);
-
+        if (!randomRecipe.getBonusOutputs().isEmpty()) {
+            ListTag bonusOutputsList = new ListTag();
+            for (ForgeScrollNetherRecipe.BonusOutput bonus : randomRecipe.getBonusOutputs()) {
+                CompoundTag bonusTag = new CompoundTag();
+                CompoundTag itemTag = new CompoundTag();
+                bonus.itemStack().save(itemTag);
+                bonusTag.put("Item", itemTag);
+                bonusTag.putFloat("Chance", bonus.chance());
+                bonusOutputsList.add(bonusTag);
+            }
+            tag.put("BonusOutputs", bonusOutputsList);
+        }
         // Применяем тег к новому предмету
         planItem.setTag(tag);
 

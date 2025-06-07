@@ -434,6 +434,27 @@ public class CreativeTabObs extends CreativeModeTab {
         outputTag.putInt("Count", result.getCount());
         resultList.add(outputTag);
         resultTag.put("RecipeResult", resultList);
+
+        // Добавляем бонусные предметы, если они есть
+        if (!forgeScrollNetherRecipe.getBonusOutputs().isEmpty()) {
+            ListTag bonusOutputsList = new ListTag();
+
+            for (ForgeScrollNetherRecipe.BonusOutput bonus : forgeScrollNetherRecipe.getBonusOutputs()) {
+                CompoundTag bonusTag = new CompoundTag();
+
+                // Сохраняем предмет бонуса
+                CompoundTag itemTag = new CompoundTag();
+                bonus.itemStack().save(itemTag);
+                bonusTag.put("Item", itemTag);
+
+                // Сохраняем шанс выпадения
+                bonusTag.putFloat("Chance", bonus.chance());
+
+                bonusOutputsList.add(bonusTag);
+            }
+
+            resultTag.put("BonusOutputs", bonusOutputsList);
+        }
     }
 
     private static void handleScrollOrderRecipe(ItemStack result, CompoundTag resultTag, Level level, ForgeScrollOrderRecipe forgeScrollOrderRecipe) {
@@ -473,6 +494,25 @@ public class CreativeTabObs extends CreativeModeTab {
         outputTag.putInt("Count", result.getCount()); // Обновляем количество
         resultList.add(outputTag);
         resultTag.put("RecipeResult", resultList);
+        if (!forgeScrollOrderRecipe.getBonusOutputs().isEmpty()) {
+            ListTag bonusOutputsList = new ListTag();
+
+            for (ForgeScrollOrderRecipe.BonusOutput bonus : forgeScrollOrderRecipe.getBonusOutputs()) {
+                CompoundTag bonusTag = new CompoundTag();
+
+                // Сохраняем предмет бонуса
+                CompoundTag itemTag = new CompoundTag();
+                bonus.itemStack().save(itemTag);
+                bonusTag.put("Item", itemTag);
+
+                // Сохраняем шанс выпадения
+                bonusTag.putFloat("Chance", bonus.chance());
+
+                bonusOutputsList.add(bonusTag);
+            }
+
+            resultTag.put("BonusOutputs", bonusOutputsList);
+        }
     }
 
     private static void handleScrollCatacombsRecipe(ItemStack result, CompoundTag resultTag, Level level, ForgeScrollCatacombsRecipe forgeScrollCatacombsRecipe) {
@@ -512,5 +552,24 @@ public class CreativeTabObs extends CreativeModeTab {
         outputTag.putInt("Count", result.getCount()); // Обновляем количество
         resultList.add(outputTag);
         resultTag.put("RecipeResult", resultList);
+        if (!forgeScrollCatacombsRecipe.getBonusOutputs().isEmpty()) {
+            ListTag bonusOutputsList = new ListTag();
+
+            for (ForgeScrollCatacombsRecipe.BonusOutput bonus : forgeScrollCatacombsRecipe.getBonusOutputs()) {
+                CompoundTag bonusTag = new CompoundTag();
+
+                // Сохраняем предмет бонуса
+                CompoundTag itemTag = new CompoundTag();
+                bonus.itemStack().save(itemTag);
+                bonusTag.put("Item", itemTag);
+
+                // Сохраняем шанс выпадения
+                bonusTag.putFloat("Chance", bonus.chance());
+
+                bonusOutputsList.add(bonusTag);
+            }
+
+            resultTag.put("BonusOutputs", bonusOutputsList);
+        }
     }
 }

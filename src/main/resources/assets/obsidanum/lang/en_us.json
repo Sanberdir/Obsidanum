@@ -322,5 +322,6 @@
   "tooltip.recipe_information": "=== Recipe Information ===",
   "tooltip.recipe_end": "=======================",
   "tooltip.scrolls.result": "Scrolls result",
+  "tooltip.scrolls.bonus_outputs": "Bonus Outputs",
   "tooltip.scrolls.ingredients": "Scrolls ingredients"
 }

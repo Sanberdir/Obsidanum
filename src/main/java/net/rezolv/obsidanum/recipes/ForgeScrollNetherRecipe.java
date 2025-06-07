@@ -128,12 +128,12 @@ public class ForgeScrollNetherRecipe implements Recipe<SimpleContainer> {
 
     public static class Type implements RecipeType<ForgeScrollNetherRecipe> {
         public static final Type FORGE_SCROLL_NETHER = new Type();
-        public static final String ID = "forge_scroll_nether";
+        public static final String ID = "scrolls/forge_scroll_nether";
     }
 
     public static class Serializer implements RecipeSerializer<ForgeScrollNetherRecipe> {
         public static final Serializer FORGE_SCROLL_NETHER = new Serializer();
-        public static final ResourceLocation ID = new ResourceLocation(Obsidanum.MOD_ID, "forge_scroll_nether");
+        public static final ResourceLocation ID = new ResourceLocation(Obsidanum.MOD_ID, "scrolls/forge_scroll_nether");
 
         @Override
         public ForgeScrollNetherRecipe fromJson(ResourceLocation recipeId, JsonObject serializedRecipe) {

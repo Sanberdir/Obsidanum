@@ -128,12 +128,12 @@ public class ForgeScrollOrderRecipe implements Recipe<SimpleContainer> {
 
     public static class Type implements RecipeType<ForgeScrollOrderRecipe> {
         public static final Type FORGE_SCROLL_ORDER = new Type();
-        public static final String ID = "forge_scroll_order";
+        public static final String ID = "scrolls/forge_scroll_order";
     }
 
     public static class Serializer implements RecipeSerializer<ForgeScrollOrderRecipe> {
         public static final Serializer FORGE_SCROLL_ORDER = new Serializer();
-        public static final ResourceLocation ID = new ResourceLocation(Obsidanum.MOD_ID, "forge_scroll_order");
+        public static final ResourceLocation ID = new ResourceLocation(Obsidanum.MOD_ID, "scrolls/forge_scroll_order");
 
         @Override
         public ForgeScrollOrderRecipe fromJson(ResourceLocation recipeId, JsonObject serializedRecipe) {

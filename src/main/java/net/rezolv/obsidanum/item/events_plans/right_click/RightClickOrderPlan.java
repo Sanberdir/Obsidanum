@@ -27,52 +27,40 @@ public class RightClickOrderPlan {
         Level level = event.getLevel();
         ItemStack heldItem = event.getItemStack();
 
-        // Проверяем, что это UN_ORDER_SCROLL и действие на сервере
+        // Check if this is UN_ORDER_SCROLL and we're on server
         if (heldItem.getItem() != ItemsObs.UN_ORDER_SCROLL.get() || level.isClientSide()) {
             return;
         }
 
-        // Получаем список всех рецептов катакомб
+        // Get all order recipes
         List<ForgeScrollOrderRecipe> recipes = level.getRecipeManager()
                 .getAllRecipesFor(ForgeScrollOrderRecipe.Type.FORGE_SCROLL_ORDER);
 
         if (recipes.isEmpty()) {
-            return; // Нет доступных рецептов
+            return; // No available recipes
         }
 
-        // Выбираем случайный рецепт
+        // Choose random recipe
         ForgeScrollOrderRecipe randomRecipe = recipes.get(RANDOM.nextInt(recipes.size()));
 
-        // Создаем новый предмет ORDER_PLAN
+        // Create new ORDER_PLAN item
         ItemStack planItem = new ItemStack(ItemsObs.ORDER_PLAN.get());
 
-        // Создаем NBT тег для предмета
+        // Create NBT tag for the item
         CompoundTag tag = new CompoundTag();
 
-        // Записываем ID рецепта
+        // Write recipe ID
         tag.putString("RecipeID", randomRecipe.getId().toString());
 
-        // Записываем результат рецепта
+        // Write recipe result
         ListTag resultList = new ListTag();
         CompoundTag resultTag = new CompoundTag();
         ItemStack result = randomRecipe.getResultItem(level.registryAccess());
         result.save(resultTag);
         resultList.add(resultTag);
         tag.put("RecipeResult", resultList);
-        // Проигрываем звук колокола
-        level.playSound(null,
-                event.getEntity().getX(),
-                event.getEntity().getY(),
-                event.getEntity().getZ(),
-                SoundsObs.LEARN.get(), // Звук колокола
-                SoundSource.PLAYERS,    // Категория звука (для игроков)
-                1.0F,                  // Громкость (1.0 = 100%)
-                0.8F + RANDOM.nextFloat() * 0.4F); // Высота тона (случайное значение для естественности)
 
-        // Возвращаем успешный результат взаимодействия
-        event.setCancellationResult(InteractionResult.SUCCESS);
-        event.setCanceled(true);
-        // Записываем ингредиенты
+        // Write ingredients
         ListTag ingredientsList = new ListTag();
         for (JsonObject ingredientJson : randomRecipe.getIngredientJsons()) {
             CompoundTag ingredientTag = new CompoundTag();
@@ -81,20 +69,44 @@ public class RightClickOrderPlan {
         }
         tag.put("Ingredients", ingredientsList);
 
-        // Применяем тег к новому предмету
+        // Write bonus outputs if present
+        if (!randomRecipe.getBonusOutputs().isEmpty()) {
+            ListTag bonusOutputsList = new ListTag();
+            for (ForgeScrollOrderRecipe.BonusOutput bonus : randomRecipe.getBonusOutputs()) {
+                CompoundTag bonusTag = new CompoundTag();
+                CompoundTag itemTag = new CompoundTag();
+                bonus.itemStack().save(itemTag);
+                bonusTag.put("Item", itemTag);
+                bonusTag.putFloat("Chance", bonus.chance());
+                bonusOutputsList.add(bonusTag);
+            }
+            tag.put("BonusOutputs", bonusOutputsList);
+        }
+
+        // Apply tag to the new item
         planItem.setTag(tag);
 
-        // Уменьшаем стак UN_ORDER_SCROLL на 1
+        // Play bell sound
+        level.playSound(null,
+                event.getEntity().getX(),
+                event.getEntity().getY(),
+                event.getEntity().getZ(),
+                SoundsObs.LEARN.get(),
+                SoundSource.PLAYERS,
+                1.0F,
+                0.8F + RANDOM.nextFloat() * 0.4F);
+
+        // Decrease UN_ORDER_SCROLL stack by 1
         heldItem.shrink(1);
 
-        // Даем игроку новый предмет
+        // Give player the new item
         if (heldItem.isEmpty()) {
             event.getEntity().setItemInHand(event.getHand(), planItem);
         } else {
             event.getEntity().getInventory().add(planItem);
         }
 
-        // Возвращаем успешный результат взаимодействия
+        // Return success result
         event.setCancellationResult(InteractionResult.SUCCESS);
         event.setCanceled(true);
     }

@@ -306,5 +306,6 @@
   "tooltip.recipe_information": "=== Информация о рецепте ===",
   "tooltip.recipe_end": "===========================",
   "tooltip.scrolls.result": "Результат",
+  "tooltip.scrolls.bonus_outputs": "Бонусный результат",
   "tooltip.scrolls.ingredients": "Необходимо"
 }

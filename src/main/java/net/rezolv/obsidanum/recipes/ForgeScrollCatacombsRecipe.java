@@ -128,12 +128,12 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
 
     public static class Type implements RecipeType<ForgeScrollCatacombsRecipe> {
         public static final Type FORGE_SCROLL_CATACOMBS = new Type();
-        public static final String ID = "forge_scroll_catacombs";
+        public static final String ID = "scrolls/forge_scroll_catacombs";
     }
 
     public static class Serializer implements RecipeSerializer<ForgeScrollCatacombsRecipe> {
         public static final Serializer FORGE_SCROLL_CATACOMBS = new Serializer();
-        public static final ResourceLocation ID = new ResourceLocation(Obsidanum.MOD_ID, "forge_scroll_catacombs");
+        public static final ResourceLocation ID = new ResourceLocation(Obsidanum.MOD_ID, "scrolls/forge_scroll_catacombs");
 
         @Override
         public ForgeScrollCatacombsRecipe fromJson(ResourceLocation recipeId, JsonObject serializedRecipe) {
