@@ -22,36 +22,43 @@ import net.minecraft.world.level.Level;
 import net.rezolv.obsidanum.Obsidanum;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
     private final NonNullList<JsonObject> ingredientJsons;
     private final NonNullList<Ingredient> ingredients;
     private final ItemStack output;
     private final ResourceLocation id;
+    private final List<BonusOutput> bonusOutputs;
 
-    public ForgeScrollCatacombsRecipe(NonNullList<Ingredient> ingredients, ItemStack output, ResourceLocation id, NonNullList<JsonObject> ingredientJsons) {
+    public ForgeScrollCatacombsRecipe(NonNullList<Ingredient> ingredients, ItemStack output, ResourceLocation id,
+                                      NonNullList<JsonObject> ingredientJsons, List<BonusOutput> bonusOutputs) {
         this.ingredients = ingredients;
-        this.output = output != null ? output : ItemStack.EMPTY; // Защита от null
+        this.output = output != null ? output : ItemStack.EMPTY;
         this.id = id;
         this.ingredientJsons = ingredientJsons;
+        this.bonusOutputs = bonusOutputs != null ? bonusOutputs : new ArrayList<>();
     }
 
     public NonNullList<JsonObject> getIngredientJsons() {
         return ingredientJsons;
     }
 
+    public List<BonusOutput> getBonusOutputs() {
+        return bonusOutputs;
+    }
+
     @Override
     public boolean matches(SimpleContainer container, Level level) {
-        // Проверяем, что все ингредиенты совпадают
         for (int i = 0; i < ingredients.size(); i++) {
             Ingredient requiredIngredient = ingredients.get(i);
-            ItemStack stackInSlot = container.getItem(i); // Слоты 0+ — ингредиенты
+            ItemStack stackInSlot = container.getItem(i);
 
             if (!requiredIngredient.test(stackInSlot)) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -65,10 +72,22 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
         ItemStack result = output.copy();
         CompoundTag tag = new CompoundTag();
 
-        // Запись ингредиентов как JSON строк
+        // Store ingredients as JSON strings
         ListTag ingredientsTag = new ListTag();
         this.ingredientJsons.forEach(json -> ingredientsTag.add(StringTag.valueOf(json.toString())));
         tag.put("Ingredients", ingredientsTag);
+
+        // Store bonus outputs if any
+        if (!bonusOutputs.isEmpty()) {
+            ListTag bonusesTag = new ListTag();
+            for (BonusOutput bonus : bonusOutputs) {
+                CompoundTag bonusTag = new CompoundTag();
+                bonusTag.put("Item", bonus.itemStack().save(new CompoundTag()));
+                bonusTag.putFloat("Chance", bonus.chance());
+                bonusesTag.add(bonusTag);
+            }
+            tag.put("BonusOutputs", bonusesTag);
+        }
 
         result.setTag(tag);
         return result;
@@ -99,6 +118,14 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
         return Type.FORGE_SCROLL_CATACOMBS;
     }
 
+    public record BonusOutput(ItemStack itemStack, float chance) {
+        public BonusOutput {
+            if (itemStack == null) itemStack = ItemStack.EMPTY;
+            if (chance < 0) chance = 0;
+            if (chance > 1) chance = 1;
+        }
+    }
+
     public static class Type implements RecipeType<ForgeScrollCatacombsRecipe> {
         public static final Type FORGE_SCROLL_CATACOMBS = new Type();
         public static final String ID = "forge_scroll_catacombs";
@@ -110,17 +137,17 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
 
         @Override
         public ForgeScrollCatacombsRecipe fromJson(ResourceLocation recipeId, JsonObject serializedRecipe) {
-            // Чтение output
+            // Read main output
             ItemStack output = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(serializedRecipe, "output"));
 
-            // Чтение ингредиентов
+            // Read ingredients
             JsonArray ingredientsJson = GsonHelper.getAsJsonArray(serializedRecipe, "ingredients");
             NonNullList<JsonObject> ingredientJsons = NonNullList.create();
             NonNullList<Ingredient> ingredients = NonNullList.create();
 
             for (JsonElement element : ingredientsJson) {
                 JsonObject ingredientJson = element.getAsJsonObject();
-                ingredientJsons.add(ingredientJson.deepCopy()); // Сохраняем копию JSON
+                ingredientJsons.add(ingredientJson.deepCopy());
 
                 Ingredient ingredient;
                 if (ingredientJson.has("tag")) {
@@ -134,19 +161,31 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
                 ingredients.add(ingredient);
             }
 
-            return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons);
+            // Read bonus outputs
+            List<BonusOutput> bonusOutputs = new ArrayList<>();
+            if (serializedRecipe.has("bonus_outputs")) {
+                JsonArray bonusesJson = GsonHelper.getAsJsonArray(serializedRecipe, "bonus_outputs");
+                for (JsonElement bonusElement : bonusesJson) {
+                    JsonObject bonusObj = bonusElement.getAsJsonObject();
+                    ItemStack bonusStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(bonusObj, "item"));
+                    float chance = GsonHelper.getAsFloat(bonusObj, "chance", 0.5f);
+                    bonusOutputs.add(new BonusOutput(bonusStack, chance));
+                }
+            }
+
+            return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs);
         }
 
         @Override
         public @Nullable ForgeScrollCatacombsRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-            // Чтение ингредиентов
+            // Read ingredients
             int ingredientSize = buffer.readInt();
             NonNullList<Ingredient> ingredients = NonNullList.withSize(ingredientSize, Ingredient.EMPTY);
             for (int i = 0; i < ingredientSize; i++) {
                 ingredients.set(i, Ingredient.fromNetwork(buffer));
             }
 
-            // Чтение JSON ингредиентов
+            // Read ingredient JSONs
             NonNullList<JsonObject> ingredientJsons = NonNullList.create();
             int jsonCount = buffer.readVarInt();
             for (int i = 0; i < jsonCount; i++) {
@@ -155,26 +194,44 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
                 ingredientJsons.add(json);
             }
 
+            // Read main output
             ItemStack output = buffer.readItem();
 
-            return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons);
+            // Read bonus outputs
+            List<BonusOutput> bonusOutputs = new ArrayList<>();
+            int bonusCount = buffer.readVarInt();
+            for (int i = 0; i < bonusCount; i++) {
+                ItemStack bonusStack = buffer.readItem();
+                float chance = buffer.readFloat();
+                bonusOutputs.add(new BonusOutput(bonusStack, chance));
+            }
+
+            return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf buffer, ForgeScrollCatacombsRecipe recipe) {
-            // Запись ингредиентов
+            // Write ingredients
             buffer.writeInt(recipe.ingredients.size());
             for (Ingredient ingredient : recipe.ingredients) {
                 ingredient.toNetwork(buffer);
             }
 
-            // Запись JSON ингредиентов
+            // Write ingredient JSONs
             buffer.writeVarInt(recipe.ingredientJsons.size());
             for (JsonObject json : recipe.ingredientJsons) {
                 buffer.writeUtf(json.toString());
             }
 
+            // Write main output
             buffer.writeItemStack(recipe.output, true);
+
+            // Write bonus outputs
+            buffer.writeVarInt(recipe.bonusOutputs.size());
+            for (BonusOutput bonus : recipe.bonusOutputs) {
+                buffer.writeItem(bonus.itemStack());
+                buffer.writeFloat(bonus.chance());
+            }
         }
     }
 }
