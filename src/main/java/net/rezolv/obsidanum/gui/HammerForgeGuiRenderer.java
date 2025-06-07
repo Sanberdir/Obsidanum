@@ -41,10 +41,28 @@ public class HammerForgeGuiRenderer {
         // Получаем текущий предмет в слоте результата (слот 6)
         ItemStack currentResult = blockEntity.itemHandler.getStackInSlot(6);
 
-        // Если в слоте есть предмет - рисуем его обычным образом
+        // Текстуры для анимации
+        ResourceLocation[] RESULT_TEXTURES = {
+                new ResourceLocation("obsidanum:textures/gui/hammer_forge_res_no.png"),
+                new ResourceLocation("obsidanum:textures/gui/hammer_forge_res_yes.png")
+        };
+
+        // Если в слоте есть предмет - рисуем его с анимацией "готово"
         if (!currentResult.isEmpty()) {
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(0, 0, 100);
+
+            // Анимированная текстура (готово)
+            int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            guiGraphics.blit(RESULT_TEXTURES[1], xPos - 4, yPos - 4, 0, frame * 24, 24, 24, 24, 192);
+            RenderSystem.disableBlend();
+
             guiGraphics.renderItem(currentResult, xPos, yPos);
             guiGraphics.renderItemDecorations(font, currentResult, xPos, yPos);
+
+            guiGraphics.pose().popPose();
             return;
         }
 
@@ -59,6 +77,15 @@ public class HammerForgeGuiRenderer {
         if (resultStack.isEmpty()) return;
 
         guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 100);
+
+        // Анимированная текстура (не готово)
+        int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        guiGraphics.blit(RESULT_TEXTURES[0], xPos - 4, yPos - 4, 0, frame * 24, 24, 24, 24, 192);
+        RenderSystem.disableBlend();
+
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F); // Полупрозрачность
 
         // Рисуем превью предмета
