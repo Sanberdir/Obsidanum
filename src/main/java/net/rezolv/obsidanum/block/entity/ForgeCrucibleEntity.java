@@ -4,7 +4,6 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,7 +15,6 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,7 +22,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -133,16 +130,8 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
     public int getMaxStackSize() {
         return 256;
     }
-
-    public boolean isCraftingReady = false;
-
-    public void markReadyForCrafting() {
-        this.isCraftingReady = true;
-        setChanged();
-    }
     // Сохраняем данные
     public CompoundTag receivedScrollData = new CompoundTag();
-    public int lastUsedIndex = -1; // Сохраняем последний использованный индекс
 
     // Метод для получения данных
     public CompoundTag getReceivedData() {

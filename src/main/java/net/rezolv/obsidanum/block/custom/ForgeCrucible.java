@@ -22,9 +22,8 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
-import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.RecipeByComplete;
-import net.rezolv.obsidanum.block.forge_crucible.update_ingredients.UpdateIngredientsForgeCrucible;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.AddTagsForgeCrucible;
+import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRecipe;
 import net.rezolv.obsidanum.gui.HammerForgeGuiMenu;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,20 +71,13 @@ public class ForgeCrucible extends BaseEntityBlock {
                 }
             }, pos);
         }
-        return UpdateIngredientsForgeCrucible.handleInteraction(
-                level,
-                player,
-                player.getItemInHand(hand),
-                crucible,
-                pos,
-                state
-        );
+        return InteractionResult.PASS;
     }
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
         super.neighborChanged(state, level, pos, block, fromPos, isMoving);
         AddTagsForgeCrucible.handleNeighborUpdate(state, level, pos, fromPos);
-        RecipeByComplete.recipeByComplete(state, level, pos, fromPos);
+        LeftCornerCompleteRecipe.handleNeighborUpdate(state, level, pos, fromPos);
     }
     public BlockState mirror(BlockState state, Mirror mirrorIn) {
         return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));

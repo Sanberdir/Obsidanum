@@ -34,6 +34,21 @@ public class HammerForgeGuiRenderer {
     public static void renderRecipeResult(GuiGraphics guiGraphics, Font font, ForgeCrucibleEntity blockEntity, int leftPos, int topPos) {
         if (blockEntity == null) return;
 
+        // Координаты слота результата
+        int xPos = leftPos + 79;
+        int yPos = topPos + 26;
+
+        // Получаем текущий предмет в слоте результата (слот 6)
+        ItemStack currentResult = blockEntity.itemHandler.getStackInSlot(6);
+
+        // Если в слоте есть предмет - рисуем его обычным образом
+        if (!currentResult.isEmpty()) {
+            guiGraphics.renderItem(currentResult, xPos, yPos);
+            guiGraphics.renderItemDecorations(font, currentResult, xPos, yPos);
+            return;
+        }
+
+        // Только если слот пуст - показываем "предпросмотр" результата
         CompoundTag data = blockEntity.getReceivedData();
         if (!data.contains("RecipeResult", Tag.TAG_LIST)) return;
 
@@ -43,15 +58,16 @@ public class HammerForgeGuiRenderer {
         ItemStack resultStack = ItemStack.of(resultList.getCompound(0));
         if (resultStack.isEmpty()) return;
 
-        // Координаты слота
-        int xPos = leftPos + 79;
-        int yPos = topPos + 26;
-
         guiGraphics.pose().pushPose();
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F);
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F); // Полупрозрачность
 
+        // Рисуем превью предмета
         guiGraphics.renderItem(resultStack, xPos, yPos);
-        guiGraphics.renderItemDecorations(font, resultStack, xPos, yPos); // Теперь font передаётся явно
+
+        // Рисуем ТОЛЬКО текст количества (если количество > 1)
+        if (resultStack.getCount() > 1) {
+            renderCountText(guiGraphics, font, xPos, yPos, resultStack.getCount());
+        }
 
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.pose().popPose();
