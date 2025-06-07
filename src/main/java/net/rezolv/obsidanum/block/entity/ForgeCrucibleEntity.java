@@ -32,8 +32,6 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.rezolv.obsidanum.Obsidanum;
-import net.rezolv.obsidanum.block.custom.ForgeCrucible;
 import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.HammerForgeGuiMenu;
 import org.jetbrains.annotations.Nullable;
 

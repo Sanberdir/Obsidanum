@@ -21,6 +21,10 @@ import net.rezolv.obsidanum.block.custom.ForgeCrucible;
 import net.rezolv.obsidanum.block.custom.LeftCornerLevel;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class LeftCornerCompleteRecipe {
 
     public static void handleNeighborUpdate(BlockState state, Level level, BlockPos pos, BlockPos fromPos) {
@@ -100,7 +104,7 @@ public class LeftCornerCompleteRecipe {
     }
 
     private static void createCraftingResult(ForgeCrucibleEntity crucible) {
-        // Повторная проверка — защита от изменения инвентаря между проверкой и крафтом
+        // Проверка ингредиентов
         if (!checkAllIngredientsWithCount(crucible)) {
             return;
         }
@@ -118,34 +122,83 @@ public class LeftCornerCompleteRecipe {
         ItemStack currentResult = crucible.itemHandler.getStackInSlot(6);
         if (!currentResult.isEmpty()) {
             if (!ItemStack.isSameItemSameTags(currentResult, resultStack)) {
-                return; // Разные предметы — не крафтим
+                return;
             }
             if (currentResult.getCount() + resultCount > currentResult.getMaxStackSize()) {
-                return; // Не помещается — не крафтим
+                return;
             }
         }
 
-        // Все проверки пройдены — удаляем ингредиенты
+        // Удаление ингредиентов
         ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
         for (int i = 0; i < ingredients.size(); i++) {
             CompoundTag ingredient = ingredients.getCompound(i);
-
             try {
                 JsonObject json = JsonParser.parseString(ingredient.getString("IngredientJson")).getAsJsonObject();
                 int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
-
                 crucible.itemHandler.extractItem(i, requiredCount, false);
             } catch (Exception e) {
                 Obsidanum.LOGGER.error("Ошибка при извлечении предметов из слота {}: {}", i, e.getMessage());
             }
         }
 
-        // Добавление результата
+        // Добавление основного результата
         if (currentResult.isEmpty()) {
             crucible.itemHandler.setStackInSlot(6, resultStack.copy());
         } else {
             currentResult.grow(resultCount);
             crucible.itemHandler.setStackInSlot(6, currentResult);
+        }
+
+        // Обработка бонусных предметов (слоты 7-11)
+        if (data.contains("BonusOutputs", Tag.TAG_LIST)) {
+            ListTag bonusOutputs = data.getList("BonusOutputs", Tag.TAG_COMPOUND);
+            Random random = new Random();
+
+            // Собираем все бонусы, прошедшие проверку шанса
+            List<ItemStack> bonusesToAdd = new ArrayList<>();
+            for (int i = 0; i < bonusOutputs.size(); i++) {
+                CompoundTag bonusTag = bonusOutputs.getCompound(i);
+                if (bonusTag.contains("Item", Tag.TAG_COMPOUND) && bonusTag.contains("Chance", Tag.TAG_FLOAT)) {
+                    if (random.nextFloat() <= bonusTag.getFloat("Chance")) {
+                        bonusesToAdd.add(ItemStack.of(bonusTag.getCompound("Item")));
+                    }
+                }
+            }
+
+            // Распределяем бонусы по слотам 7-11 с учетом стаков
+            for (ItemStack bonusStack : bonusesToAdd) {
+                boolean added = false;
+
+                // Сначала пробуем добавить к существующим стакам
+                for (int slot = 7; slot <= 11; slot++) {
+                    ItemStack slotStack = crucible.itemHandler.getStackInSlot(slot);
+                    if (!slotStack.isEmpty() && ItemStack.isSameItemSameTags(slotStack, bonusStack)) {
+                        int canAdd = Math.min(bonusStack.getCount(), slotStack.getMaxStackSize() - slotStack.getCount());
+                        if (canAdd > 0) {
+                            slotStack.grow(canAdd);
+                            bonusStack.shrink(canAdd);
+                            crucible.itemHandler.setStackInSlot(slot, slotStack);
+                            if (bonusStack.isEmpty()) {
+                                added = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Если остался остаток, ищем пустой слот
+                if (!added && !bonusStack.isEmpty()) {
+                    for (int slot = 7; slot <= 11; slot++) {
+                        ItemStack slotStack = crucible.itemHandler.getStackInSlot(slot);
+                        if (slotStack.isEmpty()) {
+                            crucible.itemHandler.setStackInSlot(slot, bonusStack.copy());
+                            added = true;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         // Обновление блока
