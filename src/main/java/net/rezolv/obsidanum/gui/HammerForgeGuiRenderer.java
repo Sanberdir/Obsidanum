@@ -34,69 +34,153 @@ public class HammerForgeGuiRenderer {
     public static void renderRecipeResult(GuiGraphics guiGraphics, Font font, ForgeCrucibleEntity blockEntity, int leftPos, int topPos) {
         if (blockEntity == null) return;
 
-        // Координаты слота результата
         int xPos = leftPos + 79;
         int yPos = topPos + 26;
 
-        // Получаем текущий предмет в слоте результата (слот 6)
         ItemStack currentResult = blockEntity.itemHandler.getStackInSlot(6);
 
-        // Текстуры для анимации
         ResourceLocation[] RESULT_TEXTURES = {
                 new ResourceLocation("obsidanum:textures/gui/hammer_forge_res_no.png"),
                 new ResourceLocation("obsidanum:textures/gui/hammer_forge_res_yes.png")
         };
 
-        // Если в слоте есть предмет - рисуем его с анимацией "готово"
-        if (!currentResult.isEmpty()) {
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(0, 0, 100);
+        // Проверяем состояние ингредиентов для определения текстуры результата
+        CompoundTag data = blockEntity.getReceivedData();
+        if (!data.contains("Ingredients")) {
+            // Если данных с ингредиентами нет, рендерим как обычно
+            if (!currentResult.isEmpty()) {
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0, 0, 100);
 
-            // Анимированная текстура (готово)
-            int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            guiGraphics.blit(RESULT_TEXTURES[1], xPos - 4, yPos - 4, 0, frame * 24, 24, 24, 24, 192);
-            RenderSystem.disableBlend();
+                int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                guiGraphics.blit(RESULT_TEXTURES[1], xPos - 4, yPos - 4, 0, frame * 24, 24, 24, 24, 192);
+                RenderSystem.disableBlend();
 
-            guiGraphics.renderItem(currentResult, xPos, yPos);
-            guiGraphics.renderItemDecorations(font, currentResult, xPos, yPos);
+                guiGraphics.renderItem(currentResult, xPos, yPos);
+                guiGraphics.renderItemDecorations(font, currentResult, xPos, yPos);
 
-            guiGraphics.pose().popPose();
+                guiGraphics.pose().popPose();
+            }
             return;
         }
 
-        // Только если слот пуст - показываем "предпросмотр" результата
-        CompoundTag data = blockEntity.getReceivedData();
-        if (!data.contains("RecipeResult", Tag.TAG_LIST)) return;
+        ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
+        if (ingredients.isEmpty()) {
+            // Аналогично, если ингредиентов нет
+            if (!currentResult.isEmpty()) {
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0, 0, 100);
 
-        ListTag resultList = data.getList("RecipeResult", Tag.TAG_COMPOUND);
-        if (resultList.isEmpty()) return;
+                int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                guiGraphics.blit(RESULT_TEXTURES[1], xPos - 4, yPos - 4, 0, frame * 24, 24, 24, 24, 192);
+                RenderSystem.disableBlend();
 
-        ItemStack resultStack = ItemStack.of(resultList.getCompound(0));
-        if (resultStack.isEmpty()) return;
+                guiGraphics.renderItem(currentResult, xPos, yPos);
+                guiGraphics.renderItemDecorations(font, currentResult, xPos, yPos);
+
+                guiGraphics.pose().popPose();
+            }
+            return;
+        }
+
+        // Логика проверки ингредиентов
+        boolean allEmpty = true;
+        boolean allSatisfied = true;
+
+        for (int i = 0; i < Math.min(6, ingredients.size()); i++) {
+            CompoundTag entry = ingredients.getCompound(i);
+            JsonObject json;
+            try {
+                json = JsonParser.parseString(entry.getString("IngredientJson")).getAsJsonObject();
+            } catch (Exception e) {
+                Obsidanum.LOGGER.error("Error parsing ingredient JSON: {}", e.getMessage());
+                continue;
+            }
+            int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
+
+            ItemStack stackInSlot = blockEntity.itemHandler.getStackInSlot(i);
+
+            if (!stackInSlot.isEmpty()) {
+                allEmpty = false; // есть предметы
+            }
+
+            if (stackInSlot.getCount() < requiredCount) {
+                allSatisfied = false; // недостаточно предметов
+            }
+        }
+
+        if (allEmpty) {
+            // Если все пусты, рисуем результат как было (без no/yes текстур)
+            if (!currentResult.isEmpty()) {
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(0, 0, 100);
+
+                guiGraphics.renderItem(currentResult, xPos, yPos);
+                guiGraphics.renderItemDecorations(font, currentResult, xPos, yPos);
+
+                guiGraphics.pose().popPose();
+            } else {
+                // Превью результата, если есть
+                if (data.contains("RecipeResult", Tag.TAG_LIST)) {
+                    ListTag resultList = data.getList("RecipeResult", Tag.TAG_COMPOUND);
+                    if (!resultList.isEmpty()) {
+                        ItemStack resultStack = ItemStack.of(resultList.getCompound(0));
+                        if (!resultStack.isEmpty()) {
+                            guiGraphics.pose().pushPose();
+                            guiGraphics.pose().translate(0, 0, 100);
+
+                            guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F);
+                            guiGraphics.renderItem(resultStack, xPos, yPos);
+                            if (resultStack.getCount() > 1) {
+                                renderCountText(guiGraphics, font, xPos, yPos, resultStack.getCount());
+                            }
+                            guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+                            guiGraphics.pose().popPose();
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        // Если есть предметы, то рисуем текстуру результата с учетом статуса yes/no
+        int textureIndex = allSatisfied ? 1 : 0;
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 100);
 
-        // Анимированная текстура (не готово)
         int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        guiGraphics.blit(RESULT_TEXTURES[0], xPos - 4, yPos - 4, 0, frame * 24, 24, 24, 24, 192);
+        guiGraphics.blit(RESULT_TEXTURES[textureIndex], xPos - 4, yPos - 4, 0, frame * 24, 24, 24, 24, 192);
         RenderSystem.disableBlend();
 
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F); // Полупрозрачность
-
-        // Рисуем превью предмета
-        guiGraphics.renderItem(resultStack, xPos, yPos);
-
-        // Рисуем ТОЛЬКО текст количества (если количество > 1)
-        if (resultStack.getCount() > 1) {
-            renderCountText(guiGraphics, font, xPos, yPos, resultStack.getCount());
+        if (!currentResult.isEmpty()) {
+            guiGraphics.renderItem(currentResult, xPos, yPos);
+            guiGraphics.renderItemDecorations(font, currentResult, xPos, yPos);
+        } else {
+            // Превью результата, если слот пуст
+            if (data.contains("RecipeResult", Tag.TAG_LIST)) {
+                ListTag resultList = data.getList("RecipeResult", Tag.TAG_COMPOUND);
+                if (!resultList.isEmpty()) {
+                    ItemStack resultStack = ItemStack.of(resultList.getCompound(0));
+                    if (!resultStack.isEmpty()) {
+                        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F);
+                        guiGraphics.renderItem(resultStack, xPos, yPos);
+                        if (resultStack.getCount() > 1) {
+                            renderCountText(guiGraphics, font, xPos, yPos, resultStack.getCount());
+                        }
+                        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+                    }
+                }
+            }
         }
 
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.pose().popPose();
     }
     public static void renderScrollItem(GuiGraphics guiGraphics, Font font, Level world, int x, int y, int z, int leftPos, int topPos) {
@@ -177,12 +261,18 @@ public class HammerForgeGuiRenderer {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 100);
 
-                // Анимированная текстура
-                int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                guiGraphics.blit(TEXTURES[hasEnough ? 1 : 0], x, y, 0, frame * 16, 16, 16, 16, 128);
-                RenderSystem.disableBlend();
+                // Анимированная текстура (только если есть предметы)
+                if (!slotStack.isEmpty()) {
+                    int frame = (int)((System.currentTimeMillis() % 1000) / 1000f * 8);
+                    RenderSystem.enableBlend();
+                    RenderSystem.defaultBlendFunc();
+
+                    // Выбираем текстуру: "yes" если хватает, иначе "no"
+                    int textureIndex = hasEnough ? 1 : 0;
+                    guiGraphics.blit(TEXTURES[textureIndex], x, y, 0, frame * 16, 16, 16, 16, 128);
+
+                    RenderSystem.disableBlend();
+                }
 
                 guiGraphics.setColor(1.0f, 1.0f, 1.0f, satisfied ? 1.0f : 0.7f);
                 guiGraphics.renderItem(stack, x, y);

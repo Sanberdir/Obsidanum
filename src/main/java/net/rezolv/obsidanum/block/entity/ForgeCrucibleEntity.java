@@ -94,62 +94,32 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
     // Метод для приема данных
     public void receiveScrollData(CompoundTag data) {
         this.receivedScrollData = data.copy();
-
-        // Очищаем слоты ингредиентов при получении пустого рецепта
-        if (!data.contains("Ingredients") || data.getList("Ingredients", Tag.TAG_COMPOUND).isEmpty()) {
-            for (int i = 0; i < 6; i++) {
-                ItemStack stack = itemHandler.getStackInSlot(i);
-                if (!stack.isEmpty()) {
-                    // Выбрасываем предмет
-                    ItemEntity itemEntity = new ItemEntity(
-                            level,
-                            worldPosition.getX() + 0.5,
-                            worldPosition.getY() + 1.0,
-                            worldPosition.getZ() + 0.5,
-                            stack.copy()
-                    );
-                    itemEntity.setDefaultPickUpDelay();
-                    level.addFreshEntity(itemEntity);
-
-                    // Очищаем слот
-                    itemHandler.setStackInSlot(i, ItemStack.EMPTY);
-                }
-            }
-        }
-
-        this.setChanged();
-        if (level != null) {
+        this.depositedItems.clear(); // Очищаем при новом рецепте
+        setChanged();
+        if(level != null) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
+        debugDepositedItems("receiveScrollData");
     }
     public void clearCrucibleData() {
         if (level != null && !level.isClientSide()) {
-            // Собираем предметы только из слотов ингредиентов (0-5)
-            List<ItemStack> itemsToDrop = new ArrayList<>();
-            for (int i = 0; i < 6; i++) {
-                ItemStack stack = itemHandler.getStackInSlot(i);
+            // Возвращаем все предметы, выбрасывая их на землю
+            for (ItemStack stack : depositedItems) {
                 if (!stack.isEmpty()) {
-                    itemsToDrop.add(stack.copy());
-                    itemHandler.setStackInSlot(i, ItemStack.EMPTY); // Очищаем слот
+                    // Создаем предмет на земле
+                    ItemEntity itemEntity = new ItemEntity(
+                            level,
+                            worldPosition.getX() + 0.5, worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, // Позиция над тиглем
+                            stack.copy() // Создаем копию стека, чтобы не изменять оригинал
+                    );
+                    itemEntity.setDefaultPickUpDelay(); // Устанавливаем задержку перед подбором
+                    level.addFreshEntity(itemEntity); // Добавляем предмет в мир
                 }
             }
-
-            // Выбрасываем предметы в мир
-            for (ItemStack stack : itemsToDrop) {
-                ItemEntity itemEntity = new ItemEntity(
-                        level,
-                        worldPosition.getX() + 0.5,
-                        worldPosition.getY() + 1.0,
-                        worldPosition.getZ() + 0.5,
-                        stack
-                );
-                itemEntity.setDefaultPickUpDelay();
-                level.addFreshEntity(itemEntity);
-            }
+            depositedItems.clear(); // Очищаем список
         }
 
         this.receivedScrollData = new CompoundTag();
-        this.depositedItems.clear(); // Очищаем историю
         this.setChanged();
 
         if (level != null) {
