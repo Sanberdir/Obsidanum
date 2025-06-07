@@ -71,18 +71,15 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         this.z = pos.getZ();
         this.access = ContainerLevelAccess.create(world, pos);
 
-        // Получаем BlockEntity и его инвентарь
         ForgeCrucibleEntity blockEntity = (ForgeCrucibleEntity) world.getBlockEntity(pos);
         if (blockEntity != null) {
-            // Используем реальный инвентарь из BlockEntity
-            this.internal = blockEntity.itemHandler; // Или другой соответствующий IItemHandler
+            this.internal = blockEntity.itemHandler;
             this.bound = true;
         } else {
-            // Fallback на пустой инвентарь, если BlockEntity не найден
-            this.internal = new ItemStackHandler(7);
+            this.internal = new ItemStackHandler(12); // Увеличиваем размер под все слоты (0-11)
         }
 
-        // Создаем слот для вывода (нельзя помещать предметы вручную)
+        // Слот результата (6) — нельзя помещать предметы вручную
         this.addSlot(new SlotItemHandler(internal, 6, 79, 26) {
             @Override
             public boolean mayPlace(ItemStack stack) {
@@ -90,7 +87,39 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
             }
         });
 
-        // Создаем слоты для ингредиентов (0-5)
+        // Новые выходные слоты 7-11, все с запретом ручного помещения предметов:
+        this.addSlot(new SlotItemHandler(internal, 7, 79, 52) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+        });
+        this.addSlot(new SlotItemHandler(internal, 8, 59, 49) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+        });
+        this.addSlot(new SlotItemHandler(internal, 9, 99, 49) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+        });
+        this.addSlot(new SlotItemHandler(internal, 10, 39, 46) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+        });
+        this.addSlot(new SlotItemHandler(internal, 11, 119, 46) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+        });
+
+        // Слоты для ингредиентов (0-5)
         for (int i = 0; i < 6; i++) {
             int slotIndex = i;
             this.addSlot(new SlotItemHandler(internal, slotIndex, 35 + i * 18, 73) {
@@ -121,12 +150,10 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
                 this.addSlot(new Slot(inv, sj + (si + 1) * 9, 8 + sj * 18, 131 + si * 18));
             }
         }
-
         for (int si = 0; si < 9; ++si) {
             this.addSlot(new Slot(inv, si, 8 + si * 18, 189));
         }
     }
-
     private boolean matchesIngredient(ItemStack stack, JsonObject ingredientJson) {
         if (stack.isEmpty()) return false;
 
@@ -166,28 +193,27 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
             ItemStack originalStack = slot.getItem();
             copiedStack = originalStack.copy();
 
-            // Определяем, откуда перемещаем:
-            // Если из инвентаря игрока (слоты 7-42) → пробуем вставить в слоты крафта (0-6)
-            if (index >= 7) {
-                if (!this.moveItemStackTo(originalStack, 0, 6, false)) {
+            // Если слот в инвентаре игрока (слоты 12-47)
+            if (index >= 12) {
+                // Перемещаем в слоты крафта/выхода (0-11)
+                if (!this.moveItemStackTo(originalStack, 0, 12, false)) {
                     return ItemStack.EMPTY;
                 }
             }
-            // Если из слотов крафта (0-6) → перемещаем в инвентарь игрока (7-42)
+            // Если слот в слоте крафта или выхода (0-11)
             else {
-                if (!this.moveItemStackTo(originalStack, 7, 42, false)) {
+                // Перемещаем в инвентарь игрока (12-47)
+                if (!this.moveItemStackTo(originalStack, 12, 48, false)) {
                     return ItemStack.EMPTY;
                 }
             }
 
-            // Если весь стек перемещен
             if (originalStack.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
             } else {
                 slot.setChanged();
             }
 
-            // Если ничего не переместилось
             if (originalStack.getCount() == copiedStack.getCount()) {
                 return ItemStack.EMPTY;
             }
@@ -197,6 +223,7 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
 
         return copiedStack;
     }
+
 
     @Override
     protected boolean moveItemStackTo(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection) {

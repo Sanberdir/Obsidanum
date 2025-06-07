@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implements WorldlyContainer {
-    public final ItemStackHandler itemHandler = new ItemStackHandler(7) {
+    public final ItemStackHandler itemHandler = new ItemStackHandler(12) {
         @Override
         protected void onContentsChanged(int slot) {
             setChanged();
