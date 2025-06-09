@@ -50,7 +50,6 @@ public class ModEventBusClientEvents {
         event.registerLayerDefinition(ModModelLayers.MEET_BEETLE, MeetBeetleModel::createBodyLayer);
         event.registerLayerDefinition(ModModelLayers.GART, GartModel::createBodyLayer);
         event.registerLayerDefinition(ModModelLayers.MUTATED_GART, MutatedGartModel::createBodyLayer);
-        event.registerLayerDefinition(HammerForgeModel.LAYER_LOCATION, HammerForgeModel::createBodyLayer);
 
     }
 

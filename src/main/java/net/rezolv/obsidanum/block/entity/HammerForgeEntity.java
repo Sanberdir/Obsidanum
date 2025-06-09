@@ -12,12 +12,20 @@ import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.rezolv.obsidanum.block.custom.HammerForge;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.RenderUtils;
 
-public class HammerForgeEntity extends BaseContainerBlockEntity implements WorldlyContainer {
+public class HammerForgeEntity extends BaseContainerBlockEntity implements WorldlyContainer, GeoAnimatable {
     public HammerForgeEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntities.HAMMER_FORGE.get(), pPos, pBlockState);
 
     }
+    private AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
+
     @Override
     public int[] getSlotsForFace(Direction direction) {
         return new int[0];
@@ -86,5 +94,37 @@ public class HammerForgeEntity extends BaseContainerBlockEntity implements World
     @Override
     public void clearContent() {
 
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "controller", 0, this::predicate));
+    }
+    private boolean wasPowered = false; // Добавляем флаг для отслеживания состояния
+
+    private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> state) {
+        boolean isPowered = isPowered();
+
+        if (isPowered && !wasPowered) {
+            // Только при переходе из выключенного в включенное состояние
+            state.getController().setAnimation(RawAnimation.begin()
+                    .then("animation.down_move", Animation.LoopType.PLAY_ONCE));
+            wasPowered = true;
+        } else if (!isPowered) {
+            wasPowered = false;
+            state.getController().setAnimation(RawAnimation.begin()
+                    .then("animation.idle", Animation.LoopType.LOOP));
+        }
+
+        return PlayState.CONTINUE;
+    }
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
+    }
+
+    @Override
+    public double getTick(Object o) {
+        return RenderUtils.getCurrentTick();
     }
 }
