@@ -69,7 +69,7 @@ public class ScrollItemRenderer {
     }
 
     private static void renderScroll(GuiGraphics guiGraphics, Font font, ItemStack scrollStack, int leftPos, int topPos) {
-        int scrollX = leftPos + 80;
+        int scrollX = leftPos + 119;
         int scrollY = topPos + 105;
 
         guiGraphics.renderItem(scrollStack, scrollX, scrollY);

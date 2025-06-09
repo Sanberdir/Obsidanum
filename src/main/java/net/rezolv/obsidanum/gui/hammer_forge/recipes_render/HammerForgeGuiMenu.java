@@ -80,7 +80,7 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         }
 
         // Слот результата (6) — нельзя помещать предметы вручную
-        this.addSlot(new SlotItemHandler(internal, 6, 79, 26) {
+        this.addSlot(new SlotItemHandler(internal, 6, 118, 26) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
@@ -88,31 +88,31 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         });
 
         // Новые выходные слоты 7-11, все с запретом ручного помещения предметов:
-        this.addSlot(new SlotItemHandler(internal, 7, 79, 52) {
+        this.addSlot(new SlotItemHandler(internal, 7, 118, 52) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new SlotItemHandler(internal, 8, 59, 49) {
+        this.addSlot(new SlotItemHandler(internal, 8, 98, 49) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new SlotItemHandler(internal, 9, 99, 49) {
+        this.addSlot(new SlotItemHandler(internal, 9, 138, 49) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new SlotItemHandler(internal, 10, 39, 46) {
+        this.addSlot(new SlotItemHandler(internal, 10, 78, 46) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
-        this.addSlot(new SlotItemHandler(internal, 11, 119, 46) {
+        this.addSlot(new SlotItemHandler(internal, 11, 158, 46) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
@@ -122,7 +122,7 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         // Слоты для ингредиентов (0-5)
         for (int i = 0; i < 6; i++) {
             int slotIndex = i;
-            this.addSlot(new SlotItemHandler(internal, slotIndex, 35 + i * 18, 73) {
+            this.addSlot(new SlotItemHandler(internal, slotIndex, 74 + i * 18, 73) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     if (blockEntity == null) return false;
@@ -147,11 +147,11 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         // Добавляем инвентарь игрока
         for (int si = 0; si < 3; ++si) {
             for (int sj = 0; sj < 9; ++sj) {
-                this.addSlot(new Slot(inv, sj + (si + 1) * 9, 8 + sj * 18, 131 + si * 18));
+                this.addSlot(new Slot(inv, sj + (si + 1) * 9, 47 + sj * 18, 131 + si * 18));
             }
         }
         for (int si = 0; si < 9; ++si) {
-            this.addSlot(new Slot(inv, si, 8 + si * 18, 189));
+            this.addSlot(new Slot(inv, si, 47 + si * 18, 189));
         }
     }
     private boolean matchesIngredient(ItemStack stack, JsonObject ingredientJson) {

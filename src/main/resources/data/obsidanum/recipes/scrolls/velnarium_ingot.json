@@ -17,5 +17,21 @@
   "output": {
     "item": "obsidanum:velnarium_ingot",
     "count": 1
-  }
+  },
+  "bonus_outputs": [
+    {
+      "item": {
+        "item": "minecraft:diamond",
+        "count": 2
+      },
+      "chance": 0.5
+    },
+    {
+      "item": {
+        "item": "minecraft:emerald_block",
+        "count": 1
+      },
+      "chance": 0.1
+    }
+  ]
 }

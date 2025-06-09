@@ -29,7 +29,7 @@ public class RecipeIngredientsRenderer {
 
     private static final int SLOT_SIZE = 18;
     private static final int MAX_SLOTS = 6;
-    private static final int START_X_OFFSET = 35;
+    private static final int START_X_OFFSET = 74;
     private static final int START_Y_OFFSET = 73;
 
     public static void render(GuiGraphics guiGraphics, Font font, HammerForgeGuiMenu menu,

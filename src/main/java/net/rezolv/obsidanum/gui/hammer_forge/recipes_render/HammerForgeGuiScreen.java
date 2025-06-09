@@ -60,8 +60,4 @@ public class HammerForgeGuiScreen extends AbstractContainerScreen<HammerForgeGui
 		// Можно добавить текст здесь если нужно
 	}
 
-	@Override
-	public void init() {
-		super.init();
-	}
 }

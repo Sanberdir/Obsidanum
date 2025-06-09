@@ -22,7 +22,7 @@ public class RecipeResultRenderer {
     public static void render(GuiGraphics guiGraphics, Font font, ForgeCrucibleEntity blockEntity, int leftPos, int topPos) {
         if (blockEntity == null) return;
 
-        int xPos = leftPos + 79;
+        int xPos = leftPos + 118;
         int yPos = topPos + 26;
         ItemStack currentResult = blockEntity.itemHandler.getStackInSlot(6);
         CompoundTag data = blockEntity.getReceivedData();
