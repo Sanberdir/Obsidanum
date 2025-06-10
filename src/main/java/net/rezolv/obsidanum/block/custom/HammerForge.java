@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.rezolv.obsidanum.block.BlocksObs;
 import net.rezolv.obsidanum.block.entity.HammerForgeEntity;
+import net.rezolv.obsidanum.sound.SoundsObs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -80,23 +81,13 @@ public class HammerForge extends BaseEntityBlock {
                 tickCounters.put(pos, 0);
             }
         }
-
-        // Обработка звука — только один раз через 15 тиков после активации
         if (isPowered && tickCounters.containsKey(pos)) {
-            int count = tickCounters.get(pos) + 1;
-            if (count == 10) {
                 level.playSound(null, pos,
-                        net.minecraft.sounds.SoundEvents.ANVIL_LAND,
+                        SoundsObs.HAMMER_FORGE.get(),
                         net.minecraft.sounds.SoundSource.BLOCKS,
                         1.5F, 1.0F);
-                // удаляем, чтобы звук не зацикливался
                 tickCounters.remove(pos);
-            } else {
-                tickCounters.put(pos, count);
-            }
         }
-
-        // Перезапланируем следующий тик
         level.scheduleTick(pos, this, 1);
     }
 

@@ -55,6 +55,14 @@
       }
     ]
   },
+  "hammer_forge": {
+    "sounds": [
+      {
+        "name": "obsidanum:hammer_forge",
+        "stream": true
+      }
+    ]
+  },
   "chacram_hit": {
     "sounds": [
       {

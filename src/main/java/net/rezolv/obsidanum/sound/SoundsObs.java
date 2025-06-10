@@ -21,6 +21,7 @@ public class SoundsObs {
     public static final RegistryObject<SoundEvent> OBSIDIAN_TOTEM = registerSoundEvents("obsidian_totem");
     public static final RegistryObject<SoundEvent> OBSIDIAN_TABLET_ACTIVE = registerSoundEvents("obsidian_tablet_active");
     public static final RegistryObject<SoundEvent> FLASH = registerSoundEvents("flash");
+    public static final RegistryObject<SoundEvent> HAMMER_FORGE = registerSoundEvents("hammer_forge");
     public static final RegistryObject<SoundEvent> OBSIDIAN_ELEMENTAL_AMBIENT = registerSoundEvents("obsidian_elemental_ambient");
     public static final RegistryObject<SoundEvent> OBSIDIAN_ELEMENTAL_HURT = registerSoundEvents("obsidian_elemental_hurt");
     public static final RegistryObject<SoundEvent> OBSIDIAN_ELEMENTAL_DEATH = registerSoundEvents("obsidian_elemental_death");
