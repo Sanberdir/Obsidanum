@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -84,6 +85,8 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
                 CompoundTag bonusTag = new CompoundTag();
                 bonusTag.put("Item", bonus.itemStack().save(new CompoundTag()));
                 bonusTag.putFloat("Chance", bonus.chance());
+                bonusTag.putInt("Min", bonus.min());
+                bonusTag.putInt("Max", bonus.max());
                 bonusesTag.add(bonusTag);
             }
             tag.put("BonusOutputs", bonusesTag);
@@ -118,11 +121,18 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
         return Type.FORGE_SCROLL_CATACOMBS;
     }
 
-    public record BonusOutput(ItemStack itemStack, float chance) {
+    public record BonusOutput(ItemStack itemStack, float chance, int min, int max) {
         public BonusOutput {
             if (itemStack == null) itemStack = ItemStack.EMPTY;
             if (chance < 0) chance = 0;
             if (chance > 1) chance = 1;
+            if (min < 1) min = 1;
+            if (max < min) max = min;
+        }
+
+        // Convenience constructor for single quantity
+        public BonusOutput(ItemStack itemStack, float chance) {
+            this(itemStack, chance, 1, 1);
         }
     }
 
@@ -167,9 +177,18 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
                 JsonArray bonusesJson = GsonHelper.getAsJsonArray(serializedRecipe, "bonus_outputs");
                 for (JsonElement bonusElement : bonusesJson) {
                     JsonObject bonusObj = bonusElement.getAsJsonObject();
-                    ItemStack bonusStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(bonusObj, "item"));
+                    JsonObject itemObj = GsonHelper.getAsJsonObject(bonusObj, "item");
+
+// Новый ручной разбор вместо itemStackFromJson
+                    Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(GsonHelper.getAsString(itemObj, "item")));
+                    int min = GsonHelper.getAsInt(itemObj, "min", 1);
+                    int max = GsonHelper.getAsInt(itemObj, "max", min);
+
+// Здесь count можно оставить 1 — он не важен, min/max хранятся отдельно
+                    ItemStack bonusStack = new ItemStack(item);
                     float chance = GsonHelper.getAsFloat(bonusObj, "chance", 0.5f);
-                    bonusOutputs.add(new BonusOutput(bonusStack, chance));
+
+                    bonusOutputs.add(new BonusOutput(bonusStack, chance, min, max));
                 }
             }
 
@@ -203,7 +222,9 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
             for (int i = 0; i < bonusCount; i++) {
                 ItemStack bonusStack = buffer.readItem();
                 float chance = buffer.readFloat();
-                bonusOutputs.add(new BonusOutput(bonusStack, chance));
+                int min = buffer.readVarInt();
+                int max = buffer.readVarInt();
+                bonusOutputs.add(new BonusOutput(bonusStack, chance, min, max));
             }
 
             return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs);
@@ -231,6 +252,8 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
             for (BonusOutput bonus : recipe.bonusOutputs) {
                 buffer.writeItem(bonus.itemStack());
                 buffer.writeFloat(bonus.chance());
+                buffer.writeVarInt(bonus.min());
+                buffer.writeVarInt(bonus.max());
             }
         }
     }

@@ -161,7 +161,26 @@ public class LeftCornerCompleteRecipe {
                 CompoundTag bonusTag = bonusOutputs.getCompound(i);
                 if (bonusTag.contains("Item", Tag.TAG_COMPOUND) && bonusTag.contains("Chance", Tag.TAG_FLOAT)) {
                     if (random.nextFloat() <= bonusTag.getFloat("Chance")) {
-                        bonusesToAdd.add(ItemStack.of(bonusTag.getCompound("Item")));
+                        ItemStack bonusStack = ItemStack.of(bonusTag.getCompound("Item"));
+
+                        // ФИКС: Корректный расчёт количества между min и max
+                        int min = bonusTag.contains("Min") ? bonusTag.getInt("Min") : 1;
+                        int max = bonusTag.contains("Max") ? bonusTag.getInt("Max") : min;
+
+                        // Если min и max равны - берём это значение
+                        int count = min;
+
+                        // Если max больше min - выбираем случайное значение в диапазоне
+                        if (max > min) {
+                            count = min + random.nextInt(max - min + 1);
+                        }
+
+                        // Создаём предмет только если count > 0
+                        if (count > 0) {
+                            ItemStack stackToAdd = bonusStack.copy();
+                            stackToAdd.setCount(count);
+                            bonusesToAdd.add(stackToAdd);
+                        }
                     }
                 }
             }

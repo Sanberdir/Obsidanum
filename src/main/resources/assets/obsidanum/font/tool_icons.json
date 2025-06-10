@@ -34,6 +34,27 @@
       "ascent": 7,
       "height": 8,
       "chars": ["\uE004"]
+    },
+    {
+      "type": "bitmap",
+      "file": "obsidanum:tool_icon/type_crafting.png",
+      "ascent": 8,
+      "height": 10,
+      "chars": ["\uE005"]
+    },
+    {
+      "type": "bitmap",
+      "file": "obsidanum:tool_icon/result_lots.png",
+      "ascent": 8,
+      "height": 10,
+      "chars": ["\uE006"]
+    },
+    {
+      "type": "bitmap",
+      "file": "obsidanum:tool_icon/result_one.png",
+      "ascent": 8,
+      "height": 10,
+      "chars": ["\uE007"]
     }
   ]
 }

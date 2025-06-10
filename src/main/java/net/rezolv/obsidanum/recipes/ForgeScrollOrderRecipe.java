@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -77,13 +78,15 @@ public class ForgeScrollOrderRecipe implements Recipe<SimpleContainer> {
         this.ingredientJsons.forEach(json -> ingredientsTag.add(StringTag.valueOf(json.toString())));
         tag.put("Ingredients", ingredientsTag);
 
-        // Store bonus outputs if any
+        // Store bonus outputs with min/max support
         if (!bonusOutputs.isEmpty()) {
             ListTag bonusesTag = new ListTag();
             for (BonusOutput bonus : bonusOutputs) {
                 CompoundTag bonusTag = new CompoundTag();
                 bonusTag.put("Item", bonus.itemStack().save(new CompoundTag()));
                 bonusTag.putFloat("Chance", bonus.chance());
+                bonusTag.putInt("Min", bonus.min());
+                bonusTag.putInt("Max", bonus.max());
                 bonusesTag.add(bonusTag);
             }
             tag.put("BonusOutputs", bonusesTag);
@@ -118,11 +121,18 @@ public class ForgeScrollOrderRecipe implements Recipe<SimpleContainer> {
         return Type.FORGE_SCROLL_ORDER;
     }
 
-    public record BonusOutput(ItemStack itemStack, float chance) {
+    public record BonusOutput(ItemStack itemStack, float chance, int min, int max) {
         public BonusOutput {
             if (itemStack == null) itemStack = ItemStack.EMPTY;
             if (chance < 0) chance = 0;
             if (chance > 1) chance = 1;
+            if (min < 1) min = 1;
+            if (max < min) max = min;
+        }
+
+        // Convenience constructor for single quantity
+        public BonusOutput(ItemStack itemStack, float chance) {
+            this(itemStack, chance, 1, 1);
         }
     }
 
@@ -161,15 +171,23 @@ public class ForgeScrollOrderRecipe implements Recipe<SimpleContainer> {
                 ingredients.add(ingredient);
             }
 
-            // Read bonus outputs
+            // Read bonus outputs with min/max support
             List<BonusOutput> bonusOutputs = new ArrayList<>();
             if (serializedRecipe.has("bonus_outputs")) {
                 JsonArray bonusesJson = GsonHelper.getAsJsonArray(serializedRecipe, "bonus_outputs");
                 for (JsonElement bonusElement : bonusesJson) {
                     JsonObject bonusObj = bonusElement.getAsJsonObject();
-                    ItemStack bonusStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(bonusObj, "item"));
+                    JsonObject itemObj = GsonHelper.getAsJsonObject(bonusObj, "item");
+
+                    // Manual parsing for min/max support
+                    Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(GsonHelper.getAsString(itemObj, "item")));
+                    int min = GsonHelper.getAsInt(itemObj, "min", 1);
+                    int max = GsonHelper.getAsInt(itemObj, "max", min);
+
+                    ItemStack bonusStack = new ItemStack(item);
                     float chance = GsonHelper.getAsFloat(bonusObj, "chance", 0.5f);
-                    bonusOutputs.add(new BonusOutput(bonusStack, chance));
+
+                    bonusOutputs.add(new BonusOutput(bonusStack, chance, min, max));
                 }
             }
 
@@ -197,13 +215,15 @@ public class ForgeScrollOrderRecipe implements Recipe<SimpleContainer> {
             // Read main output
             ItemStack output = buffer.readItem();
 
-            // Read bonus outputs
+            // Read bonus outputs with min/max support
             List<BonusOutput> bonusOutputs = new ArrayList<>();
             int bonusCount = buffer.readVarInt();
             for (int i = 0; i < bonusCount; i++) {
                 ItemStack bonusStack = buffer.readItem();
                 float chance = buffer.readFloat();
-                bonusOutputs.add(new BonusOutput(bonusStack, chance));
+                int min = buffer.readVarInt();
+                int max = buffer.readVarInt();
+                bonusOutputs.add(new BonusOutput(bonusStack, chance, min, max));
             }
 
             return new ForgeScrollOrderRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs);
@@ -226,11 +246,13 @@ public class ForgeScrollOrderRecipe implements Recipe<SimpleContainer> {
             // Write main output
             buffer.writeItemStack(recipe.output, true);
 
-            // Write bonus outputs
+            // Write bonus outputs with min/max support
             buffer.writeVarInt(recipe.bonusOutputs.size());
             for (BonusOutput bonus : recipe.bonusOutputs) {
                 buffer.writeItem(bonus.itemStack());
                 buffer.writeFloat(bonus.chance());
+                buffer.writeVarInt(bonus.min());
+                buffer.writeVarInt(bonus.max());
             }
         }
     }

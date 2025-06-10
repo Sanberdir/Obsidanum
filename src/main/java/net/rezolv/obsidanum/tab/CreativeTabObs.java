@@ -450,6 +450,10 @@ public class CreativeTabObs extends CreativeModeTab {
                 // Сохраняем шанс выпадения
                 bonusTag.putFloat("Chance", bonus.chance());
 
+                // Сохраняем диапазон количества: min и max
+                bonusTag.putInt("Min", bonus.min());
+                bonusTag.putInt("Max", bonus.max());
+
                 bonusOutputsList.add(bonusTag);
             }
 
@@ -508,6 +512,10 @@ public class CreativeTabObs extends CreativeModeTab {
                 // Сохраняем шанс выпадения
                 bonusTag.putFloat("Chance", bonus.chance());
 
+                // Сохраняем диапазон количества: min и max
+                bonusTag.putInt("Min", bonus.min());
+                bonusTag.putInt("Max", bonus.max());
+
                 bonusOutputsList.add(bonusTag);
             }
 
@@ -537,7 +545,7 @@ public class CreativeTabObs extends CreativeModeTab {
                         stack.save(stackTag);
                         stacksList.add(stackTag);
                     }
-                    ingredientTag.put("Items", stacksList); // Используем "Items" для списка
+                    ingredientTag.put("Items", stacksList);
                 }
             }
 
@@ -549,9 +557,11 @@ public class CreativeTabObs extends CreativeModeTab {
         ListTag resultList = new ListTag();
         CompoundTag outputTag = new CompoundTag();
         forgeScrollCatacombsRecipe.getResultItem(level.registryAccess()).save(outputTag);
-        outputTag.putInt("Count", result.getCount()); // Обновляем количество
+        outputTag.putInt("Count", result.getCount());
         resultList.add(outputTag);
         resultTag.put("RecipeResult", resultList);
+
+        // Добавляем бонусные предметы, если они есть
         if (!forgeScrollCatacombsRecipe.getBonusOutputs().isEmpty()) {
             ListTag bonusOutputsList = new ListTag();
 
@@ -565,6 +575,10 @@ public class CreativeTabObs extends CreativeModeTab {
 
                 // Сохраняем шанс выпадения
                 bonusTag.putFloat("Chance", bonus.chance());
+
+                // Сохраняем диапазон количества: min и max
+                bonusTag.putInt("Min", bonus.min());
+                bonusTag.putInt("Max", bonus.max());
 
                 bonusOutputsList.add(bonusTag);
             }

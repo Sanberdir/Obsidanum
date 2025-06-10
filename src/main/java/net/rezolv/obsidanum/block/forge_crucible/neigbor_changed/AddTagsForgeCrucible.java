@@ -66,22 +66,45 @@ public class AddTagsForgeCrucible {
                                 dataToSend.putString("RecipesPlans", scrollNBT.getString("RecipesPlans"));
                             }
 
-                            // Copy bonus outputs if present
+                            // Copy and process bonus outputs
                             if (scrollNBT.contains("BonusOutputs", Tag.TAG_LIST)) {
                                 ListTag bonusOutputs = scrollNBT.getList("BonusOutputs", Tag.TAG_COMPOUND);
                                 dataToSend.put("BonusOutputs", bonusOutputs);
 
-                                // Also store a processed version for easier access
+                                // Create processed version with min/max support
                                 ListTag processedBonuses = new ListTag();
                                 for (Tag bonusTag : bonusOutputs) {
                                     if (bonusTag instanceof CompoundTag bonusCompound) {
                                         CompoundTag processed = new CompoundTag();
+
+                                        // Copy item data
                                         if (bonusCompound.contains("Item", Tag.TAG_COMPOUND)) {
                                             processed.put("Item", bonusCompound.getCompound("Item"));
                                         }
-                                        if (bonusCompound.contains("Chance", Tag.TAG_FLOAT)) {
-                                            processed.putFloat("Chance", bonusCompound.getFloat("Chance"));
+
+                                        // Copy chance (default to 1.0 if not specified)
+                                        float chance = bonusCompound.contains("Chance", Tag.TAG_FLOAT)
+                                                ? bonusCompound.getFloat("Chance")
+                                                : 1.0f;
+                                        processed.putFloat("Chance", chance);
+
+                                        // Handle min/max quantities
+                                        int min = bonusCompound.contains("Min", Tag.TAG_INT)
+                                                ? bonusCompound.getInt("Min")
+                                                : 1; // Default to 1 if not specified
+
+                                        int max = bonusCompound.contains("Max", Tag.TAG_INT)
+                                                ? bonusCompound.getInt("Max")
+                                                : min; // Default to min if not specified
+
+                                        // Ensure max is not less than min
+                                        if (max < min) {
+                                            max = min;
                                         }
+
+                                        processed.putInt("Min", min);
+                                        processed.putInt("Max", max);
+
                                         processedBonuses.add(processed);
                                     }
                                 }

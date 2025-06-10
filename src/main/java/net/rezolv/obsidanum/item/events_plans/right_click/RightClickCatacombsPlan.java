@@ -88,6 +88,8 @@ public class RightClickCatacombsPlan {
                 bonus.itemStack().save(itemTag);
                 bonusTag.put("Item", itemTag);
                 bonusTag.putFloat("Chance", bonus.chance());
+                bonusTag.putInt("Min", bonus.min());  // Сохраняем min
+                bonusTag.putInt("Max", bonus.max());  // Сохраняем max
                 bonusOutputsList.add(bonusTag);
             }
             tag.put("BonusOutputs", bonusOutputsList);

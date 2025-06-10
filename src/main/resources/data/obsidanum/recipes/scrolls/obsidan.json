@@ -17,5 +17,23 @@
   "output": {
     "item": "obsidanum:obsidan",
     "count": 1
-  }
+  },
+  "bonus_outputs": [
+    {
+      "item": {
+        "item": "minecraft:coal",
+        "min": 3,
+        "max": 25
+      },
+      "chance": 0.8
+    },
+    {
+      "item": {
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 3
+      },
+      "chance": 0.9
+    }
+  ]
 }

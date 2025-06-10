@@ -37,6 +37,24 @@ public class ScrollText extends Item {
         // Main header
         tooltip.add(Component.translatable("tooltip.recipe_information").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 
+        // Icon indicating scroll type
+        MutableComponent typeScrollIcon = Component.literal("\uE005")
+                .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
+
+        // Result icons
+        MutableComponent manyResultsIcon = Component.literal("\uE006")
+                .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
+        MutableComponent singleResultIcon = Component.literal("\uE007")
+                .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
+
+
+// Combine icons inline
+        MutableComponent iconsLine = Component.literal("")
+                .append(typeScrollIcon)
+                .append(" ")
+                .append(tag.contains("BonusOutputs", Tag.TAG_LIST) ? manyResultsIcon : singleResultIcon);
+        tooltip.add(iconsLine);
+
         // Display results (RecipeResult)
         if (tag.contains("RecipeResult")) {
             ListTag resultList = tag.getList("RecipeResult", Tag.TAG_COMPOUND);
@@ -45,10 +63,7 @@ public class ScrollText extends Item {
                 ItemStack result = ItemStack.of(resultTag);
                 int count = result.getCount();
 
-                tooltip.add(
-                        result.getHoverName().copy().withStyle(ChatFormatting.WHITE)
-                );
-
+                tooltip.add(result.getHoverName().copy().withStyle(ChatFormatting.WHITE));
                 tooltip.add(
                         Component.translatable("tooltip.scrolls.quantity")
                                 .withStyle(ChatFormatting.GRAY)
@@ -57,46 +72,16 @@ public class ScrollText extends Item {
             }
         }
 
-        // Display bonus outputs if present
-        if (tag.contains("BonusOutputs")) {
-            tooltip.add(Component.translatable("tooltip.scrolls.bonus_outputs").withStyle(ChatFormatting.GOLD));
-
-            ListTag bonusList = tag.getList("BonusOutputs", Tag.TAG_COMPOUND);
-            for (int i = 0; i < bonusList.size(); i++) {
-                CompoundTag bonusTag = bonusList.getCompound(i);
-                if (bonusTag.contains("Item", Tag.TAG_COMPOUND)) {
-                    ItemStack bonusStack = ItemStack.of(bonusTag.getCompound("Item"));
-                    float chance = bonusTag.contains("Chance", Tag.TAG_FLOAT) ?
-                            bonusTag.getFloat("Chance") : 0.5f; // Default 50% chance
-                    int count = bonusStack.getCount();
-
-                    // Format chance as percentage
-                    String chanceText = String.format("%.0f%%", chance * 100);
-
-                    MutableComponent line = Component.literal(" - ").withStyle(ChatFormatting.GRAY)
-                            .append(Component.literal(count + "x ").withStyle(ChatFormatting.YELLOW))
-                            .append(bonusStack.getHoverName().copy().withStyle(ChatFormatting.WHITE))
-                            .append(Component.literal(" (" + chanceText + ")").withStyle(ChatFormatting.GREEN));
-
-                    tooltip.add(line);
-                }
-            }
-        }
-
         // Display ingredients (RecipeIngredients)
         if (tag.contains("Ingredients")) {
             tooltip.add(Component.translatable("tooltip.scrolls.ingredients").withStyle(ChatFormatting.GOLD));
-
             ListTag ingredientList = tag.getList("Ingredients", Tag.TAG_COMPOUND);
             for (int i = 0; i < ingredientList.size(); i++) {
                 CompoundTag ingredientTag = ingredientList.getCompound(i);
-
                 if (ingredientTag.contains("IngredientJson")) {
                     JsonObject ingredientJson = JsonParser.parseString(ingredientTag.getString("IngredientJson")).getAsJsonObject();
                     int count = ingredientJson.has("count") ? ingredientJson.get("count").getAsInt() : 1;
-
                     MutableComponent line = Component.literal(" - ").withStyle(ChatFormatting.GRAY);
-
                     if (ingredientJson.has("tag")) {
                         ResourceLocation tagId = new ResourceLocation(ingredientJson.get("tag").getAsString());
                         line.append(getTagComponent(tagId, count));
@@ -104,12 +89,10 @@ public class ScrollText extends Item {
                         ResourceLocation itemId = new ResourceLocation(ingredientJson.get("item").getAsString());
                         line.append(getItemComponent(itemId, count));
                     }
-
                     tooltip.add(line);
                 } else if (ingredientTag.contains("ItemStack")) {
                     ItemStack ingredient = ItemStack.of(ingredientTag.getCompound("ItemStack"));
                     int count = ingredient.getCount();
-
                     tooltip.add(
                             Component.literal(" - ").withStyle(ChatFormatting.GRAY)
                                     .append(Component.literal(count + "x ").withStyle(ChatFormatting.YELLOW))
@@ -126,17 +109,14 @@ public class ScrollText extends Item {
     private Component getTagComponent(ResourceLocation tagId, int count) {
         MutableComponent component = Component.literal(count + "x #" + tagId).withStyle(ChatFormatting.BLUE);
         TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagId);
-
         List<Item> items = ForgeRegistries.ITEMS.tags().getTag(tagKey).stream().toList();
         if (!items.isEmpty()) {
             Component hoverText = Component.literal("Предметы из тега:")
                     .append("\n" + items.stream()
                             .map(item -> new ItemStack(item).getHoverName().getString())
                             .collect(Collectors.joining("\n")));
-
             component.withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
         }
-
         return component;
     }
 

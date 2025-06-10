@@ -17,5 +17,23 @@
   "output": {
     "item": "obsidanum:flame_bolt",
     "count": 4
-  }
+  },
+  "bonus_outputs": [
+    {
+      "item": {
+        "item": "minecraft:coal",
+        "min": 2,
+        "max": 4
+      },
+      "chance": 0.8
+    },
+    {
+      "item": {
+        "item": "minecraft:emerald",
+        "min": 1,
+        "max": 3
+      },
+      "chance": 0.9
+    }
+  ]
 }
