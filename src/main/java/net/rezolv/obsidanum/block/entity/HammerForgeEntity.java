@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.rezolv.obsidanum.block.custom.HammerForge;
@@ -35,7 +36,20 @@ public class HammerForgeEntity extends BaseContainerBlockEntity implements World
         if (this.level == null) return false;
         return this.getBlockState().getValue(HammerForge.POWERED);
     }
-
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (!level.isClientSide) {
+            BlockState state = level.getBlockState(worldPosition);
+            if (state.getBlock() instanceof HammerForge forge) {
+                boolean shouldBePowered = forge.checkForPressedCorners(level, worldPosition);
+                if (shouldBePowered != state.getValue(HammerForge.POWERED)) {
+                    level.setBlock(worldPosition, state.setValue(HammerForge.POWERED, shouldBePowered), Block.UPDATE_ALL);
+                    level.scheduleTick(worldPosition, state.getBlock(), 1);
+                }
+            }
+        }
+    }
     @Override
     public boolean canPlaceItemThroughFace(int i, ItemStack itemStack, @Nullable Direction direction) {
         return false;
