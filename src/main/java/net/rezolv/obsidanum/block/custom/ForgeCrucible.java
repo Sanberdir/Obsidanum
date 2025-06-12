@@ -24,7 +24,7 @@ import net.minecraftforge.network.NetworkHooks;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.AddTagsForgeCrucible;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRecipe;
-import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.HammerForgeGuiMenu;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -61,12 +61,12 @@ public class ForgeCrucible extends BaseEntityBlock {
             NetworkHooks.openScreen(serverPlayer, new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
-                    return Component.translatable("container.obsidanum.hammer_forge");
+                    return Component.translatable("container.obsidanum.forge_crucible");
                 }
 
                 @Override
                 public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-                    return new HammerForgeGuiMenu(containerId, playerInventory,
+                    return new ForgeCrucibleGuiMenu(containerId, playerInventory,
                             new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(pos));
                 }
             }, pos);

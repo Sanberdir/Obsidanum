@@ -1,4 +1,4 @@
-package net.rezolv.obsidanum.gui.hammer_forge.recipes_render;
+package net.rezolv.obsidanum.gui.forge_crucible.recipes_render;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -11,15 +11,15 @@ import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.HashMap;
 
-public class HammerForgeGuiScreen extends AbstractContainerScreen<HammerForgeGuiMenu> {
-	private final static HashMap<String, Object> guistate = HammerForgeGuiMenu.guistate;
+public class ForgeCrucibleGuiScreen extends AbstractContainerScreen<ForgeCrucibleGuiMenu> {
+	private final static HashMap<String, Object> guistate = ForgeCrucibleGuiMenu.guistate;
 	private final Level world;
 	private final int x, y, z;
 	private final Player entity;
 
-	private static final ResourceLocation TEXTURE = new ResourceLocation("obsidanum:textures/gui/hammer_forge_menu.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation("obsidanum:textures/gui/forge_crucible_menu.png");
 
-	public HammerForgeGuiScreen(HammerForgeGuiMenu container, Inventory inventory, Component text) {
+	public ForgeCrucibleGuiScreen(ForgeCrucibleGuiMenu container, Inventory inventory, Component text) {
 		super(container, inventory, text);
 		this.world = container.world;
 		this.x = container.x;
@@ -39,10 +39,10 @@ public class HammerForgeGuiScreen extends AbstractContainerScreen<HammerForgeGui
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
-		HammerForgeGuiRenderer.renderBackground(guiGraphics, this.leftPos, this.topPos, this.imageWidth, this.imageHeight, TEXTURE);
-		HammerForgeGuiRenderer.renderScrollItem(guiGraphics, this.font, world, x, y, z, leftPos, topPos);
-		HammerForgeGuiRenderer.renderRecipeIngredients(guiGraphics, this.font, menu, world, new BlockPos(x, y, z), leftPos, topPos);
-		HammerForgeGuiRenderer.renderRecipeResult(guiGraphics, this.font, menu.getBlockEntity(), leftPos, topPos);
+		ForgeCrucibleGuiRenderer.renderBackground(guiGraphics, this.leftPos, this.topPos, this.imageWidth, this.imageHeight, TEXTURE);
+		ForgeCrucibleGuiRenderer.renderScrollItem(guiGraphics, this.font, world, x, y, z, leftPos, topPos);
+		ForgeCrucibleGuiRenderer.renderRecipeIngredients(guiGraphics, this.font, menu, world, new BlockPos(x, y, z), leftPos, topPos);
+		ForgeCrucibleGuiRenderer.renderRecipeResult(guiGraphics, this.font, menu.getBlockEntity(), leftPos, topPos);
 
 	}
 

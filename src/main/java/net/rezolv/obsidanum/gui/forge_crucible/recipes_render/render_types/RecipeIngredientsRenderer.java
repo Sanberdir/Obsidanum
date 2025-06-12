@@ -1,4 +1,4 @@
-package net.rezolv.obsidanum.gui.hammer_forge.recipes_render.render_types;
+package net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -19,12 +19,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
-import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.HammerForgeGuiMenu;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
 
 public class RecipeIngredientsRenderer {
     private static final ResourceLocation[] INGREDIENT_TEXTURES = {
-            new ResourceLocation("obsidanum:textures/gui/hammer_forge_ingredients_no.png"),
-            new ResourceLocation("obsidanum:textures/gui/hammer_forge_ingredients_yes.png")
+            new ResourceLocation("obsidanum:textures/gui/forge_crucible_ingredients_no.png"),
+            new ResourceLocation("obsidanum:textures/gui/forge_crucible_ingredients_yes.png")
     };
 
     private static final int SLOT_SIZE = 18;
@@ -32,7 +32,7 @@ public class RecipeIngredientsRenderer {
     private static final int START_X_OFFSET = 74;
     private static final int START_Y_OFFSET = 73;
 
-    public static void render(GuiGraphics guiGraphics, Font font, HammerForgeGuiMenu menu,
+    public static void render(GuiGraphics guiGraphics, Font font, ForgeCrucibleGuiMenu menu,
                               Level level, BlockPos pos, int leftPos, int topPos) {
         ForgeCrucibleEntity crucible = getCrucible(level, pos);
         if (crucible == null) return;
@@ -51,7 +51,7 @@ public class RecipeIngredientsRenderer {
         return be instanceof ForgeCrucibleEntity crucible ? crucible : null;
     }
 
-    private static void renderIngredients(GuiGraphics guiGraphics, Font font, HammerForgeGuiMenu menu,
+    private static void renderIngredients(GuiGraphics guiGraphics, Font font, ForgeCrucibleGuiMenu menu,
                                           ForgeCrucibleEntity crucible, ListTag ingredients,
                                           int leftPos, int topPos) {
         int startX = leftPos + START_X_OFFSET;
@@ -67,7 +67,7 @@ public class RecipeIngredientsRenderer {
         }
     }
 
-    private static void renderIngredientSlot(GuiGraphics guiGraphics, Font font, HammerForgeGuiMenu menu,
+    private static void renderIngredientSlot(GuiGraphics guiGraphics, Font font, ForgeCrucibleGuiMenu menu,
                                              ForgeCrucibleEntity crucible, CompoundTag entry, int slotIndex,
                                              int startX, int startY) throws Exception {
         JsonObject json = JsonParser.parseString(entry.getString("IngredientJson")).getAsJsonObject();

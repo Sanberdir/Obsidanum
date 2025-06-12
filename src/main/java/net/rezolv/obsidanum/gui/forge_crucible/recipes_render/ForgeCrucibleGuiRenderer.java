@@ -1,4 +1,4 @@
-package net.rezolv.obsidanum.gui.hammer_forge.recipes_render;
+package net.rezolv.obsidanum.gui.forge_crucible.recipes_render;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
@@ -6,11 +6,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.gui.GuiGraphics;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
-import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.render_types.RecipeIngredientsRenderer;
-import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.render_types.RecipeResultRenderer;
-import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.render_types.ScrollItemRenderer;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types.RecipeIngredientsRenderer;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types.RecipeResultRenderer;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types.ScrollItemRenderer;
 
-public class HammerForgeGuiRenderer {
+public class ForgeCrucibleGuiRenderer {
     public static void renderBackground(GuiGraphics guiGraphics, int leftPos, int topPos, int imageWidth, int imageHeight, ResourceLocation texture) {
         guiGraphics.blit(texture, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
     }
@@ -24,7 +24,7 @@ public class HammerForgeGuiRenderer {
     }
 
     public static void renderRecipeIngredients(GuiGraphics guiGraphics, Font font,
-                                               HammerForgeGuiMenu menu, Level level,
+                                               ForgeCrucibleGuiMenu menu, Level level,
                                                BlockPos pos, int leftPos, int topPos) {
         RecipeIngredientsRenderer.render(guiGraphics, font, menu, level, pos, leftPos, topPos);
     }

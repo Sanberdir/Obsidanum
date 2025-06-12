@@ -1,4 +1,4 @@
-package net.rezolv.obsidanum.gui.hammer_forge.recipes_render.render_types;
+package net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -15,8 +15,8 @@ import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 
 public class RecipeResultRenderer {
     private static final ResourceLocation[] RESULT_TEXTURES = {
-            new ResourceLocation("obsidanum:textures/gui/hammer_forge_res_no.png"),
-            new ResourceLocation("obsidanum:textures/gui/hammer_forge_res_yes.png")
+            new ResourceLocation("obsidanum:textures/gui/forge_crucible_res_no.png"),
+            new ResourceLocation("obsidanum:textures/gui/forge_crucible_res_yes.png")
     };
 
     public static void render(GuiGraphics guiGraphics, Font font, ForgeCrucibleEntity blockEntity, int leftPos, int topPos) {

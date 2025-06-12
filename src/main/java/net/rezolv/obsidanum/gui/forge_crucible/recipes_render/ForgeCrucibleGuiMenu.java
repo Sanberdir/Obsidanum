@@ -1,4 +1,4 @@
-package net.rezolv.obsidanum.gui.hammer_forge.recipes_render;
+package net.rezolv.obsidanum.gui.forge_crucible.recipes_render;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplier<Map<Integer, Slot>> {
-    protected HammerForgeGuiMenu(@Nullable MenuType<?> pMenuType, int pContainerId, Level world, Player entity) {
+public class ForgeCrucibleGuiMenu extends AbstractContainerMenu implements Supplier<Map<Integer, Slot>> {
+    protected ForgeCrucibleGuiMenu(@Nullable MenuType<?> pMenuType, int pContainerId, Level world, Player entity) {
         super(pMenuType, pContainerId);
         this.world = world;
         this.entity = entity;
@@ -60,8 +60,8 @@ public class HammerForgeGuiMenu extends AbstractContainerMenu implements Supplie
         BlockEntity be = this.world.getBlockEntity(new BlockPos(x, y, z));
         return be instanceof ForgeCrucibleEntity ? (ForgeCrucibleEntity) be : null;
     }
-    public HammerForgeGuiMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
-        super(ObsidanumMenus.HAMMER_FORGE_GUI.get(), id);
+    public ForgeCrucibleGuiMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
+        super(ObsidanumMenus.FORGE_CRUCIBLE_GUI.get(), id);
         this.entity = inv.player;
         this.world = inv.player.level();
 

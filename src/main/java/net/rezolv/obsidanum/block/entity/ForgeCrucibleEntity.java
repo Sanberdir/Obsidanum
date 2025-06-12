@@ -32,7 +32,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.HammerForgeGuiMenu;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -184,7 +184,7 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory) {
-        return new HammerForgeGuiMenu(id, inventory, new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(this.worldPosition));
+        return new ForgeCrucibleGuiMenu(id, inventory, new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(this.worldPosition));
     }
 
 

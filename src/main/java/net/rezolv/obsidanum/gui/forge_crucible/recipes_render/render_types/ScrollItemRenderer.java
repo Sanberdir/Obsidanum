@@ -1,4 +1,4 @@
-package net.rezolv.obsidanum.gui.hammer_forge.recipes_render.render_types;
+package net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

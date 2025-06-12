@@ -5,14 +5,16 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.rezolv.obsidanum.gui.hammer_forge.recipes_render.HammerForgeGuiScreen;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiScreen;
+import net.rezolv.obsidanum.gui.forge_crucible.repair_render.ForgeCrucibleRepairScreen;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ObsidanumScreens {
     @SubscribeEvent
     public static void clientLoad(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            MenuScreens.register(ObsidanumMenus.HAMMER_FORGE_GUI.get(), HammerForgeGuiScreen::new);
+            MenuScreens.register(ObsidanumMenus.FORGE_CRUCIBLE_GUI.get(), ForgeCrucibleGuiScreen::new);
+            MenuScreens.register(ObsidanumMenus.FORGE_CRUCIBLE_GUI_REPAIR.get(), ForgeCrucibleRepairScreen::new);
         });
     }
 }
