@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -13,29 +14,26 @@ import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.entity.ModModelLayers;
 import net.rezolv.obsidanum.entity.gart.Gart;
 import net.rezolv.obsidanum.entity.gart.GartModel;
+import software.bernie.geckolib.renderer.GeoBlockRenderer;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
-public class MutatedGartRenderer extends MobRenderer<MutatedGart, MutatedGartModel<MutatedGart>>
-
-    {
-    public MutatedGartRenderer(EntityRendererProvider.Context context) {
-        super(context, new MutatedGartModel<>(context.bakeLayer(ModModelLayers.MUTATED_GART)), 0.5f);
-        this.addLayer(new RenderLayer<MutatedGart, MutatedGartModel<MutatedGart>>(this) {
-
-            @Override
-            public void render(PoseStack poseStack, MultiBufferSource bufferSource, int light, MutatedGart entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-            }
-        });
+public class MutatedGartRenderer extends GeoEntityRenderer<MutatedGart> {
+    public MutatedGartRenderer(EntityRendererProvider.Context renderManager) {
+        super(renderManager, new MutatedGartModel());
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MutatedGart pEntity) {
+    public ResourceLocation getTextureLocation(MutatedGart animatable) {
         return new ResourceLocation(Obsidanum.MOD_ID, "textures/entity/mutated_gart/mutated_gart.png");
     }
 
     @Override
-    public void render(MutatedGart pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack,
-            MultiBufferSource pBuffer, int pPackedLight) {
-            pMatrixStack.scale(1.5f, 1.5f, 1.5f);
-        super.render(pEntity, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
+    public void render(MutatedGart entity, float entityYaw, float partialTick, PoseStack poseStack,
+                       MultiBufferSource bufferSource, int packedLight) {
+        if(entity.isBaby()) {
+            poseStack.scale(0.4f, 0.4f, 0.4f);
+        }
+        poseStack.scale(2.0f, 2.0f, 2.0f);
+        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
     }
 }

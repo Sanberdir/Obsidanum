@@ -31,7 +31,5 @@ public class ModModelLayers {
     public static final ModelLayerLocation MUTATED_GART = new ModelLayerLocation(
             new ResourceLocation("obsidanum", "mutated_gart"), "main");
 
-    public static void registerLayersMutatedGart(EntityRenderersEvent.RegisterLayerDefinitions event) {
-        event.registerLayerDefinition(MUTATED_GART, MutatedGartModel::createBodyLayer);
-    }
+
 }

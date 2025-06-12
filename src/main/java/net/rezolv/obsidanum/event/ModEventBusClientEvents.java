@@ -1,14 +1,20 @@
 package net.rezolv.obsidanum.event;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.BoatModel;
 import net.minecraft.client.model.ChestBoatModel;
 import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -20,9 +26,11 @@ import net.rezolv.obsidanum.block.entity.renderer.HammerForgeRenderer;
 import net.rezolv.obsidanum.block.entity.renderer.PranaCrystallRenderer;
 import net.rezolv.obsidanum.effect.effects.effect_overlay.ConfusionOverlay;
 import net.rezolv.obsidanum.effect.effects.effect_overlay.PreConfusionOverlay;
+import net.rezolv.obsidanum.entity.ModEntities;
 import net.rezolv.obsidanum.entity.ModModelLayers;
 import net.rezolv.obsidanum.entity.gart.GartModel;
 import net.rezolv.obsidanum.entity.meat_beetle.MeetBeetleModel;
+import net.rezolv.obsidanum.entity.mutated_gart.MutatedGart;
 import net.rezolv.obsidanum.entity.mutated_gart.MutatedGartModel;
 import net.rezolv.obsidanum.entity.obsidian_elemental.ObsidianElementalModel;
 import net.rezolv.obsidanum.item.ItemsObs;
@@ -49,8 +57,6 @@ public class ModEventBusClientEvents {
         event.registerLayerDefinition(ModModelLayers.OBSIDIAN_ELEMENTAL, ObsidianElementalModel::createBodyLayer);
         event.registerLayerDefinition(ModModelLayers.MEET_BEETLE, MeetBeetleModel::createBodyLayer);
         event.registerLayerDefinition(ModModelLayers.GART, GartModel::createBodyLayer);
-        event.registerLayerDefinition(ModModelLayers.MUTATED_GART, MutatedGartModel::createBodyLayer);
-
     }
 
     @SubscribeEvent

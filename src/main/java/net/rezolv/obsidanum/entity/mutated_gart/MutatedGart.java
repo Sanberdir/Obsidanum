@@ -5,136 +5,49 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.RangedAttackMob;
-import net.minecraft.world.entity.monster.Witch;
-import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
-import net.rezolv.obsidanum.entity.mutated_gart.ai.MutatedGartAttackGoal;
-import net.rezolv.obsidanum.entity.mutated_gart.ai.MutatedGartRangedAttackGoal;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.animation.AnimationState; // Исправленный импорт
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.RenderUtils;
 
-public class MutatedGart extends Monster implements RangedAttackMob {
-    // Синхронизация данных для атак
-    private static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> MAGIC_ATTACKING = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.BOOLEAN);
+public class MutatedGart extends Monster implements GeoEntity {
+    // Анимации
+    private static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("idle");
+    private static final RawAnimation WALK_ANIM = RawAnimation.begin().thenLoop("walk");
+    private static final RawAnimation PUNCH_ANIM = RawAnimation.begin().thenPlay("punch");
+    private static final EntityDataAccessor<Integer> ATTACK_TIMER = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.INT);
 
-    // Состояния анимаций
-    public final AnimationState attackAnimationState = new AnimationState();
-    public final AnimationState magicAttackAnimationState = new AnimationState();
-    public int attackAnimationTimeout = 0;
-    public final AnimationState idleAnimationState = new AnimationState();
-    private int idleAnimationTimeout = 0;
-
-    // Цель для дальнего боя
-    private MutatedGartRangedAttackGoal rangedAttackGoal;
-
-    // Полоса здоровья босса
+    private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
     private ServerBossEvent bossInfo;
 
-    // Конструктор
-    public MutatedGart(EntityType<? extends Monster> pEntityType, Level pLevel) {
-        super(pEntityType, pLevel);
+    public MutatedGart(EntityType<? extends Monster> entityType, Level level) {
+        super(entityType, level);
     }
 
-    // Реализация дальнего боя
-    @Override
-    public void performRangedAttack(LivingEntity target, float velocity) {
-        if (!this.level().isClientSide) {
-            Snowball snowball = new Snowball(this.level(), this);
-            double dX = target.getX() - this.getX();
-            double dY = target.getY(0.5) - snowball.getY();
-            double dZ = target.getZ() - this.getZ();
-            double distance = Math.sqrt(dX * dX + dZ * dZ) * 0.2;
-            snowball.shoot(dX, dY + distance, dZ, 1.6F, 12.0F);
-            this.level().addFreshEntity(snowball);
-            this.setMagicAttacking(true); // Запуск анимации магической атаки
-        }
-    }
-
-    // Проверка, движется ли моб
-    public boolean isMoving() {
-        return this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6;
-    }
-    public final AnimationState appearanceAnimationState = new AnimationState();
-
-    // Обновление состояния моба
-    @Override
-    public void tick() {
-        super.tick();
-        if (this.level().isClientSide && this.tickCount == 1) {
-            // Запуск анимации при первом тике на клиенте
-            this.appearanceAnimationState.start(this.tickCount);
-        }
-        if (this.level().isClientSide()) {
-            setupAnimationStates(); // Настройка состояний анимации
-        }
-    }
-
-    // Определение синхронизированных данных
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(ATTACKING, false);
-        this.entityData.define(MAGIC_ATTACKING, false);
+        this.entityData.define(ATTACK_TIMER, 0);
     }
-
-    // Установка состояния магической атаки
-    public void setMagicAttacking(boolean attacking) {
-        this.entityData.set(MAGIC_ATTACKING, attacking);
-    }
-
-    // Проверка, выполняется ли магическая атака
-    public boolean isMagicAttacking() {
-        return this.entityData.get(MAGIC_ATTACKING);
-    }
-
-    // Настройка состояний анимации
-    private void setupAnimationStates() {
-        // Анимация бездействия
-        if (this.idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = this.random.nextInt(40) + 80;
-            this.idleAnimationState.start(this.tickCount);
-        } else {
-            this.idleAnimationTimeout--;
-        }
-
-        // Анимация ближней атаки
-        if (this.isAttacking() && attackAnimationTimeout <= 0) {
-            attackAnimationTimeout = 13; // Длительность анимации
-            attackAnimationState.start(this.tickCount);
-        } else if (!this.isAttacking()) {
-            attackAnimationState.stop();
-        }
-
-        // Анимация дальней атаки
-        if (this.isMagicAttacking()) {
-            if (attackAnimationTimeout <= 0) {
-                attackAnimationTimeout = 40; // Длительность анимации
-                magicAttackAnimationState.start(this.tickCount);
-            }
-        } else {
-            magicAttackAnimationState.stop();
-        }
-
-        // Уменьшение таймера анимации
-        if (attackAnimationTimeout > 0) {
-            attackAnimationTimeout--;
-        }
-    }
-
     // Обновление AI
     @Override
     public void aiStep() {
@@ -176,41 +89,41 @@ public class MutatedGart extends Monster implements RangedAttackMob {
         this.bossInfo.setProgress(this.getHealth() / this.getMaxHealth());
     }
 
-    // Установка состояния атаки
-    public void setAttacking(boolean attacking) {
-        this.entityData.set(ATTACKING, attacking);
-    }
+    @Override
+    public boolean doHurtTarget(Entity target) {
+        // Проверяем, не идет ли уже анимация удара
+        if (this.entityData.get(ATTACK_TIMER) > 0) {
+            return false;
+        }
 
-    // Проверка, выполняется ли атака
-    public boolean isAttacking() {
-        return this.entityData.get(ATTACKING);
-    }
+        if (!this.level().isClientSide) {
+            this.entityData.set(ATTACK_TIMER, 20);
+            this.setLastHurtByMob((LivingEntity) target);
+        }
 
-    // Регистрация целей AI
+        this.swing(InteractionHand.MAIN_HAND);
+        return true;
+    }
+    // Регистрация целей AI (только пассивное поведение)
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(1, new MutatedGartAttackGoal(this, 1.0D, true));
+        // Добавляем цель для ближнего боя
+        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true)); // Приоритет 2 - высокий
+
+        // Существующие цели
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, IronGolem.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Warden.class, true));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Villager.class, true));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, WitherBoss.class, true));
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 15.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1.2D));
-        this.goalSelector.addGoal(1, new MoveTowardsRestrictionGoal(this, 1.0));
-
-        // Инициализация цели дальнего боя
-        this.rangedAttackGoal = new MutatedGartRangedAttackGoal(this, 1.0, 10.0F);
-        this.goalSelector.addGoal(3, this.rangedAttackGoal);
-
-        // Цели для атаки
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Villager.class, 10, true, false, target -> this.distanceTo(target) <= 18.0));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, 10, true, false, target -> this.distanceTo(target) <= 18.0));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, SnowGolem.class, 10, true, false, target -> this.distanceTo(target) <= 18.0));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, target -> this.distanceTo(target) <= 18.0));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Witch.class, 10, true, false, target -> this.distanceTo(target) <= 18.0));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, ZombifiedPiglin.class, 10, true, false, target -> this.distanceTo(target) <= 18.0));
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        this.goalSelector.addGoal(6, new MoveTowardsRestrictionGoal(this, 1.0));
     }
 
-    // Создание атрибутов моба
+    // Создание атрибутов моба (сохранены оригинальные характеристики)
     public static AttributeSupplier.Builder createAttributes() {
         return createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 200)
@@ -218,8 +131,8 @@ public class MutatedGart extends Monster implements RangedAttackMob {
                 .add(Attributes.ARMOR_TOUGHNESS, 0.8D)
                 .add(Attributes.FOLLOW_RANGE, 20)
                 .add(Attributes.ATTACK_DAMAGE, 12)
-                .add(Attributes.ATTACK_KNOCKBACK, 0)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 0.3)
+                .add(Attributes.ATTACK_KNOCKBACK, 3)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.1)
                 .add(Attributes.ARMOR, 0.0);
     }
 
@@ -230,15 +143,60 @@ public class MutatedGart extends Monster implements RangedAttackMob {
         this.level().addFreshEntity(new ExperienceOrb(this.level(), this.getX(), this.getY(), this.getZ(), 500));
     }
 
-    // Обновление анимации ходьбы
     @Override
-    protected void updateWalkAnimation(float pPartialTick) {
-        float f;
-        if (this.getPose() == Pose.STANDING) {
-            f = Math.min(pPartialTick * 6F, 1f);
-        } else {
-            f = 0f;
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController<>(this, "controller", 5, this::animate));
+    }
+
+    // Исправленный метод без дженерика
+    private PlayState animate(AnimationState state) {
+        int timer = this.entityData.get(ATTACK_TIMER);
+        if (timer > 0) {
+            state.getController().setAnimation(PUNCH_ANIM);
+            return PlayState.CONTINUE;
         }
-        this.walkAnimation.update(f, 0.2f);
+
+        // Стандартные анимации
+        if (state.isMoving()) {
+            state.getController().setAnimation(WALK_ANIM);
+        } else {
+            state.getController().setAnimation(IDLE_ANIM);
+        }
+        return PlayState.CONTINUE;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (!this.level().isClientSide) {
+            int timer = this.entityData.get(ATTACK_TIMER);
+
+            if (timer > 0) {
+                this.entityData.set(ATTACK_TIMER, timer - 1);
+
+                // Когда таймер дойдёт до 0 — наносим урон
+                if (timer == 1) {
+                    Entity target = this.getLastHurtByMob();
+                    if (target != null && this.distanceTo(target) < 4.0F && target.isAlive()) {
+                        // Урон и звук
+                        boolean result = super.doHurtTarget(target);
+                        if (result) {
+                            this.playSound(SoundEvents.PLAYER_ATTACK_STRONG, 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
+    }
+
+    @Override
+    public double getTick(Object o) {
+        return RenderUtils.getCurrentTick();
     }
 }

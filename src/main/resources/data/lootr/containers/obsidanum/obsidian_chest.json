@@ -1,0 +1,8 @@
+{
+  "type": "lootr:single",
+  "match": {
+    "block": "obsidanum:obsidian_chest"
+  },
+  "replacement": "lootr:lootr_chest",
+  "copy_state": true
+}
