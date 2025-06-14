@@ -2,20 +2,24 @@
   "type": "obsidanum:forge_scroll_catacombs",
   "ingredients": [
     {
-      "item": "obsidanum:obsidian_tear",
+      "item": "minecraft:golden_hoe",
       "count": 1
     },
     {
-      "item": "minecraft:blaze_powder",
+      "item": "minecraft:obsidian",
+      "count": 10
+    },
+    {
+      "item": "obsidanum:obsidan",
       "count": 2
     },
     {
-      "item": "minecraft:iron_ingot",
-      "count": 12
+      "item": "obsidanum:obsidan_essence",
+      "count": 8
     }
   ],
   "output": {
-    "item": "obsidanum:obsidan",
+    "item": "obsidanum:obsidan_hoe",
     "count": 1
   },
   "bonus_outputs": [
@@ -23,7 +27,7 @@
       "item": {
         "item": "minecraft:obsidan_essence",
         "min": 1,
-        "max": 3
+        "max": 1
       },
       "chance": 0.1
     }

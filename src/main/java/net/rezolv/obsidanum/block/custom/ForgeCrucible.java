@@ -22,9 +22,11 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
+import net.rezolv.obsidanum.block.enum_blocks.ScrollType;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.AddTagsForgeCrucible;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRecipe;
 import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
+import net.rezolv.obsidanum.gui.forge_crucible.repair_render.ForgeCrucibleRepairMenu;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -51,27 +53,44 @@ public class ForgeCrucible extends BaseEntityBlock {
     }
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos,
-                                 Player player, InteractionHand hand, BlockHitResult hit) {
+                                 Player player, InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof ForgeCrucibleEntity crucible)) {
             return InteractionResult.PASS;
         }
 
-        if (player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openScreen(serverPlayer, new MenuProvider() {
+        if (player instanceof ServerPlayer server) {
+            // узнаём, какой scrollType пришёл из соседнего блока
+            String typeName = crucible.getReceivedData().getString("TypeScroll");
+            ScrollType type = ScrollType.valueOf(typeName.isEmpty() ? "NONE" : typeName);
+
+            MenuProvider provider = new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
-                    return Component.translatable("container.obsidanum.forge_crucible");
+                    return Component.translatable(
+                            type == ScrollType.NONE
+                                    ? "container.obsidanum.forge_crucible_repair"
+                                    : "container.obsidanum.forge_crucible"
+                    );
                 }
 
                 @Override
-                public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-                    return new ForgeCrucibleGuiMenu(containerId, playerInventory,
-                            new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(pos));
+                public AbstractContainerMenu createMenu(int id, Inventory inv, Player ply) {
+                    FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer()).writeBlockPos(pos);
+
+                    if ((type == ScrollType.NETHER)||(type == ScrollType.CATACOMBS)||(type == ScrollType.ORDER)) {
+                        return new ForgeCrucibleGuiMenu(id, inv, buf);
+                    }
+                    else {
+                        return new ForgeCrucibleRepairMenu(id, inv, buf);
+                    }
                 }
-            }, pos);
+            };
+
+            NetworkHooks.openScreen(server, provider, pos);
         }
-        return InteractionResult.PASS;
+
+        return InteractionResult.SUCCESS;
     }
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {

@@ -8,6 +8,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.GuiGraphics;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types.RecipeIngredientsRenderer;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types.RecipeResultRenderer;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types.ScrollItemRenderer;
 
 import java.util.HashMap;
 
@@ -39,11 +42,11 @@ public class ForgeCrucibleGuiScreen extends AbstractContainerScreen<ForgeCrucibl
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
-		ForgeCrucibleGuiRenderer.renderBackground(guiGraphics, this.leftPos, this.topPos, this.imageWidth, this.imageHeight, TEXTURE);
-		ForgeCrucibleGuiRenderer.renderScrollItem(guiGraphics, this.font, world, x, y, z, leftPos, topPos);
-		ForgeCrucibleGuiRenderer.renderRecipeIngredients(guiGraphics, this.font, menu, world, new BlockPos(x, y, z), leftPos, topPos);
-		ForgeCrucibleGuiRenderer.renderRecipeResult(guiGraphics, this.font, menu.getBlockEntity(), leftPos, topPos);
+		guiGraphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
 
+		ScrollItemRenderer.render(guiGraphics, this.font, world, x, y, z, leftPos, topPos);
+		RecipeIngredientsRenderer.render(guiGraphics, this.font, menu, world, new BlockPos(x, y, z), leftPos, topPos);
+		RecipeResultRenderer.render(guiGraphics, this.font, menu.getBlockEntity(), leftPos, topPos);
 	}
 
 	@Override

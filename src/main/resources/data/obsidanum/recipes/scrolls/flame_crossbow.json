@@ -21,5 +21,15 @@
   "output": {
     "item": "obsidanum:flame_crossbow",
     "count": 1
-  }
+  },
+  "bonus_outputs": [
+    {
+      "item": {
+        "item": "minecraft:obsidan_essence",
+        "min": 1,
+        "max": 10
+      },
+      "chance": 0.1
+    }
+  ]
 }

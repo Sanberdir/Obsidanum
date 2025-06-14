@@ -16,7 +16,7 @@ public class ForgeCrucibleRepairScreen extends AbstractContainerScreen<ForgeCruc
     private final int x, y, z;
     private final Player entity;
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation("obsidanum:textures/gui/forge_crucible_repair.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation("obsidanum:textures/gui/forge_crucible_menu_repair.png");
 
     public ForgeCrucibleRepairScreen(ForgeCrucibleRepairMenu container, Inventory inventory, Component text) {
         super(container, inventory, text);
@@ -38,8 +38,7 @@ public class ForgeCrucibleRepairScreen extends AbstractContainerScreen<ForgeCruc
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
-        ForgeCrucibleRepairRenderer.renderBackground(guiGraphics, this.leftPos, this.topPos, this.imageWidth, this.imageHeight, TEXTURE);
-
+        guiGraphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
     }
 
     @Override

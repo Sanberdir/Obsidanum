@@ -40,14 +40,7 @@ public class HammerForgeEntity extends BaseContainerBlockEntity implements World
     public void onLoad() {
         super.onLoad();
         if (!level.isClientSide) {
-            BlockState state = level.getBlockState(worldPosition);
-            if (state.getBlock() instanceof HammerForge forge) {
-                boolean shouldBePowered = forge.checkForPressedCorners(level, worldPosition);
-                if (shouldBePowered != state.getValue(HammerForge.POWERED)) {
-                    level.setBlock(worldPosition, state.setValue(HammerForge.POWERED, shouldBePowered), Block.UPDATE_ALL);
-                    level.scheduleTick(worldPosition, state.getBlock(), 1);
-                }
-            }
+            level.scheduleTick(worldPosition, this.getBlockState().getBlock(), 1); // Принудительный тик после загрузки
         }
     }
     @Override

@@ -10,10 +10,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -73,14 +75,15 @@ public class RecipeIngredientsRenderer {
         JsonObject json = JsonParser.parseString(entry.getString("IngredientJson")).getAsJsonObject();
         int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
 
-        ItemStack displayStack = getDisplayStackForIngredient(json);
+        ItemStack displayStack = getDisplayStackForIngredient(json, slotIndex);
         if (displayStack.isEmpty()) return;
+        Ingredient ingredient = getIngredientFromJson(json);
 
         int x = startX + slotIndex * SLOT_SIZE;
         int y = startY;
         ItemStack slotStack = menu.internal.getStackInSlot(slotIndex);
-        boolean hasEnough = slotStack.getCount() >= requiredCount;
-        boolean satisfied = crucible.isIngredientSatisfied(slotIndex);
+        boolean hasEnough = ingredient.test(slotStack) && slotStack.getCount() >= requiredCount;
+        boolean satisfied = hasEnough;
 
         renderSlotBackground(guiGraphics, x, y, slotStack, hasEnough);
         renderIngredientItem(guiGraphics, font, displayStack, slotStack, satisfied, x, y, requiredCount);
@@ -110,10 +113,9 @@ public class RecipeIngredientsRenderer {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 100);
 
-        guiGraphics.setColor(1.0f, 1.0f, 1.0f, satisfied ? 1.0f : 0.7f);
-        guiGraphics.renderItem(displayStack, x, y);
-
-        if (!satisfied && slotStack.isEmpty()) {
+        if (!satisfied) {
+            guiGraphics.setColor(1.0f, 1.0f, 1.0f, 0.7f);
+            guiGraphics.renderItem(displayStack, x, y);
             renderCountText(guiGraphics, font, x, y, requiredCount);
         }
 
@@ -147,7 +149,10 @@ public class RecipeIngredientsRenderer {
         guiGraphics.pose().popPose();
     }
 
-    public static ItemStack getDisplayStackForIngredient(JsonObject json) {
+    /**
+     * Возвращает отображаемый стак для ингредиента. Если указан тег, цикляет предметы из тега.
+     */
+    public static ItemStack getDisplayStackForIngredient(JsonObject json, int slotIndex) {
         if (json.has("item")) {
             ResourceLocation itemId = new ResourceLocation(json.get("item").getAsString());
             Item item = ForgeRegistries.ITEMS.getValue(itemId);
@@ -157,15 +162,16 @@ public class RecipeIngredientsRenderer {
         if (json.has("tag")) {
             ResourceLocation tagId = new ResourceLocation(json.get("tag").getAsString());
             TagKey<Item> tag = TagKey.create(Registries.ITEM, tagId);
-
-            return ForgeRegistries.ITEMS.tags()
-                    .getTag(tag)
-                    .stream()
-                    .findFirst()
-                    .map(ItemStack::new)
-                    .orElse(ItemStack.EMPTY);
+            var items = ForgeRegistries.ITEMS.tags().getTag(tag).stream().toList();
+            if (items.isEmpty()) return ItemStack.EMPTY;
+            // Циклим предметы каждые 500 мс
+            int idx = (int)((System.currentTimeMillis() / 500) % items.size());
+            return new ItemStack(items.get(idx));
         }
 
         return ItemStack.EMPTY;
+    }
+    public static Ingredient getIngredientFromJson(JsonObject json) {
+        return Ingredient.fromJson(json);
     }
 }

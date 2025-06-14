@@ -13,13 +13,12 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.items.SlotItemHandler;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 import net.rezolv.obsidanum.gui.ObsidanumMenus;
 import org.jetbrains.annotations.Nullable;
@@ -70,35 +69,41 @@ public class ForgeCrucibleRepairMenu extends AbstractContainerMenu implements Su
             this.internal = blockEntity.itemHandler;
             this.bound = true;
         } else {
-            this.internal = new ItemStackHandler(6); // Только 6 слотов для ингредиентов
+            this.internal = new ItemStackHandler(12); // как минимум 4+ слота
         }
 
-        // Добавляем инвентарь игрока
+        // Индексы слотов: 0 — input, 1-2 — материалы, 3 — output
+        // Слот 0: предмет для починки
+        this.addSlot(new SlotItemHandler(internal, 0, 119, 19));
+
+        // Слоты 1 и 2: материалы
+        this.addSlot(new SlotItemHandler(internal, 1, 69, 78));
+        this.addSlot(new SlotItemHandler(internal, 2, 169, 78));
+
+        // Слот 3: результат (запрет на ручную загрузку)
+        this.addSlot(new SlotItemHandler(internal, 3, 119, 55) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+
+            @Override
+            public boolean mayPickup(Player player) {
+                return true;
+            }
+        });
+
+        // Слоты инвентаря игрока (индексы с 4 по 39)
         for (int si = 0; si < 3; ++si) {
             for (int sj = 0; sj < 9; ++sj) {
                 this.addSlot(new Slot(inv, sj + (si + 1) * 9, 47 + sj * 18, 131 + si * 18));
             }
         }
+
+        // Хотбар (индексы 0–8, после предыдущих это 40–48)
         for (int si = 0; si < 9; ++si) {
             this.addSlot(new Slot(inv, si, 47 + si * 18, 189));
         }
-    }
-
-    private boolean matchesIngredient(ItemStack stack, JsonObject ingredientJson) {
-        if (stack.isEmpty()) return false;
-
-        if (ingredientJson.has("item")) {
-            ResourceLocation itemId = new ResourceLocation(ingredientJson.get("item").getAsString());
-            return ForgeRegistries.ITEMS.getValue(itemId) == stack.getItem();
-        }
-
-        if (ingredientJson.has("tag")) {
-            ResourceLocation tagId = new ResourceLocation(ingredientJson.get("tag").getAsString());
-            TagKey<Item> tag = TagKey.create(Registries.ITEM, tagId);
-            return stack.is(tag);
-        }
-
-        return false;
     }
 
     @Override
@@ -123,7 +128,18 @@ public class ForgeCrucibleRepairMenu extends AbstractContainerMenu implements Su
             ItemStack originalStack = slot.getItem();
             copiedStack = originalStack.copy();
 
-
+            // Кастомные слоты печи (0-3)
+            if (index < 4) {
+                // Переместить в инвентарь игрока (4–39)
+                if (!this.moveItemStackTo(originalStack, 4, 40, true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else {
+                // Переместить в кастомные слоты (0–3)
+                if (!this.moveItemStackTo(originalStack, 0, 3, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
 
             if (originalStack.isEmpty()) {
                 slot.set(ItemStack.EMPTY);

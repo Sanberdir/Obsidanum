@@ -1,0 +1,27 @@
+{
+  "type": "obsidanum:forge_scroll_order",
+  "ingredients": [
+    {
+      "tag": "obsidanum:scrolls",
+      "count": 1
+    },
+    {
+      "item": "minecraft:blaze_powder",
+      "count": 1
+    }
+  ],
+  "output": {
+    "item": "obsidanum:obsidan_essence",
+    "count": 5
+  },
+  "bonus_outputs": [
+    {
+      "item": {
+        "item": "obsidanum:obsidan_essence",
+        "min": 1,
+        "max": 20
+      },
+      "chance": 1
+    }
+  ]
+}
