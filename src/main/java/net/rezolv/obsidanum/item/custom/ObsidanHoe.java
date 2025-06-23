@@ -4,12 +4,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.ItemStack;
@@ -19,14 +21,18 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.rezolv.obsidanum.block.BlocksObs;
+import net.rezolv.obsidanum.item.upgrade.IUpgradeableItem;
+import net.rezolv.obsidanum.item.upgrade.ObsidanumToolUpgrades;
+import net.rezolv.obsidanum.item.upgrade.UpgradeLibrary;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ObsidanHoe extends HoeItem {
+public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
     @Override
     public boolean isEnchantable(ItemStack pStack) {
         return false;
@@ -36,6 +42,29 @@ public class ObsidanHoe extends HoeItem {
     private static final String TAG_ACTIVATED = "Activated";
     private static final String TAG_LAST_ACTIVATION_TIME = "LastActivationTime";
     private static final String TAG_COOLDOWN_END = "CooldownEndTime";
+
+    private static final String TAG_UPGRADE = "Upgrade";
+    private static final String TAG_UPGRADE_LEVEL = "UpgradeLevel";
+    public void setUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade, int level) {
+        stack.getOrCreateTag().putString(TAG_UPGRADE, upgrade.getName());
+        stack.getTag().putInt(TAG_UPGRADE_LEVEL, level);
+    }
+    public int getUpgradeLevel(ItemStack stack) {
+        ObsidanumToolUpgrades upg = getUpgrade(stack);
+        if (upg == null) return 0;
+        return stack.getTag().getInt(TAG_UPGRADE_LEVEL);
+    }
+    public ObsidanumToolUpgrades getUpgrade(ItemStack stack) {
+        if (!stack.hasTag() || !stack.getTag().contains(TAG_UPGRADE)) {
+            return null;
+        }
+        String name = stack.getTag().getString(TAG_UPGRADE);
+        for (ObsidanumToolUpgrades upg : ObsidanumToolUpgrades.values()) {
+            if (upg.getName().equals(name)) return upg;
+        }
+        return null;
+    }
+
 
     private static final BlockState[] TARGET_BLOCKS = {
             Blocks.GRASS.defaultBlockState(),
@@ -87,30 +116,86 @@ public class ObsidanHoe extends HoeItem {
 
     @Override
     public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, net.minecraft.world.entity.LivingEntity entity) {
-        if (!level.isClientSide && isActivated(stack)) {
-            for (BlockState targetBlock : TARGET_BLOCKS) {
-                if (state.is(targetBlock.getBlock())) {
-                    BlockPos playerPos = entity.blockPosition();
-                    for (BlockPos blockPos : BlockPos.betweenClosed(playerPos.offset(-20, -20, -20), playerPos.offset(20, 20, 20))) {
-                        BlockState targetState = level.getBlockState(blockPos);
-                        for (BlockState targetBlockInner : TARGET_BLOCKS) {
-                            if (targetState.is(targetBlockInner.getBlock())) {
-                                level.destroyBlock(blockPos, true);
-                                break;
+        // Получаем параметры улучшения (работает всегда)
+        ObsidanumToolUpgrades upg = getUpgrade(stack);
+        int levelRH = getUpgradeLevel(stack);
+        int multiplier = 1;
+        if (upg == ObsidanumToolUpgrades.RICH_HARVEST && levelRH > 0) {
+            multiplier = UpgradeLibrary.getRichHarvestMultiplier(levelRH);
+        }
+
+        if (!level.isClientSide) {
+            ServerLevel serverWorld = (ServerLevel) level;
+
+            // Обработка умножения дропа для ВСЕХ блоков (если есть улучшение)
+            if (multiplier > 1) {
+                BlockEntity be = level.getBlockEntity(pos);
+                List<ItemStack> originalDrops = Block.getDrops(state, serverWorld, pos, be, entity, stack);
+                level.destroyBlock(pos, false);
+
+                for (ItemStack drop : originalDrops) {
+                    for (int i = 0; i < multiplier; i++) {
+                        ItemEntity itemEntity = new ItemEntity(level,
+                                pos.getX() + 0.5,
+                                pos.getY() + 0.5,
+                                pos.getZ() + 0.5,
+                                drop.copy());
+                        level.addFreshEntity(itemEntity);
+                    }
+                }
+            }
+
+            // Обработка активированного режима для TARGET_BLOCKS (работает независимо от улучшений)
+            if (isActivated(stack)) {
+                for (BlockState targetBlock : TARGET_BLOCKS) {
+                    if (state.is(targetBlock.getBlock())) {
+                        BlockPos playerPos = entity.blockPosition();
+                        for (BlockPos blockPos : BlockPos.betweenClosed(playerPos.offset(-20, -20, -20),
+                                playerPos.offset(20, 20, 20))) {
+                            BlockState targetState = level.getBlockState(blockPos);
+                            for (BlockState targetBlockInner : TARGET_BLOCKS) {
+                                if (targetState.is(targetBlockInner.getBlock())) {
+                                    // Применяем умножение дропа и для активированных блоков
+                                    if (multiplier > 1) {
+                                        BlockEntity be = level.getBlockEntity(blockPos);
+                                        List<ItemStack> drops = Block.getDrops(targetState, serverWorld, blockPos, be, entity, stack);
+                                        level.destroyBlock(blockPos, false);
+                                        for (ItemStack drop : drops) {
+                                            for (int i = 0; i < multiplier; i++) {
+                                                ItemEntity e = new ItemEntity(level,
+                                                        blockPos.getX() + 0.5,
+                                                        blockPos.getY() + 0.5,
+                                                        blockPos.getZ() + 0.5,
+                                                        drop.copy());
+                                                level.addFreshEntity(e);
+                                            }
+                                        }
+                                    } else {
+                                        level.destroyBlock(blockPos, true);
+                                    }
+                                    break;
+                                }
                             }
                         }
+                        deactivate(stack, (Player) entity, level.getGameTime());
+                        return false; // Прерываем дальнейшую обработку
                     }
-                    deactivate(stack, (Player) entity, level.getGameTime());
-                    break;
                 }
             }
         }
+
         return super.mineBlock(stack, level, state, pos, entity);
     }
 
     @Override
     public void appendHoverText(ItemStack itemstack, Level world, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, world, list, flag);
+        ObsidanumToolUpgrades upg = getUpgrade(itemstack);
+        int level = getUpgradeLevel(itemstack);
+        if (upg != null && level > 0) {
+            list.add(Component.literal("Улучшение: " + upg.getName() + " " + level)
+                    .withStyle(ChatFormatting.GOLD));
+        }
         if (Screen.hasShiftDown()) {
             list.add(Component.translatable("obsidanum.press_shift2").withStyle(ChatFormatting.DARK_GRAY));
             list.add(Component.translatable("item.obsidan.description.hoe").withStyle(ChatFormatting.DARK_GRAY));

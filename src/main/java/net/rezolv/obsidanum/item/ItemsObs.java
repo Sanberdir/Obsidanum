@@ -47,7 +47,7 @@ public class ItemsObs {
             () -> new Item(new Item.Properties().stacksTo(1)));
 
 
-    public static final RegistryObject<Item> UPGRADE_PLAN = ITEMS.register("upgrade_plan",
+    public static final RegistryObject<Item> NETHER_UPGRADE_PLAN = ITEMS.register("nether_upgrade_plan",
             () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
 
 

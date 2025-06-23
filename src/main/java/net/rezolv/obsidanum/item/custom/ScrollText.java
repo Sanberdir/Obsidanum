@@ -41,21 +41,26 @@ public class ScrollText extends Item {
         MutableComponent typeScrollIcon = Component.literal("\uE005")
                 .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
 
-        // Result icons
-        MutableComponent manyResultsIcon = Component.literal("\uE006")
-                .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
-        MutableComponent singleResultIcon = Component.literal("\uE007")
+        // Result icon depending on quantity
+        MutableComponent resultIcon = Component.literal("\uE007") // Default: single result
                 .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
 
+        if (tag.contains("RecipeResult")) {
+            ListTag resultList = tag.getList("RecipeResult", Tag.TAG_COMPOUND);
+            int totalCount = 0;
+            for (int i = 0; i < resultList.size(); i++) {
+                CompoundTag resultTag = resultList.getCompound(i);
+                ItemStack result = ItemStack.of(resultTag);
+                totalCount += result.getCount();
+            }
+            if (totalCount > 1) {
+                resultIcon = Component.literal("\uE006")
+                        .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
+            }
+        }
 
-// Combine icons inline
-        MutableComponent iconsLine = Component.literal("")
-                .append(typeScrollIcon)
-                .append(" ")
-                .append(tag.contains("BonusOutputs", Tag.TAG_LIST) ? manyResultsIcon : singleResultIcon);
-        tooltip.add(iconsLine);
-
-        // Display results (RecipeResult)
+        // Combine icons inline
+// Display results (RecipeResult)
         if (tag.contains("RecipeResult")) {
             ListTag resultList = tag.getList("RecipeResult", Tag.TAG_COMPOUND);
             for (int i = 0; i < resultList.size(); i++) {
@@ -64,13 +69,15 @@ public class ScrollText extends Item {
                 int count = result.getCount();
 
                 tooltip.add(result.getHoverName().copy().withStyle(ChatFormatting.WHITE));
-                tooltip.add(
-                        Component.translatable("tooltip.scrolls.quantity")
-                                .withStyle(ChatFormatting.GRAY)
-                                .append(Component.literal(": " + count).withStyle(ChatFormatting.YELLOW))
-                );
             }
         }
+
+// Combine icons inline (after results)
+        MutableComponent iconsLine = Component.literal("")
+                .append(typeScrollIcon)
+                .append(" ")
+                .append(resultIcon);
+        tooltip.add(iconsLine);
 
         // Display ingredients (RecipeIngredients)
         if (tag.contains("Ingredients")) {
@@ -106,8 +113,11 @@ public class ScrollText extends Item {
         tooltip.add(Component.translatable("tooltip.recipe_end").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
     }
 
+
     private Component getTagComponent(ResourceLocation tagId, int count) {
-        MutableComponent component = Component.literal(count + "x #" + tagId).withStyle(ChatFormatting.BLUE);
+        MutableComponent component = Component.literal(count + "x ")
+                .withStyle(ChatFormatting.YELLOW)
+                .append(Component.translatable("tag." + tagId.getNamespace() + ":" + tagId.getPath()).withStyle(ChatFormatting.BLUE));
         TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagId);
         List<Item> items = ForgeRegistries.ITEMS.tags().getTag(tagKey).stream().toList();
         if (!items.isEmpty()) {

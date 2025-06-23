@@ -7,7 +7,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -47,8 +46,8 @@ public class RightForgeScroll extends BaseEntityBlock {
             newType = ScrollType.ORDER;
         } else if (itemInHand.is(ItemsObs.CATACOMBS_PLAN.get())) {
             newType = ScrollType.CATACOMBS;
-        } else if (itemInHand.is(ItemsObs.UPGRADE_PLAN.get())) {
-            newType = ScrollType.UPDATE;
+        } else if (itemInHand.is(ItemsObs.NETHER_UPGRADE_PLAN.get())) {
+            newType = ScrollType.UPDATE_NETHER;
         }
 
         // Добавить свиток и NBT
@@ -82,7 +81,7 @@ public class RightForgeScroll extends BaseEntityBlock {
                         case NETHER -> scrollItem = ItemsObs.NETHER_PLAN.get().getDefaultInstance();
                         case ORDER -> scrollItem = ItemsObs.ORDER_PLAN.get().getDefaultInstance();
                         case CATACOMBS -> scrollItem = ItemsObs.CATACOMBS_PLAN.get().getDefaultInstance();
-                        case UPDATE -> scrollItem = ItemsObs.UPGRADE_PLAN.get().getDefaultInstance();
+                        case UPDATE_NETHER -> scrollItem = ItemsObs.NETHER_UPGRADE_PLAN.get().getDefaultInstance();
                     }
 
                     if (scrollItem != null) {

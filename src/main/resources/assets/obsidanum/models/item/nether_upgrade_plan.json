@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "obsidanum:item/catacombs_plan"
+    "layer0": "obsidanum:item/nether_upgrade_plan"
   }
 }

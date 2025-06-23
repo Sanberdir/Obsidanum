@@ -20,7 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.rezolv.obsidanum.Obsidanum;
-import net.rezolv.obsidanum.item.upgrade.ObsidanumToolUpgrades;
 
 import javax.annotation.Nullable;
 

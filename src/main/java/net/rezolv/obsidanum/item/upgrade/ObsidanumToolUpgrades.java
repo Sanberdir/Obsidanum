@@ -1,6 +1,7 @@
 package net.rezolv.obsidanum.item.upgrade;
 
 public enum ObsidanumToolUpgrades {
+
     // укрепление
     STRENGTH("strength"),
     // балансировка
@@ -26,4 +27,5 @@ public enum ObsidanumToolUpgrades {
     public String getName() {
         return name;
     }
+
 }

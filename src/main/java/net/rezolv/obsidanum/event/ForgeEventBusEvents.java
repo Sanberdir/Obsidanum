@@ -3,15 +3,23 @@ package net.rezolv.obsidanum.event;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.effect.EffectsObs;
+import net.rezolv.obsidanum.item.upgrade.UpgradeCommand;
 
 @Mod.EventBusSubscriber(modid = Obsidanum.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeEventBusEvents {
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        UpgradeCommand.register(event.getDispatcher());
+    }
+
+
     @SubscribeEvent
     public static void onLivingVisibilityCheck(LivingEvent.LivingVisibilityEvent event) {
         // Проверяем, является ли сущность игроком
