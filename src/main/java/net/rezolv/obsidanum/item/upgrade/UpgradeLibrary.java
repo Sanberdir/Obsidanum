@@ -6,10 +6,13 @@ public final class UpgradeLibrary {
 
     // Получаем макс уровеньь для
     public static int getMaxLevel(ObsidanumToolUpgrades upgrade) {
-        if (upgrade == ObsidanumToolUpgrades.RICH_HARVEST) {
-            return 3;
+        switch (upgrade) {
+            case RICH_HARVEST:
+            case STRENGTH:
+                return 3;
+            default:
+                return 1;
         }
-        return 1;
     }
 
     // Богатый урожай уровни
@@ -22,5 +25,13 @@ public final class UpgradeLibrary {
                 throw new IllegalArgumentException("Invalid Rich Harvest level: " + level);
         }
     }
-
+    public static float getStrengthChance(int level) {
+        switch (level) {
+            case 1: return 0.3f; // 30%
+            case 2: return 0.5f; // 50%
+            case 3: return 0.7f; // 70%
+            default:
+                throw new IllegalArgumentException("Invalid Strength level: " + level);
+        }
+    }
 }

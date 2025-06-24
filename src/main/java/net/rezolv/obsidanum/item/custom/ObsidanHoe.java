@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -139,15 +140,19 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
         // Получаем все улучшения
         Map<ObsidanumToolUpgrades, Integer> upgrades = getUpgrades(stack);
         int multiplier = 1;
+        float strengthChance = 0.0f;
 
         // Обрабатываем каждое улучшение
         for (Map.Entry<ObsidanumToolUpgrades, Integer> entry : upgrades.entrySet()) {
             ObsidanumToolUpgrades upg = entry.getKey();
             int levelUpg = entry.getValue();
+
             if (upg == ObsidanumToolUpgrades.RICH_HARVEST) {
                 multiplier *= UpgradeLibrary.getRichHarvestMultiplier(levelUpg);
             }
-            // Другие типы улучшений можно добавить здесь
+            else if (upg == ObsidanumToolUpgrades.STRENGTH) {
+                strengthChance = Math.max(strengthChance, UpgradeLibrary.getStrengthChance(levelUpg));
+            }
         }
 
         if (!level.isClientSide) {
@@ -209,7 +214,15 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
             }
         }
 
-        return super.mineBlock(stack, level, state, pos, entity);
+        // Вызываем базовую логику копания
+        boolean result = super.mineBlock(stack, level, state, pos, entity);
+
+        // Применяем эффект прочности после копания
+        if (strengthChance > 0) {
+            applyStrengthEffect(stack, level.random, strengthChance);
+        }
+
+        return result;
     }
 
     @Override
@@ -268,7 +281,6 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        // Без изменений из оригинального кода
         Level world = context.getLevel();
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
@@ -294,11 +306,34 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
                         world.levelEvent(2001, targetPos, Block.getId(targetState));
                     }
                 }
-                stack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(hand));
+
+                // Применяем эффект прочности при вспашке
+                float strengthChance = 0.0f;
+                int strengthLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.STRENGTH);
+                if (strengthLevel > 0) {
+                    strengthChance = UpgradeLibrary.getStrengthChance(strengthLevel);
+                }
+
+                if (strengthChance > 0 && world.random.nextFloat() < strengthChance) {
+                    // Не тратим прочность при срабатывании эффекта
+                } else {
+                    stack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(hand));
+                }
             }
             return InteractionResult.SUCCESS;
         }
 
         return InteractionResult.PASS;
+    }
+
+    // Применяет эффект прочности к инструменту
+    private void applyStrengthEffect(ItemStack stack, RandomSource random, float chance) {
+        if (chance > 0 && random.nextFloat() < chance) {
+            // Восстанавливаем 1 единицу прочности
+            int currentDamage = stack.getDamageValue();
+            if (currentDamage > 0) {
+                stack.setDamageValue(currentDamage - 1);
+            }
+        }
     }
 }
