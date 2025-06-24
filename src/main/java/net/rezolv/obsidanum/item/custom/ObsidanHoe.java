@@ -45,8 +45,13 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
     private static final String TAG_LAST_ACTIVATION_TIME = "LastActivationTime";
     private static final String TAG_COOLDOWN_END = "CooldownEndTime";
 
-    private static final String TAG_UPGRADES = "Upgrades"; // Изменено на составной тег для нескольких улучшений
-    // Устанавливаем улучшение (добавляем или заменяем существующее)
+    // Список разрешенных улучшений для этого инструмента
+    private static final ObsidanumToolUpgrades[] ALLOWED_UPGRADES = {
+            ObsidanumToolUpgrades.RICH_HARVEST,
+            ObsidanumToolUpgrades.STRENGTH,
+            ObsidanumToolUpgrades.LONG_HANDLE
+    };
+
     @Override
     public Map<ObsidanumToolUpgrades, Integer> getUpgrades(ItemStack stack) {
         Map<ObsidanumToolUpgrades, Integer> upgrades = new HashMap<>();
@@ -54,35 +59,30 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
         if (upgradesTag != null) {
             for (String key : upgradesTag.getAllKeys()) {
                 ObsidanumToolUpgrades upgrade = ObsidanumToolUpgrades.byName(key);
-                if (upgrade != null) {
+                if (upgrade != null && isUpgradeAllowed(upgrade)) {
                     upgrades.put(upgrade, upgradesTag.getInt(key));
                 }
             }
         }
         return upgrades;
-    }
-    // Получаем уровень конкретного улучшения
-    public int getUpgradeLevel(ItemStack stack, ObsidanumToolUpgrades upgrade) {
-        CompoundTag upgradesTag = stack.getTagElement(TAG_UPGRADES);
-        if (upgradesTag == null || !upgradesTag.contains(upgrade.getName())) {
-            return 0;
-        }
-        return upgradesTag.getInt(upgrade.getName());
     }
 
-    // Получаем все улучшения в виде карты
-    public Map<ObsidanumToolUpgrades, Integer> getAllUpgrades(ItemStack stack) {
-        Map<ObsidanumToolUpgrades, Integer> upgrades = new HashMap<>();
-        CompoundTag upgradesTag = stack.getTagElement(TAG_UPGRADES);
-        if (upgradesTag != null) {
-            for (String key : upgradesTag.getAllKeys()) {
-                ObsidanumToolUpgrades upgrade = ObsidanumToolUpgrades.byName(key);
-                if (upgrade != null) {
-                    upgrades.put(upgrade, upgradesTag.getInt(key));
-                }
+    // Проверяем, разрешено ли улучшение для этого инструмента
+    private boolean isUpgradeAllowed(ObsidanumToolUpgrades upgrade) {
+        for (ObsidanumToolUpgrades allowed : ALLOWED_UPGRADES) {
+            if (allowed == upgrade) {
+                return true;
             }
         }
-        return upgrades;
+        return false;
+    }
+
+    // Переопределяем метод добавления улучшения с проверкой
+    @Override
+    public void addUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade, int level) {
+        if (isUpgradeAllowed(upgrade)) {
+            IUpgradeableItem.super.addUpgrade(stack, upgrade, level);
+        }
     }
 
 
@@ -137,7 +137,7 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
     @Override
     public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, net.minecraft.world.entity.LivingEntity entity) {
         // Получаем все улучшения
-        Map<ObsidanumToolUpgrades, Integer> upgrades = getAllUpgrades(stack);
+        Map<ObsidanumToolUpgrades, Integer> upgrades = getUpgrades(stack);
         int multiplier = 1;
 
         // Обрабатываем каждое улучшение
@@ -217,7 +217,7 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
         super.appendHoverText(itemstack, world, list, flag);
 
         // Выводим все улучшения
-        Map<ObsidanumToolUpgrades, Integer> upgrades = getAllUpgrades(itemstack);
+        Map<ObsidanumToolUpgrades, Integer> upgrades = getUpgrades(itemstack);
         for (Map.Entry<ObsidanumToolUpgrades, Integer> entry : upgrades.entrySet()) {
             list.add(Component.literal("Улучшение: " + entry.getKey().getName() + " " + entry.getValue())
                     .withStyle(ChatFormatting.GOLD));
