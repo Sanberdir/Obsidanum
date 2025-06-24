@@ -18,9 +18,21 @@ import java.util.Map;
 public class UpgradeCommand {
 
     public static final SuggestionProvider<CommandSourceStack> ADD_SUGGEST = (ctx, builder) -> {
-        // Предлагаем все возможные улучшения
-        for (ObsidanumToolUpgrades upg : ObsidanumToolUpgrades.values()) {
-            builder.suggest(upg.getName());
+        try {
+            Player player = ctx.getSource().getPlayerOrException();
+            ItemStack stack = player.getMainHandItem();
+
+            if (stack.getItem() instanceof IUpgradeableItem) {
+                IUpgradeableItem upgradable = (IUpgradeableItem) stack.getItem();
+
+                // Предлагаем только разрешенные улучшения
+                for (ObsidanumToolUpgrades upg : ObsidanumToolUpgrades.values()) {
+                    if (upgradable.isUpgradeAllowed(upg)) {
+                        builder.suggest(upg.getName());
+                    }
+                }
+            }
+        } catch (CommandSyntaxException ignored) {
         }
         return builder.buildFuture();
     };
@@ -60,12 +72,11 @@ public class UpgradeCommand {
                                         .suggests(REMOVE_SUGGEST)
                                         .executes(ctx -> executeRemove(ctx, StringArgumentType.getString(ctx, "upgrade")))
                                 )
-                                .then(Commands.literal("all") // Новая команда для удаления всех
+                                .then(Commands.literal("all")
                                         .executes(UpgradeCommand::executeRemoveAll)
                                 )
                         ));
     }
-
 
     private static int executeAdd(CommandContext<CommandSourceStack> ctx, String upgradeName, int level) {
         Player player;
@@ -87,6 +98,18 @@ public class UpgradeCommand {
             return Command.SINGLE_SUCCESS;
         }
 
+        IUpgradeableItem upgradable = (IUpgradeableItem) stack.getItem();
+
+        // Проверяем, разрешено ли улучшение для этого инструмента
+        if (!upgradable.isUpgradeAllowed(upgrade)) {
+            player.displayClientMessage(
+                    Component.literal("Это улучшение нельзя применить к данному инструменту!")
+                            .withStyle(ChatFormatting.RED),
+                    false
+            );
+            return Command.SINGLE_SUCCESS;
+        }
+
         int maxLevel = UpgradeLibrary.getMaxLevel(upgrade);
         if (level < 1 || level > maxLevel) {
             player.displayClientMessage(
@@ -97,7 +120,6 @@ public class UpgradeCommand {
             return Command.SINGLE_SUCCESS;
         }
 
-        IUpgradeableItem upgradable = (IUpgradeableItem) stack.getItem();
         upgradable.addUpgrade(stack, upgrade, level);
 
         player.displayClientMessage(

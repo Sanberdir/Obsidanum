@@ -68,7 +68,7 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
     }
 
     // Проверяем, разрешено ли улучшение для этого инструмента
-    private boolean isUpgradeAllowed(ObsidanumToolUpgrades upgrade) {
+    public boolean isUpgradeAllowed(ObsidanumToolUpgrades upgrade) {
         for (ObsidanumToolUpgrades allowed : ALLOWED_UPGRADES) {
             if (allowed == upgrade) {
                 return true;

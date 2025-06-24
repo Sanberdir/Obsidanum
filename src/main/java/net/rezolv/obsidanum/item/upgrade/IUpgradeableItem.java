@@ -6,8 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.Map;
 
 public interface IUpgradeableItem {
-
-    String NBT_UPGRADES = "Upgrades"; // Изменено на множественное число
+    String NBT_UPGRADES = "Upgrades";
 
     /**
      * Добавить или обновить улучшение
@@ -16,9 +15,11 @@ public interface IUpgradeableItem {
         CompoundTag upgradesTag = stack.getOrCreateTagElement(NBT_UPGRADES);
         upgradesTag.putInt(upgrade.getName(), level);
     }
+
     default void removeAllUpgrades(ItemStack stack) {
         stack.removeTagKey(NBT_UPGRADES);
     }
+
     /**
      * Удалить конкретное улучшение
      */
@@ -26,7 +27,6 @@ public interface IUpgradeableItem {
         CompoundTag upgradesTag = stack.getTagElement(NBT_UPGRADES);
         if (upgradesTag != null) {
             upgradesTag.remove(upgrade.getName());
-            // Если тег пуст - удаляем его полностью
             if (upgradesTag.isEmpty()) {
                 stack.removeTagKey(NBT_UPGRADES);
             }
@@ -45,7 +45,14 @@ public interface IUpgradeableItem {
     }
 
     /**
-     * Получить все улучшения (должен быть реализован в классе предмета)
+     * Получить все улучшения
      */
     Map<ObsidanumToolUpgrades, Integer> getUpgrades(ItemStack stack);
+
+    /**
+     * Проверить, разрешено ли улучшение для этого предмета
+     */
+    default boolean isUpgradeAllowed(ObsidanumToolUpgrades upgrade) {
+        return true; // По умолчанию разрешены все улучшения
+    }
 }
