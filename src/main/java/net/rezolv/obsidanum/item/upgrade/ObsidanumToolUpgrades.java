@@ -1,7 +1,6 @@
 package net.rezolv.obsidanum.item.upgrade;
 
 public enum ObsidanumToolUpgrades {
-
     // укрепление
     STRENGTH("strength"),
     // балансировка
@@ -20,12 +19,24 @@ public enum ObsidanumToolUpgrades {
     WOODCUTTER("woodcutter"),
     // Камнелом
     STONE_BREAKER("stone_breaker");
+
     private final String name;
+
     ObsidanumToolUpgrades(String name) {
         this.name = name;
     }
+
     public String getName() {
         return name;
     }
 
+    // Добавляем метод для поиска по имени
+    public static ObsidanumToolUpgrades byName(String name) {
+        for (ObsidanumToolUpgrades upgrade : values()) {
+            if (upgrade.name.equals(name)) {
+                return upgrade;
+            }
+        }
+        return null;
+    }
 }

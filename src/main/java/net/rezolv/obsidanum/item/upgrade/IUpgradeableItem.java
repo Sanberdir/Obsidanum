@@ -3,58 +3,49 @@ package net.rezolv.obsidanum.item.upgrade;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Map;
+
 public interface IUpgradeableItem {
 
-    String NBT_UPGRADE = "Upgrade";
-    String NBT_NAME = "Name";
-    String NBT_LEVEL = "Level";
+    String NBT_UPGRADES = "Upgrades"; // Изменено на множественное число
 
     /**
-     * Apply the given upgrade with a level to the ItemStack (store in NBT).
+     * Добавить или обновить улучшение
      */
-    default void setUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade, int level) {
-        if (!stack.hasTag()) {
-            stack.setTag(new CompoundTag());
-        }
-        CompoundTag tag = stack.getTag();
-        CompoundTag upgradeTag = new CompoundTag();
-        upgradeTag.putString(NBT_NAME, upgrade.getName());
-        upgradeTag.putInt(NBT_LEVEL, Math.max(1, level)); // минимум 1
-        tag.put(NBT_UPGRADE, upgradeTag);
+    default void addUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade, int level) {
+        CompoundTag upgradesTag = stack.getOrCreateTagElement(NBT_UPGRADES);
+        upgradesTag.putInt(upgrade.getName(), level);
     }
-
+    default void removeAllUpgrades(ItemStack stack) {
+        stack.removeTagKey(NBT_UPGRADES);
+    }
     /**
-     * Get the currently applied upgrade from the ItemStack, or null if none.
+     * Удалить конкретное улучшение
      */
-    default ObsidanumToolUpgrades getUpgrade(ItemStack stack) {
-        if (!stack.hasTag()) return null;
-        CompoundTag upgradeTag = stack.getTag().getCompound(NBT_UPGRADE);
-        if (upgradeTag == null || !upgradeTag.contains(NBT_NAME)) return null;
-        String name = upgradeTag.getString(NBT_NAME);
-        for (ObsidanumToolUpgrades upg : ObsidanumToolUpgrades.values()) {
-            if (upg.getName().equalsIgnoreCase(name)) {
-                return upg;
+    default void removeUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade) {
+        CompoundTag upgradesTag = stack.getTagElement(NBT_UPGRADES);
+        if (upgradesTag != null) {
+            upgradesTag.remove(upgrade.getName());
+            // Если тег пуст - удаляем его полностью
+            if (upgradesTag.isEmpty()) {
+                stack.removeTagKey(NBT_UPGRADES);
             }
         }
-        return null;
     }
 
     /**
-     * Get the level of the currently applied upgrade, or 0 if none.
+     * Получить уровень конкретного улучшения
      */
-    default int getUpgradeLevel(ItemStack stack) {
-        if (!stack.hasTag()) return 0;
-        CompoundTag upgradeTag = stack.getTag().getCompound(NBT_UPGRADE);
-        if (upgradeTag == null || !upgradeTag.contains(NBT_LEVEL)) return 0;
-        return upgradeTag.getInt(NBT_LEVEL);
-    }
-
-    /**
-     * Remove any applied upgrade from the ItemStack.
-     */
-    default void removeUpgrade(ItemStack stack) {
-        if (stack.hasTag()) {
-            stack.getTag().remove(NBT_UPGRADE);
+    default int getUpgradeLevel(ItemStack stack, ObsidanumToolUpgrades upgrade) {
+        CompoundTag upgradesTag = stack.getTagElement(NBT_UPGRADES);
+        if (upgradesTag == null || !upgradesTag.contains(upgrade.getName())) {
+            return 0;
         }
+        return upgradesTag.getInt(upgrade.getName());
     }
+
+    /**
+     * Получить все улучшения (должен быть реализован в классе предмета)
+     */
+    Map<ObsidanumToolUpgrades, Integer> getUpgrades(ItemStack stack);
 }

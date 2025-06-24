@@ -3,6 +3,7 @@ package net.rezolv.obsidanum.item.custom;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -28,8 +29,9 @@ import net.rezolv.obsidanum.item.upgrade.IUpgradeableItem;
 import net.rezolv.obsidanum.item.upgrade.ObsidanumToolUpgrades;
 import net.rezolv.obsidanum.item.upgrade.UpgradeLibrary;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
@@ -43,26 +45,44 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
     private static final String TAG_LAST_ACTIVATION_TIME = "LastActivationTime";
     private static final String TAG_COOLDOWN_END = "CooldownEndTime";
 
-    private static final String TAG_UPGRADE = "Upgrade";
-    private static final String TAG_UPGRADE_LEVEL = "UpgradeLevel";
-    public void setUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade, int level) {
-        stack.getOrCreateTag().putString(TAG_UPGRADE, upgrade.getName());
-        stack.getTag().putInt(TAG_UPGRADE_LEVEL, level);
-    }
-    public int getUpgradeLevel(ItemStack stack) {
-        ObsidanumToolUpgrades upg = getUpgrade(stack);
-        if (upg == null) return 0;
-        return stack.getTag().getInt(TAG_UPGRADE_LEVEL);
-    }
-    public ObsidanumToolUpgrades getUpgrade(ItemStack stack) {
-        if (!stack.hasTag() || !stack.getTag().contains(TAG_UPGRADE)) {
-            return null;
+    private static final String TAG_UPGRADES = "Upgrades"; // Изменено на составной тег для нескольких улучшений
+    // Устанавливаем улучшение (добавляем или заменяем существующее)
+    @Override
+    public Map<ObsidanumToolUpgrades, Integer> getUpgrades(ItemStack stack) {
+        Map<ObsidanumToolUpgrades, Integer> upgrades = new HashMap<>();
+        CompoundTag upgradesTag = stack.getTagElement(IUpgradeableItem.NBT_UPGRADES);
+        if (upgradesTag != null) {
+            for (String key : upgradesTag.getAllKeys()) {
+                ObsidanumToolUpgrades upgrade = ObsidanumToolUpgrades.byName(key);
+                if (upgrade != null) {
+                    upgrades.put(upgrade, upgradesTag.getInt(key));
+                }
+            }
         }
-        String name = stack.getTag().getString(TAG_UPGRADE);
-        for (ObsidanumToolUpgrades upg : ObsidanumToolUpgrades.values()) {
-            if (upg.getName().equals(name)) return upg;
+        return upgrades;
+    }
+    // Получаем уровень конкретного улучшения
+    public int getUpgradeLevel(ItemStack stack, ObsidanumToolUpgrades upgrade) {
+        CompoundTag upgradesTag = stack.getTagElement(TAG_UPGRADES);
+        if (upgradesTag == null || !upgradesTag.contains(upgrade.getName())) {
+            return 0;
         }
-        return null;
+        return upgradesTag.getInt(upgrade.getName());
+    }
+
+    // Получаем все улучшения в виде карты
+    public Map<ObsidanumToolUpgrades, Integer> getAllUpgrades(ItemStack stack) {
+        Map<ObsidanumToolUpgrades, Integer> upgrades = new HashMap<>();
+        CompoundTag upgradesTag = stack.getTagElement(TAG_UPGRADES);
+        if (upgradesTag != null) {
+            for (String key : upgradesTag.getAllKeys()) {
+                ObsidanumToolUpgrades upgrade = ObsidanumToolUpgrades.byName(key);
+                if (upgrade != null) {
+                    upgrades.put(upgrade, upgradesTag.getInt(key));
+                }
+            }
+        }
+        return upgrades;
     }
 
 
@@ -116,18 +136,24 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
 
     @Override
     public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, net.minecraft.world.entity.LivingEntity entity) {
-        // Получаем параметры улучшения (работает всегда)
-        ObsidanumToolUpgrades upg = getUpgrade(stack);
-        int levelRH = getUpgradeLevel(stack);
+        // Получаем все улучшения
+        Map<ObsidanumToolUpgrades, Integer> upgrades = getAllUpgrades(stack);
         int multiplier = 1;
-        if (upg == ObsidanumToolUpgrades.RICH_HARVEST && levelRH > 0) {
-            multiplier = UpgradeLibrary.getRichHarvestMultiplier(levelRH);
+
+        // Обрабатываем каждое улучшение
+        for (Map.Entry<ObsidanumToolUpgrades, Integer> entry : upgrades.entrySet()) {
+            ObsidanumToolUpgrades upg = entry.getKey();
+            int levelUpg = entry.getValue();
+            if (upg == ObsidanumToolUpgrades.RICH_HARVEST) {
+                multiplier *= UpgradeLibrary.getRichHarvestMultiplier(levelUpg);
+            }
+            // Другие типы улучшений можно добавить здесь
         }
 
         if (!level.isClientSide) {
             ServerLevel serverWorld = (ServerLevel) level;
 
-            // Обработка умножения дропа для ВСЕХ блоков (если есть улучшение)
+            // Применяем множитель дропа
             if (multiplier > 1) {
                 BlockEntity be = level.getBlockEntity(pos);
                 List<ItemStack> originalDrops = Block.getDrops(state, serverWorld, pos, be, entity, stack);
@@ -145,7 +171,7 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
                 }
             }
 
-            // Обработка активированного режима для TARGET_BLOCKS (работает независимо от улучшений)
+            // Обработка активированного режима
             if (isActivated(stack)) {
                 for (BlockState targetBlock : TARGET_BLOCKS) {
                     if (state.is(targetBlock.getBlock())) {
@@ -155,7 +181,6 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
                             BlockState targetState = level.getBlockState(blockPos);
                             for (BlockState targetBlockInner : TARGET_BLOCKS) {
                                 if (targetState.is(targetBlockInner.getBlock())) {
-                                    // Применяем умножение дропа и для активированных блоков
                                     if (multiplier > 1) {
                                         BlockEntity be = level.getBlockEntity(blockPos);
                                         List<ItemStack> drops = Block.getDrops(targetState, serverWorld, blockPos, be, entity, stack);
@@ -178,7 +203,7 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
                             }
                         }
                         deactivate(stack, (Player) entity, level.getGameTime());
-                        return false; // Прерываем дальнейшую обработку
+                        return false;
                     }
                 }
             }
@@ -190,12 +215,14 @@ public class ObsidanHoe extends HoeItem implements IUpgradeableItem {
     @Override
     public void appendHoverText(ItemStack itemstack, Level world, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, world, list, flag);
-        ObsidanumToolUpgrades upg = getUpgrade(itemstack);
-        int level = getUpgradeLevel(itemstack);
-        if (upg != null && level > 0) {
-            list.add(Component.literal("Улучшение: " + upg.getName() + " " + level)
+
+        // Выводим все улучшения
+        Map<ObsidanumToolUpgrades, Integer> upgrades = getAllUpgrades(itemstack);
+        for (Map.Entry<ObsidanumToolUpgrades, Integer> entry : upgrades.entrySet()) {
+            list.add(Component.literal("Улучшение: " + entry.getKey().getName() + " " + entry.getValue())
                     .withStyle(ChatFormatting.GOLD));
         }
+
         if (Screen.hasShiftDown()) {
             list.add(Component.translatable("obsidanum.press_shift2").withStyle(ChatFormatting.DARK_GRAY));
             list.add(Component.translatable("item.obsidan.description.hoe").withStyle(ChatFormatting.DARK_GRAY));
