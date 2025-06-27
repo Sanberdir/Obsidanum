@@ -1,25 +1,57 @@
 package net.rezolv.obsidanum.item.upgrade;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public interface IUpgradeableItem {
     String NBT_UPGRADES = "Upgrades";
+    int MAX_UPGRADE_SLOTS = 10; // Максимальное количество слотов
 
     /**
      * Добавить или обновить улучшение
      */
-    default void addUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade, int level) {
+    default boolean addUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade, int level) {
+        // Получаем текущие улучшения
+        Map<ObsidanumToolUpgrades, Integer> currentUpgrades = getUpgrades(stack);
+
+        // Рассчитываем текущее количество слотов
+        int usedSlots = currentUpgrades.values().stream().mapToInt(Integer::intValue).sum();
+        int currentLevel = currentUpgrades.getOrDefault(upgrade, 0);
+        int newSlots = usedSlots - currentLevel + level;
+
+        // Проверяем ограничение
+        if (newSlots > MAX_UPGRADE_SLOTS) {
+            return false;
+        }
+
+        // Сохраняем улучшение
         CompoundTag upgradesTag = stack.getOrCreateTagElement(NBT_UPGRADES);
         upgradesTag.putInt(upgrade.getName(), level);
+        return true;
     }
 
     default void removeAllUpgrades(ItemStack stack) {
         stack.removeTagKey(NBT_UPGRADES);
     }
+    static boolean hasUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade) {
+        CompoundTag tag = stack.getTag();
+        if (tag == null || !tag.contains("Upgrades", Tag.TAG_LIST)) return false;
 
+        ListTag list = tag.getList("Upgrades", Tag.TAG_STRING);
+        for (Tag upgradeTag : list) {
+            if (upgradeTag instanceof StringTag str && str.getAsString().equals(upgrade.name())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
     /**
      * Удалить конкретное улучшение
      */
@@ -32,7 +64,6 @@ public interface IUpgradeableItem {
             }
         }
     }
-
     /**
      * Получить уровень конкретного улучшения
      */
@@ -47,8 +78,23 @@ public interface IUpgradeableItem {
     /**
      * Получить все улучшения
      */
-    Map<ObsidanumToolUpgrades, Integer> getUpgrades(ItemStack stack);
+    default Map<ObsidanumToolUpgrades, Integer> getUpgrades(ItemStack stack) {
+        Map<ObsidanumToolUpgrades, Integer> upgrades = new HashMap<>();
+        CompoundTag upgradesTag = stack.getTagElement(NBT_UPGRADES);
 
+        if (upgradesTag != null) {
+            for (String key : upgradesTag.getAllKeys()) {
+                ObsidanumToolUpgrades upgrade = ObsidanumToolUpgrades.byName(key);
+                if (upgrade != null) {
+                    upgrades.put(upgrade, upgradesTag.getInt(key));
+                }
+            }
+        }
+        return upgrades;
+    }
+    default int getUsedSlots(ItemStack stack) {
+        return getUpgrades(stack).values().stream().mapToInt(Integer::intValue).sum();
+    }
     /**
      * Проверить, разрешено ли улучшение для этого предмета
      */

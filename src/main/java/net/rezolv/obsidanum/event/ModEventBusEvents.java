@@ -7,14 +7,17 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -27,6 +30,9 @@ import net.rezolv.obsidanum.entity.gart.Gart;
 import net.rezolv.obsidanum.entity.meat_beetle.MeetBeetle;
 import net.rezolv.obsidanum.entity.mutated_gart.MutatedGart;
 import net.rezolv.obsidanum.entity.obsidian_elemental.ObsidianElemental;
+import net.rezolv.obsidanum.item.custom.ObsidanPickaxe;
+
+import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Obsidanum.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModEventBusEvents {
@@ -34,6 +40,7 @@ public class ModEventBusEvents {
     public static void registerAttributesElemental(EntityAttributeCreationEvent event) {
         event.put(ModEntities.OBSIDIAN_ELEMENTAL.get(), ObsidianElemental.createAttributes().build());
     }
+
 
     @SubscribeEvent
     public static void registerAttributesBeetle(EntityAttributeCreationEvent event) {

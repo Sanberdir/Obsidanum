@@ -25,15 +25,17 @@ public enum ObsidanumToolUpgrades {
     ObsidanumToolUpgrades(String name) {
         this.name = name;
     }
-
     public String getName() {
         return name;
+    }
+    public String getTranslationKey() {
+        return "upgrade.obsidanum." + this.name().toLowerCase();
     }
 
     // Добавляем метод для поиска по имени
     public static ObsidanumToolUpgrades byName(String name) {
         for (ObsidanumToolUpgrades upgrade : values()) {
-            if (upgrade.name.equals(name)) {
+            if (upgrade.getName().equalsIgnoreCase(name)) {
                 return upgrade;
             }
         }

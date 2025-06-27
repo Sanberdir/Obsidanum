@@ -1,8 +1,12 @@
 package net.rezolv.obsidanum.item.custom;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -10,15 +14,26 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.ForgeMod;
+import net.rezolv.obsidanum.item.upgrade.IUpgradeableItem;
+import net.rezolv.obsidanum.item.upgrade.ObsidanumToolUpgrades;
+import net.rezolv.obsidanum.item.upgrade.UpgradeLibrary;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-public class ObsidanSword extends SwordItem {
+public class ObsidanSword extends SwordItem implements IUpgradeableItem {
     // NBT теги
     private static final String ACTIVATED_TAG = "Activated";
     private static final String LAST_ACTIVATION_TAG = "LastActivationTime";
@@ -32,6 +47,189 @@ public class ObsidanSword extends SwordItem {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
     }
 
+    // Список разрешенных улучшений для этого инструмента
+    private static final ObsidanumToolUpgrades[] ALLOWED_UPGRADES = {
+            ObsidanumToolUpgrades.STRENGTH,
+            ObsidanumToolUpgrades.BALANCING,
+            ObsidanumToolUpgrades.SHARPENING,
+            ObsidanumToolUpgrades.LONG_HANDLE
+    };
+
+    @Override
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
+        Multimap<Attribute, AttributeModifier> modifiers = super.getAttributeModifiers(slot, stack);
+
+        if (slot == EquipmentSlot.MAINHAND) {
+            // Получаем текущий уровень улучшений
+            int sharpeningLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.SHARPENING);
+            int strengthLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.STRENGTH);
+            int balancingLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.BALANCING);
+            boolean isActivated = isActivated(stack);
+
+            // Получаем базовые значения атрибутов
+            float baseDamage = 0;
+            float baseAttackSpeed = 0;
+
+            for (AttributeModifier modifier : modifiers.get(Attributes.ATTACK_DAMAGE)) {
+                if (modifier.getId().equals(Item.BASE_ATTACK_DAMAGE_UUID)) {
+                    baseDamage = (float) modifier.getAmount();
+                    break;
+                }
+            }
+
+            for (AttributeModifier modifier : modifiers.get(Attributes.ATTACK_SPEED)) {
+                if (modifier.getId().equals(Item.BASE_ATTACK_SPEED_UUID)) {
+                    baseAttackSpeed = (float) modifier.getAmount();
+                    break;
+                }
+            }
+
+            // Создаем новый мультимап для изменений
+            ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+
+            // 1. Обрабатываем SHARPENING (увеличение урона)
+            double totalDamage = baseDamage;
+            if (sharpeningLevel > 0) {
+                totalDamage += sharpeningLevel; // +1 урона за уровень
+            }
+
+            // 2. Обрабатываем активацию (умножение урона)
+            if (isActivated) {
+                totalDamage *= 4;
+            }
+
+            // 3. Обрабатываем BALANCING (увеличение скорости атаки)
+            float totalAttackSpeed = baseAttackSpeed;
+            if (balancingLevel > 0) {
+                totalAttackSpeed += 0.1f * balancingLevel; // +0.1 скорости атаки за уровень
+            }
+
+            // 4. Обрабатываем STRENGTH (уменьшение скорости атаки)
+            if (strengthLevel > 0) {
+                totalAttackSpeed -= 0.1f * strengthLevel; // -0.1 скорости атаки за уровень
+            }
+
+            // Добавляем модификаторы
+            builder.put(
+                    Attributes.ATTACK_DAMAGE,
+                    new AttributeModifier(
+                            Item.BASE_ATTACK_DAMAGE_UUID,
+                            "Tool modifier",
+                            totalDamage,
+                            AttributeModifier.Operation.ADDITION
+                    )
+            );
+
+            builder.put(
+                    Attributes.ATTACK_SPEED,
+                    new AttributeModifier(
+                            Item.BASE_ATTACK_SPEED_UUID,
+                            "Tool modifier",
+                            totalAttackSpeed,
+                            AttributeModifier.Operation.ADDITION
+                    )
+            );
+
+            // Копируем остальные модификаторы (если есть)
+            for (Map.Entry<Attribute, AttributeModifier> entry : modifiers.entries()) {
+                if (entry.getKey() != Attributes.ATTACK_DAMAGE && entry.getKey() != Attributes.ATTACK_SPEED) {
+                    builder.put(entry.getKey(), entry.getValue());
+                }
+            }
+
+            modifiers = builder.build();
+        }
+
+        return modifiers;
+    }
+
+    @Override
+    public Map<ObsidanumToolUpgrades, Integer> getUpgrades(ItemStack stack) {
+        Map<ObsidanumToolUpgrades, Integer> upgrades = new HashMap<>();
+        CompoundTag upgradesTag = stack.getTagElement(IUpgradeableItem.NBT_UPGRADES);
+        if (upgradesTag != null) {
+            for (String key : upgradesTag.getAllKeys()) {
+                ObsidanumToolUpgrades upgrade = ObsidanumToolUpgrades.byName(key);
+                if (upgrade != null && isUpgradeAllowed(upgrade)) {
+                    upgrades.put(upgrade, upgradesTag.getInt(key));
+                }
+            }
+        }
+        return upgrades;
+    }
+
+    // Проверяем, разрешено ли улучшение для этого инструмента
+    public boolean isUpgradeAllowed(ObsidanumToolUpgrades upgrade) {
+        for (ObsidanumToolUpgrades allowed : ALLOWED_UPGRADES) {
+            if (allowed == upgrade) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Переопределяем метод добавления улучшения с проверкой
+    @Override
+    public boolean addUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade, int level) {
+        if (isUpgradeAllowed(upgrade)) {
+            // Если добавляем HARVESTER или STONE_BREAKER, пересчитываем урон
+            if (upgrade == ObsidanumToolUpgrades.LONG_HANDLE
+                    || upgrade == ObsidanumToolUpgrades.BALANCING
+                    || upgrade == ObsidanumToolUpgrades.SHARPENING) {
+                int currentDamage = stack.getDamageValue();
+                int oldMaxDamage = getMaxDamage(stack); // Текущая макс. прочность (уже с учетом всех штрафов)
+                int newMaxDamage = getMaxDamageAfterUpgrade(stack, upgrade); // Новая макс. прочность
+
+                // Пересчитываем урон пропорционально
+                double damageRatio = (double) currentDamage / oldMaxDamage;
+                int scaledDamage = (int) (damageRatio * newMaxDamage);
+
+                stack.setDamageValue(scaledDamage);
+            }
+            IUpgradeableItem.super.addUpgrade(stack, upgrade, level);
+        }
+        return true;
+    }
+    // Вспомогательный метод для расчета новой макс. прочности после апгрейда
+    private int getMaxDamageAfterUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade) {
+        int baseDurability = getMaxDamageWithoutPenalties(stack);
+
+        if (upgrade == ObsidanumToolUpgrades.LONG_HANDLE) {
+            return baseDurability - 50; // -200 за уровень (уже учтено в getMaxDamageWithoutPenalties)
+        }
+        else if (upgrade == ObsidanumToolUpgrades.BALANCING) {
+            return baseDurability - 25;
+        }
+        else if (upgrade == ObsidanumToolUpgrades.SHARPENING) {
+            return baseDurability - 50;
+        }
+
+        return baseDurability;
+    }
+    private int getMaxDamageWithoutPenalties(ItemStack stack) {
+        int baseDurability = super.getMaxDamage(stack);
+        int strengthLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.STRENGTH);
+        int balancingLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.BALANCING);
+        int sharpeningLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.SHARPENING);
+        int longHandleLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.LONG_HANDLE);
+
+        // Добавляем бонус от STRENGTH (+50 за уровень)
+        int modifiedDurability = baseDurability + (50 * strengthLevel);
+
+        // Вычитаем штраф от HARVESTER (-200 за уровень)
+        modifiedDurability -= 200 * longHandleLevel;
+        modifiedDurability -= 25 * balancingLevel;
+        modifiedDurability -= 50 * sharpeningLevel;
+
+        // Минимальная прочность = 1 (чтобы предмет не сломался полностью)
+        return Math.max(1, modifiedDurability);
+    }
+    @Override
+    public int getMaxDamage(ItemStack stack) {
+        int baseDurability = getMaxDamageWithoutPenalties(stack);
+
+        return baseDurability;
+    }
     @Override
     public boolean isEnchantable(ItemStack pStack) {
         return false;
@@ -40,6 +238,15 @@ public class ObsidanSword extends SwordItem {
     @Override
     public void appendHoverText(ItemStack itemstack, Level world, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(itemstack, world, list, flag);
+
+        // Выводим все улучшения
+        Map<ObsidanumToolUpgrades, Integer> upgrades = getUpgrades(itemstack);
+        for (Map.Entry<ObsidanumToolUpgrades, Integer> entry : upgrades.entrySet()) {
+            list.add(Component.translatable(entry.getKey().getTranslationKey())
+                    .append(" " + entry.getValue())
+                    .withStyle(ChatFormatting.GOLD));
+        }
+
         if (Screen.hasShiftDown()) {
             list.add(Component.translatable("obsidanum.press_shift2").withStyle(ChatFormatting.DARK_GRAY));
             list.add(Component.translatable("item.obsidan.description.sword").withStyle(ChatFormatting.DARK_GRAY));
@@ -55,19 +262,88 @@ public class ObsidanSword extends SwordItem {
         stack.getOrCreateTag().putLong(LAST_ACTIVATION_TAG, 0);
         stack.getOrCreateTag().putLong(COOLDOWN_END_TAG, 0);
     }
+    private static UUID generateUUID(String name) {
+        return UUID.nameUUIDFromBytes(name.getBytes());
+    }
+    public boolean onDroppedByPlayer(ItemStack stack, Player player) {
+        // UUID-ы те же, что в inventoryTick
+        UUID reachUUID = generateUUID("obsidan_sword.long_handle_reach");
+        UUID attackRangeUUID = generateUUID("obsidan_sword.long_handle_attack_range");
 
+        // Снимаем модификаторы, если они остались
+        var reachAttr = player.getAttribute(ForgeMod.BLOCK_REACH.get());
+        if (reachAttr != null && reachAttr.getModifier(reachUUID) != null) {
+            reachAttr.removeModifier(reachUUID);
+        }
+        var attackRangeAttr = player.getAttribute(ForgeMod.ENTITY_REACH.get());
+        if (attackRangeAttr != null && attackRangeAttr.getModifier(attackRangeUUID) != null) {
+            attackRangeAttr.removeModifier(attackRangeUUID);
+        }
+
+        return super.onDroppedByPlayer(stack, player);
+    }
     @Override
     public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
 
+        if (!(entity instanceof Player player) || world.isClientSide)
+            return;
+
+        // Получаем текущие UUID модификаторов
+        UUID reachUUID = generateUUID("obsidan_sword.long_handle_reach");
+        UUID attackRangeUUID = generateUUID("obsidan_sword.long_handle_attack_range");
+
+        // Удаляем старые модификаторы (если есть)
+        var reachAttr = player.getAttribute(ForgeMod.BLOCK_REACH.get());
+        if (reachAttr != null) {
+            reachAttr.removeModifier(reachUUID);
+        }
+
+        var attackRangeAttr = player.getAttribute(ForgeMod.ENTITY_REACH.get());
+        if (attackRangeAttr != null) {
+            attackRangeAttr.removeModifier(attackRangeUUID);
+        }
+
+        // Проверяем, держит ли игрок меч в руке (основной или дополнительной)
+        boolean isHoldingSword = player.getMainHandItem() == stack || player.getOffhandItem() == stack;
+
+        if (isHoldingSword) {
+            int longHandleLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.LONG_HANDLE);
+
+            if (longHandleLevel > 0) {
+                double bonus = UpgradeLibrary.getLongHandleBonus(longHandleLevel);
+
+                // Применяем бонус к дальности взаимодействия с блоками
+                if (reachAttr != null) {
+                    AttributeModifier reachMod = new AttributeModifier(
+                            reachUUID,
+                            "obsidan_sword.long_handle_reach",
+                            bonus,
+                            AttributeModifier.Operation.ADDITION
+                    );
+                    reachAttr.addTransientModifier(reachMod);
+                }
+
+                // Применяем бонус к дальности атаки
+                if (attackRangeAttr != null) {
+                    AttributeModifier attackRangeMod = new AttributeModifier(
+                            attackRangeUUID,
+                            "obsidan_sword.long_handle_attack_range",
+                            bonus,
+                            AttributeModifier.Operation.ADDITION
+                    );
+                    attackRangeAttr.addTransientModifier(attackRangeMod);
+                }
+            }
+        }
+
+        // Обработка активации/деактивации меча
         if (!world.isClientSide && isActivated(stack)) {
             long currentTime = world.getGameTime();
             long lastActivationTime = getLastActivationTime(stack);
 
             if (currentTime - lastActivationTime >= ACTIVATION_DURATION) {
-                if (entity instanceof Player) {
-                    deactivate(stack, (Player) entity, currentTime);
-                }
+                deactivate(stack, player, currentTime);
             }
         }
     }
@@ -86,26 +362,22 @@ public class ObsidanSword extends SwordItem {
         return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
     }
 
+
     @Override
     public boolean onLeftClickEntity(ItemStack stack, Player player, Entity entity) {
-        if (!player.isLocalPlayer() && entity instanceof LivingEntity) {
-            LivingEntity livingEntity = (LivingEntity) entity;
-            if (isActivated(stack)) {
-                float baseDamage = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                float additionalDamage = 4f;
+        if (isActivated(stack)) {
+            // Деактивируем меч после удара
+            deactivate(stack, player, player.level().getGameTime());
 
-                livingEntity.hurt(new DamageSource(player.getCommandSenderWorld().registryAccess()
-                                .registryOrThrow(Registries.DAMAGE_TYPE)
-                                .getHolderOrThrow(DamageTypes.PLAYER_ATTACK)),
-                        baseDamage * additionalDamage);
+            // Наносим урон предмету
+            stack.hurtAndBreak(1, player, (p) -> {
+                p.broadcastBreakEvent(player.getUsedItemHand());
+            });
 
-                deactivate(stack, player, player.level().getGameTime());
-                return true;
-            }
+            return false; // Позволяем стандартной атаке произойти
         }
-        return super.onLeftClickEntity(stack, player, entity);
+        return false;
     }
-
     private void activate(ItemStack stack, long currentTime) {
         stack.getOrCreateTag().putBoolean(ACTIVATED_TAG, true);
         stack.getOrCreateTag().putLong(LAST_ACTIVATION_TAG, currentTime);

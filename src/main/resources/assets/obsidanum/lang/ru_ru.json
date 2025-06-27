@@ -312,5 +312,31 @@
   "tooltip.recipe_end": "===========================",
   "tooltip.scrolls.result": "Результат",
   "tooltip.scrolls.bonus_outputs": "Бонусный результат",
-  "tooltip.scrolls.ingredients": "Необходимо"
+  "tooltip.scrolls.ingredients": "Необходимо",
+
+  "upgrade.obsidanum.stone_breaker": "Камнелом",
+  "upgrade.obsidanum.archaeologist": "Археолог",
+  "upgrade.obsidanum.balancing": "Балансировка",
+  "upgrade.obsidanum.sharpening": "Заточка",
+  "upgrade.obsidanum.harvester": "Собиратель",
+  "upgrade.obsidanum.woodcutter": "Дровосек",
+  "upgrade.obsidanum.rich_harvest": "Богатый урожай",
+  "upgrade.obsidanum.strength": "Укрепление",
+  "upgrade.obsidanum.long_handle": "Длинная рукоять",
+
+  "command.obsidanum.too_many_upgrades": "Нельзя добавить улучшение! Превышен лимит %s слотов",
+  "command.obsidanum.upgrade_failed": "Ошибка при добавлении улучшения",
+  "command.obsidanum.upgrade.not_upgradeable": "Этот предмет нельзя улучшить!",
+  "command.obsidanum.upgrade.unknown_upgrade": "Неизвестное улучшение: %s",
+  "command.obsidanum.upgrade.not_allowed": "Это улучшение нельзя применить к данному инструменту!",
+  "command.obsidanum.upgrade.conflict": "Нельзя добавить улучшение %s, так как оно конфликтует с уже установленным %s",
+  "command.obsidanum.upgrade.invalid_level": "Недопустимый уровень: %s. Должен быть между %s и %s.",
+  "command.obsidanum.upgrade.added": "Добавлено улучшение: %s (уровень %s)",
+  "command.obsidanum.upgrade.updated": "Обновлено улучшение: %s (уровень %s)",
+  "command.obsidanum.upgrade.removed": "Удалено улучшение: %s",
+  "command.obsidanum.upgrade.none": "На предмете нет улучшений",
+  "command.obsidanum.upgrade.all_removed": "Все улучшения удалены (%s шт.)",
+
+
+  "message.obsidanum.archaeologist_find": "Вы нашли %s во время копания!"
 }

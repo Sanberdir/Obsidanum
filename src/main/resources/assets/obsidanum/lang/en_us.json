@@ -328,5 +328,31 @@
   "tooltip.recipe_end": "=======================",
   "tooltip.scrolls.result": "Scrolls result",
   "tooltip.scrolls.bonus_outputs": "Bonus Outputs",
-  "tooltip.scrolls.ingredients": "Scrolls ingredients"
+  "tooltip.scrolls.ingredients": "Scrolls ingredients",
+
+  "upgrade.obsidanum.stone_breaker": "Stone Breaker",
+  "upgrade.obsidanum.archaeologist": "Archaeologist",
+  "upgrade.obsidanum.balancing": "Balancing",
+  "upgrade.obsidanum.sharpening": "Sharpening",
+  "upgrade.obsidanum.harvester": "Harvester",
+  "upgrade.obsidanum.woodcutter": "Woodcutter",
+  "upgrade.obsidanum.rich_harvest": "Rich Harvest",
+  "upgrade.obsidanum.strength": "Strength",
+  "upgrade.obsidanum.long_handle": "Long Handle",
+
+  "command.obsidanum.too_many_upgrades": "Cannot add upgrade! Maximum %s slots exceeded",
+  "command.obsidanum.upgrade_failed": "Failed to add upgrade",
+  "command.obsidanum.upgrade.not_upgradeable": "This item cannot be upgraded!",
+  "command.obsidanum.upgrade.unknown_upgrade": "Unknown upgrade: %s",
+  "command.obsidanum.upgrade.not_allowed": "This upgrade cannot be applied to this tool!",
+  "command.obsidanum.upgrade.conflict": "Cannot add upgrade %s as it conflicts with existing %s",
+  "command.obsidanum.upgrade.invalid_level": "Invalid level: %s. Must be between %s and %s.",
+  "command.obsidanum.upgrade.added": "Added upgrade: %s (level %s)",
+  "command.obsidanum.upgrade.updated": "Update upgrade: %s (level %s)",
+  "command.obsidanum.upgrade.removed": "Removed upgrade: %s",
+  "command.obsidanum.upgrade.none": "No upgrades on this item",
+  "command.obsidanum.upgrade.all_removed": "All upgrades removed (%s)",
+
+
+  "message.obsidanum.archaeologist_find": "You found a %s while digging!"
 }

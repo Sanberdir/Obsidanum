@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Map;
+import java.util.Set;
 
 public class UpgradeCommand {
 
@@ -87,47 +88,100 @@ public class UpgradeCommand {
         }
         ItemStack stack = player.getMainHandItem();
 
+        // Проверка, что предмет поддерживает улучшения
         if (!(stack.getItem() instanceof IUpgradeableItem)) {
-            player.displayClientMessage(Component.literal("Этот предмет нельзя улучшить!"), false);
+            player.displayClientMessage(Component.translatable(TranslationKeysCommand.COMMAND_NOT_UPGRADEABLE), false);
             return Command.SINGLE_SUCCESS;
         }
 
+        // Поиск улучшения по имени
         ObsidanumToolUpgrades upgrade = findUpgradeByName(upgradeName);
         if (upgrade == null) {
-            player.displayClientMessage(Component.literal("Неизвестное улучшение: " + upgradeName), false);
+            player.displayClientMessage(Component.translatable(TranslationKeysCommand.COMMAND_UNKNOWN_UPGRADE, upgradeName), false);
             return Command.SINGLE_SUCCESS;
         }
 
         IUpgradeableItem upgradable = (IUpgradeableItem) stack.getItem();
 
-        // Проверяем, разрешено ли улучшение для этого инструмента
+        // Проверка, разрешено ли улучшение для этого предмета
         if (!upgradable.isUpgradeAllowed(upgrade)) {
             player.displayClientMessage(
-                    Component.literal("Это улучшение нельзя применить к данному инструменту!")
+                    Component.translatable(TranslationKeysCommand.COMMAND_UPGRADE_NOT_ALLOWED)
                             .withStyle(ChatFormatting.RED),
                     false
             );
             return Command.SINGLE_SUCCESS;
         }
 
+        // Получаем текущие улучшения
+        Map<ObsidanumToolUpgrades, Integer> currentUpgrades = upgradable.getUpgrades(stack);
+        int currentLevel = currentUpgrades.getOrDefault(upgrade, 0);
+
+        // Проверка конфликтов с другими улучшениями (только если добавляем новое улучшение)
+        if (currentLevel == 0) {
+            Set<ObsidanumToolUpgrades> exclusiveGroup = getExclusiveGroup(upgrade);
+
+            if (exclusiveGroup != null) {
+                for (ObsidanumToolUpgrades existingUpgrade : currentUpgrades.keySet()) {
+                    // Проверяем только если это другое улучшение из той же группы
+                    if (exclusiveGroup.contains(existingUpgrade) && existingUpgrade != upgrade) {
+                        player.displayClientMessage(
+                                Component.translatable(TranslationKeysCommand.COMMAND_UPGRADE_CONFLICT,
+                                                upgradeName, existingUpgrade.getName())
+                                        .withStyle(ChatFormatting.RED),
+                                false
+                        );
+                        return Command.SINGLE_SUCCESS;
+                    }
+                }
+            }
+        }
+
+        // Проверка допустимого уровня улучшения
         int maxLevel = UpgradeLibrary.getMaxLevel(upgrade);
         if (level < 1 || level > maxLevel) {
             player.displayClientMessage(
-                    Component.literal("Недопустимый уровень: " + level + ". Должен быть между 1 и " + maxLevel + ".")
+                    Component.translatable(TranslationKeysCommand.COMMAND_INVALID_LEVEL, level, 1, maxLevel)
                             .withStyle(ChatFormatting.RED),
                     false
             );
             return Command.SINGLE_SUCCESS;
         }
 
+        // Проверка ограничения по количеству слотов
+        int usedSlots = upgradable.getUsedSlots(stack);
+        int newSlots = usedSlots - currentLevel + level;
+
+        if (newSlots > IUpgradeableItem.MAX_UPGRADE_SLOTS) {
+            player.displayClientMessage(
+                    Component.translatable(TranslationKeysCommand.COMMAND_TOO_MANY_UPGRADES,
+                                    IUpgradeableItem.MAX_UPGRADE_SLOTS)
+                            .withStyle(ChatFormatting.RED),
+                    false
+            );
+            return Command.SINGLE_SUCCESS;
+        }
+
+        // Добавление/обновление улучшения
         upgradable.addUpgrade(stack, upgrade, level);
 
+        // Успешное добавление/обновление
         player.displayClientMessage(
-                Component.literal("Добавлено улучшение: " + upgradeName + " (уровень " + level + ")")
+                Component.translatable(TranslationKeysCommand.COMMAND_UPGRADE_ADDED, upgradeName, level)
                         .withStyle(ChatFormatting.GOLD),
                 false
         );
         return Command.SINGLE_SUCCESS;
+    }
+
+
+    // Метод для получения группы взаимоисключающих улучшений
+    private static Set<ObsidanumToolUpgrades> getExclusiveGroup(ObsidanumToolUpgrades upgrade) {
+        // HARVESTER и ARCHAEOLOGIST - взаимоисключающие
+        if (upgrade == ObsidanumToolUpgrades.HARVESTER || upgrade == ObsidanumToolUpgrades.ARCHAEOLOGIST) {
+            return Set.of(ObsidanumToolUpgrades.HARVESTER, ObsidanumToolUpgrades.ARCHAEOLOGIST);
+        }
+        return null;
     }
 
     private static int executeRemove(CommandContext<CommandSourceStack> ctx, String upgradeName) {
@@ -140,13 +194,13 @@ public class UpgradeCommand {
         ItemStack stack = player.getMainHandItem();
 
         if (!(stack.getItem() instanceof IUpgradeableItem)) {
-            player.displayClientMessage(Component.literal("Этот предмет нельзя улучшить!"), false);
+            player.displayClientMessage(Component.translatable(TranslationKeysCommand.COMMAND_NOT_UPGRADEABLE), false);
             return Command.SINGLE_SUCCESS;
         }
 
         ObsidanumToolUpgrades upgrade = findUpgradeByName(upgradeName);
         if (upgrade == null) {
-            player.displayClientMessage(Component.literal("Неизвестное улучшение: " + upgradeName), false);
+            player.displayClientMessage(Component.translatable(TranslationKeysCommand.COMMAND_UNKNOWN_UPGRADE, upgradeName), false);
             return Command.SINGLE_SUCCESS;
         }
 
@@ -154,7 +208,7 @@ public class UpgradeCommand {
         upgradable.removeUpgrade(stack, upgrade);
 
         player.displayClientMessage(
-                Component.literal("Удалено улучшение: " + upgradeName)
+                Component.translatable(TranslationKeysCommand.COMMAND_UPGRADE_REMOVED, upgradeName)
                         .withStyle(ChatFormatting.GOLD),
                 false
         );
@@ -171,29 +225,26 @@ public class UpgradeCommand {
         ItemStack stack = player.getMainHandItem();
 
         if (!(stack.getItem() instanceof IUpgradeableItem)) {
-            player.displayClientMessage(Component.literal("Этот предмет нельзя улучшить!"), false);
+            player.displayClientMessage(Component.translatable(TranslationKeysCommand.COMMAND_NOT_UPGRADEABLE), false);
             return Command.SINGLE_SUCCESS;
         }
 
         IUpgradeableItem upgradable = (IUpgradeableItem) stack.getItem();
-
-        // Получаем все улучшения для отображения в сообщении
         Map<ObsidanumToolUpgrades, Integer> upgrades = upgradable.getUpgrades(stack);
 
         if (upgrades.isEmpty()) {
             player.displayClientMessage(
-                    Component.literal("На предмете нет улучшений")
+                    Component.translatable(TranslationKeysCommand.COMMAND_NO_UPGRADES)
                             .withStyle(ChatFormatting.YELLOW),
                     false
             );
             return Command.SINGLE_SUCCESS;
         }
 
-        // Удаляем все улучшения
         upgradable.removeAllUpgrades(stack);
 
         player.displayClientMessage(
-                Component.literal("Все улучшения удалены (" + upgrades.size() + " шт.)")
+                Component.translatable(TranslationKeysCommand.COMMAND_ALL_UPGRADES_REMOVED, upgrades.size())
                         .withStyle(ChatFormatting.GOLD),
                 false
         );
