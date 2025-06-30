@@ -5,6 +5,8 @@ import net.minecraft.util.StringRepresentable;
 public enum ScrollType implements StringRepresentable {
     NONE,
     UPDATE_NETHER,
+    UPDATE_CATACOMBS,
+    UPDATE_ORDER,
     NETHER,
     ORDER,
     CATACOMBS;

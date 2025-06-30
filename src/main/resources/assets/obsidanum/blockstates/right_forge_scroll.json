@@ -16,19 +16,35 @@
             "y": 270
         },
 
-        "facing=north,type_scroll=update": {
-            "model": "obsidanum:block/right_forge_update_scroll"
+        "facing=north,type_scroll=update_nether": {
+            "model": "obsidanum:block/right_forge_update_nether_scroll"
         },
-        "facing=east,type_scroll=update": {
-            "model": "obsidanum:block/right_forge_update_scroll",
+        "facing=east,type_scroll=update_nether": {
+            "model": "obsidanum:block/right_forge_update_nether_scroll",
             "y": 90
         },
-        "facing=south,type_scroll=update": {
-            "model": "obsidanum:block/right_forge_update_scroll",
+        "facing=south,type_scroll=update_nether": {
+            "model": "obsidanum:block/right_forge_update_nether_scroll",
             "y": 180
         },
-        "facing=west,type_scroll=update": {
-            "model": "obsidanum:block/right_forge_update_scroll",
+        "facing=west,type_scroll=update_nether": {
+            "model": "obsidanum:block/right_forge_update_nether_scroll",
+            "y": 270
+        },
+
+        "facing=north,type_scroll=update_catacombs": {
+            "model": "obsidanum:block/right_forge_update_catacombs_scroll"
+        },
+        "facing=east,type_scroll=update_catacombs": {
+            "model": "obsidanum:block/right_forge_update_catacombs_scroll",
+            "y": 90
+        },
+        "facing=south,type_scroll=update_catacombs": {
+            "model": "obsidanum:block/right_forge_update_catacombs_scroll",
+            "y": 180
+        },
+        "facing=west,type_scroll=update_catacombs": {
+            "model": "obsidanum:block/right_forge_update_catacombs_scroll",
             "y": 270
         },
 

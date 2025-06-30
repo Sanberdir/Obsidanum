@@ -46,8 +46,19 @@ public class ItemsObs {
     public static final RegistryObject<Item> UN_CATACOMBS_SCROLL = ITEMS.register("un_catacombs_scroll",
             () -> new Item(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> UN_CATACOMBS_SCROLL_UP = ITEMS.register("un_catacombs_scroll_up",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> UN_NETHER_SCROLL_UP = ITEMS.register("un_nether_scroll_up",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> UN_ORDER_SCROLL_UP = ITEMS.register("un_order_scroll_up",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+
 
     public static final RegistryObject<Item> NETHER_UPGRADE_PLAN = ITEMS.register("nether_upgrade_plan",
+            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CATACOMBS_UPGRADE_PLAN = ITEMS.register("catacombs_upgrade_plan",
+            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> ORDER_UPGRADE_PLAN = ITEMS.register("order_upgrade_plan",
             () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
 
 

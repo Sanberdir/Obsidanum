@@ -33,9 +33,7 @@ import net.rezolv.obsidanum.item.upgrade.UpgradeLibrary;
 import java.util.*;
 
 public class ObsShovel extends ShovelItem implements IUpgradeableItem {
-    public ObsShovel(Tier pTier, float pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
-        super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
-    }
+
 
     // Список разрешенных улучшений для этого инструмента
     private static final ObsidanumToolUpgrades[] ALLOWED_UPGRADES = {
@@ -46,6 +44,9 @@ public class ObsShovel extends ShovelItem implements IUpgradeableItem {
             ObsidanumToolUpgrades.LONG_HANDLE
     };
 
+    public ObsShovel(Tier pTier, float pAttackDamageModifier, float pAttackSpeedModifier, Properties pProperties) {
+        super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
+    }
     @Override
     public Map<ObsidanumToolUpgrades, Integer> getUpgrades(ItemStack stack) {
         Map<ObsidanumToolUpgrades, Integer> upgrades = new HashMap<>();

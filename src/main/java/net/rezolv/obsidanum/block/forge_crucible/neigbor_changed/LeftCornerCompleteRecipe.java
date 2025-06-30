@@ -118,7 +118,6 @@ public class LeftCornerCompleteRecipe {
         ItemStack resultStack = ItemStack.of(resultList.getCompound(0));
         int resultCount = resultStack.getCount();
 
-        // Проверка выходного слота (слот 6)
         ItemStack currentResult = crucible.itemHandler.getStackInSlot(6);
         if (!currentResult.isEmpty()) {
             if (!ItemStack.isSameItemSameTags(currentResult, resultStack)) {
@@ -129,7 +128,6 @@ public class LeftCornerCompleteRecipe {
             }
         }
 
-        // Удаление ингредиентов
         ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
         for (int i = 0; i < ingredients.size(); i++) {
             CompoundTag ingredient = ingredients.getCompound(i);
@@ -138,11 +136,9 @@ public class LeftCornerCompleteRecipe {
                 int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
                 crucible.itemHandler.extractItem(i, requiredCount, false);
             } catch (Exception e) {
-                Obsidanum.LOGGER.error("Ошибка при извлечении предметов из слота {}: {}", i, e.getMessage());
             }
         }
 
-        // Добавление основного результата
         if (currentResult.isEmpty()) {
             crucible.itemHandler.setStackInSlot(6, resultStack.copy());
         } else {
@@ -150,12 +146,10 @@ public class LeftCornerCompleteRecipe {
             crucible.itemHandler.setStackInSlot(6, currentResult);
         }
 
-        // Обработка бонусных предметов (слоты 7-11)
         if (data.contains("BonusOutputs", Tag.TAG_LIST)) {
             ListTag bonusOutputs = data.getList("BonusOutputs", Tag.TAG_COMPOUND);
             Random random = new Random();
 
-            // Собираем все бонусы, прошедшие проверку шанса
             List<ItemStack> bonusesToAdd = new ArrayList<>();
             for (int i = 0; i < bonusOutputs.size(); i++) {
                 CompoundTag bonusTag = bonusOutputs.getCompound(i);

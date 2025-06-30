@@ -1,0 +1,15 @@
+
+{
+  "type": "obsidanum:forge_scroll_catacombs_up",
+  "ingredients": [
+    {
+      "item": "minecraft:diamond",
+      "count": 3
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 1
+    }
+  ],
+  "upgrade": "sharpening"
+}

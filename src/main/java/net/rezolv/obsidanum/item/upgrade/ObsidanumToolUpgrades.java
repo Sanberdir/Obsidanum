@@ -28,6 +28,7 @@ public enum ObsidanumToolUpgrades {
     public String getName() {
         return name;
     }
+
     public String getTranslationKey() {
         return "upgrade.obsidanum." + this.name().toLowerCase();
     }

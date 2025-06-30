@@ -1,0 +1,10 @@
+{
+  "type": "obsidanum:forge_scroll_order_up",
+  "ingredients": [
+    {
+      "item": "minecraft:emerald",
+      "count": 1
+    }
+  ],
+  "upgrade": "woodcutter"
+}

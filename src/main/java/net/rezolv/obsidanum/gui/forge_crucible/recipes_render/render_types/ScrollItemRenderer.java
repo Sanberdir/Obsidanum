@@ -82,6 +82,8 @@ public class ScrollItemRenderer {
             case ORDER -> ItemsObs.ORDER_PLAN.get().getDefaultInstance();
             case CATACOMBS -> ItemsObs.CATACOMBS_PLAN.get().getDefaultInstance();
             case UPDATE_NETHER -> ItemsObs.NETHER_UPGRADE_PLAN.get().getDefaultInstance();
+            case UPDATE_CATACOMBS -> ItemsObs.CATACOMBS_UPGRADE_PLAN.get().getDefaultInstance();
+            case UPDATE_ORDER -> ItemsObs.ORDER_UPGRADE_PLAN.get().getDefaultInstance();
             default -> ItemStack.EMPTY;
         };
     }

@@ -1,0 +1,14 @@
+{
+  "type": "obsidanum:forge_scroll_order_up",
+  "ingredients": [
+    {
+      "item": "minecraft:emerald",
+      "count": 3
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 3
+    }
+  ],
+  "upgrade": "long_handle"
+}

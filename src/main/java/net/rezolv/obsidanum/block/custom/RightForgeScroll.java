@@ -48,6 +48,10 @@ public class RightForgeScroll extends BaseEntityBlock {
             newType = ScrollType.CATACOMBS;
         } else if (itemInHand.is(ItemsObs.NETHER_UPGRADE_PLAN.get())) {
             newType = ScrollType.UPDATE_NETHER;
+        } else if (itemInHand.is(ItemsObs.CATACOMBS_UPGRADE_PLAN.get())) {
+            newType = ScrollType.UPDATE_CATACOMBS;
+        } else if (itemInHand.is(ItemsObs.ORDER_UPGRADE_PLAN.get())) {
+            newType = ScrollType.UPDATE_ORDER;
         }
 
         // Добавить свиток и NBT
@@ -82,6 +86,8 @@ public class RightForgeScroll extends BaseEntityBlock {
                         case ORDER -> scrollItem = ItemsObs.ORDER_PLAN.get().getDefaultInstance();
                         case CATACOMBS -> scrollItem = ItemsObs.CATACOMBS_PLAN.get().getDefaultInstance();
                         case UPDATE_NETHER -> scrollItem = ItemsObs.NETHER_UPGRADE_PLAN.get().getDefaultInstance();
+                        case UPDATE_CATACOMBS -> scrollItem = ItemsObs.CATACOMBS_UPGRADE_PLAN.get().getDefaultInstance();
+                        case UPDATE_ORDER -> scrollItem = ItemsObs.ORDER_UPGRADE_PLAN.get().getDefaultInstance();
                     }
 
                     if (scrollItem != null) {

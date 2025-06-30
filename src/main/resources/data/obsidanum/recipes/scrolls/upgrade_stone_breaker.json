@@ -1,0 +1,14 @@
+{
+  "type": "obsidanum:forge_scroll_catacombs_up",
+  "ingredients": [
+    {
+      "item": "minecraft:coal",
+      "count": 1
+    },
+    {
+      "item": "minecraft:lapis_lazuli",
+      "count": 2
+    }
+  ],
+  "upgrade": "stone_breaker"
+}

@@ -1,9 +1,6 @@
 package net.rezolv.obsidanum.item.upgrade;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
@@ -39,22 +36,7 @@ public interface IUpgradeableItem {
     default void removeAllUpgrades(ItemStack stack) {
         stack.removeTagKey(NBT_UPGRADES);
     }
-    static boolean hasUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade) {
-        CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.contains("Upgrades", Tag.TAG_LIST)) return false;
 
-        ListTag list = tag.getList("Upgrades", Tag.TAG_STRING);
-        for (Tag upgradeTag : list) {
-            if (upgradeTag instanceof StringTag str && str.getAsString().equals(upgrade.name())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-    /**
-     * Удалить конкретное улучшение
-     */
     default void removeUpgrade(ItemStack stack, ObsidanumToolUpgrades upgrade) {
         CompoundTag upgradesTag = stack.getTagElement(NBT_UPGRADES);
         if (upgradesTag != null) {

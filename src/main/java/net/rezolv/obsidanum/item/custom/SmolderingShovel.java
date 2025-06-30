@@ -45,7 +45,7 @@ public class SmolderingShovel extends ShovelItem implements IUpgradeableItem {
         super(pTier, pAttackDamageModifier, pAttackSpeedModifier, pProperties);
     }
 
-    // Список разрешенных улучшений для этого инструмента
+
     private static final ObsidanumToolUpgrades[] ALLOWED_UPGRADES = {
             ObsidanumToolUpgrades.STRENGTH,
             ObsidanumToolUpgrades.HARVESTER,

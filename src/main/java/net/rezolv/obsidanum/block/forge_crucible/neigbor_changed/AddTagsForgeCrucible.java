@@ -54,7 +54,9 @@ public class AddTagsForgeCrucible {
 
                     // <-- Вставляем сразу наш новый тег TypeScroll
                     dataToSend.putString("TypeScroll", scrollType.name());
-
+                    if (scrollNBT.contains("Upgrade", Tag.TAG_STRING)) {
+                        dataToSend.putString("Upgrade", scrollNBT.getString("Upgrade"));
+                    }
                     // Copy ingredients
                     if (scrollNBT.contains("Ingredients", Tag.TAG_LIST)) {
                         dataToSend.put("Ingredients", scrollNBT.getList("Ingredients", Tag.TAG_COMPOUND));

@@ -245,8 +245,8 @@ public class ObsPickaxe extends PickaxeItem implements IUpgradeableItem {
     @Override
     public boolean onDroppedByPlayer(ItemStack stack, Player player) {
         // UUID-ы те же, что в inventoryTick
-        UUID reachUUID = generateUUID("obsidian_pickaxe.long_handle_reach");
-        UUID attackRangeUUID = generateUUID("obsidian_pickaxe.long_handle_attack_range");
+        UUID reachUUID = generateUUID("obs_pickaxe.long_handle_reach");
+        UUID attackRangeUUID = generateUUID("obs_pickaxe.long_handle_attack_range");
 
         // Снимаем модификаторы, если они остались
         var reachAttr = player.getAttribute(ForgeMod.BLOCK_REACH.get());
@@ -272,8 +272,8 @@ public class ObsPickaxe extends PickaxeItem implements IUpgradeableItem {
         var attackRangeAttr = player.getAttribute(ForgeMod.ENTITY_REACH.get());
 
         // Генерируем UUID для модификаторов
-        UUID reachUUID = generateUUID("obsidian_pickaxe.long_handle_reach");
-        UUID attackRangeUUID = generateUUID("obsidian_pickaxe.long_handle_attack_range");
+        UUID reachUUID = generateUUID("obs_pickaxe.long_handle_reach");
+        UUID attackRangeUUID = generateUUID("obs_pickaxe.long_handle_attack_range");
 
         // Удаляем старые модификаторы (если есть)
         if (reachAttr != null && reachAttr.getModifier(reachUUID) != null) {
@@ -295,7 +295,7 @@ public class ObsPickaxe extends PickaxeItem implements IUpgradeableItem {
                 if (reachAttr != null) {
                     AttributeModifier reachMod = new AttributeModifier(
                             reachUUID,
-                            "obsidian_pickaxe.long_handle_reach",
+                            "obs_pickaxe.long_handle_reach",
                             bonus,
                             AttributeModifier.Operation.ADDITION
                     );
@@ -306,7 +306,7 @@ public class ObsPickaxe extends PickaxeItem implements IUpgradeableItem {
                 if (attackRangeAttr != null) {
                     AttributeModifier attackRangeMod = new AttributeModifier(
                             attackRangeUUID,
-                            "obsidian_pickaxe.long_handle_attack_range",
+                            "obs_pickaxe.long_handle_attack_range",
                             bonus,
                             AttributeModifier.Operation.ADDITION
                     );
@@ -332,7 +332,7 @@ public class ObsPickaxe extends PickaxeItem implements IUpgradeableItem {
         int balancingLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.BALANCING);
         int stoneBreakerLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.STONE_BREAKER);
         if (stoneBreakerLevel > 0 && isStoneBlock(state)) {
-            baseSpeed *= 10.0f;  // +50% за уровень
+            baseSpeed *= 12.0f;  // +50% за уровень
         }
         // Уменьшаем скорость от HARVESTER (например, на 10% за уровень)
         if (harvesterLevel > 0) {

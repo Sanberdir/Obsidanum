@@ -231,7 +231,13 @@ public class CreativeTabObs extends CreativeModeTab {
                         pOutput.accept(ItemsObs.NETHER_PLAN.get());
                         pOutput.accept(ItemsObs.ORDER_PLAN.get());
                         pOutput.accept(ItemsObs.CATACOMBS_PLAN.get());
+                        pOutput.accept(ItemsObs.CATACOMBS_UPGRADE_PLAN.get());
+                        pOutput.accept(ItemsObs.ORDER_UPGRADE_PLAN.get());
+                        pOutput.accept(ItemsObs.NETHER_UPGRADE_PLAN.get());
                         pOutput.accept(ItemsObs.UN_CATACOMBS_SCROLL.get());
+                        pOutput.accept(ItemsObs.UN_CATACOMBS_SCROLL_UP.get());
+                        pOutput.accept(ItemsObs.UN_NETHER_SCROLL_UP.get());
+                        pOutput.accept(ItemsObs.UN_ORDER_SCROLL_UP.get());
                         pOutput.accept(ItemsObs.UN_NETHER_SCROLL.get());
                         pOutput.accept(ItemsObs.UN_ORDER_SCROLL.get());
                         pOutput.accept(ItemsObs.OBSIDAN.get());
@@ -308,8 +314,6 @@ public class CreativeTabObs extends CreativeModeTab {
                                 result = ItemsObs.ORDER_PLAN.get().getDefaultInstance();
                             } else if (recipe.getType() == ForgeScrollCatacombsRecipe.Type.FORGE_SCROLL_CATACOMBS) {
                                 result = ItemsObs.CATACOMBS_PLAN.get().getDefaultInstance();
-                            } else if (recipe.getType() == ForgeScrollUpgradeRecipe.Type.FORGE_SCROLL_UPGRADE) {
-                                result = ItemsObs.NETHER_UPGRADE_PLAN.get().getDefaultInstance();
                             }
 
                             if (result != null && !result.isEmpty()) {

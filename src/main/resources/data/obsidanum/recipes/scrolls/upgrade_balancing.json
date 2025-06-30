@@ -1,0 +1,10 @@
+{
+  "type": "obsidanum:forge_scroll_catacombs_up",
+  "ingredients": [
+    {
+      "item": "minecraft:redstone",
+      "count": 3
+    }
+  ],
+  "upgrade": "balancing"
+}

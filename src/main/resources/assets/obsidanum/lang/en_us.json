@@ -236,10 +236,15 @@
   "item.obsidanum.order_plan": "Order Plan",
   "item.obsidanum.nether_plan": "Nether Plan",
   "item.obsidanum.catacombs_plan": "Catacombs Plan",
+  "item.obsidanum.catacombs_upgrade_plan": "Upgrade Plan",
   "item.obsidanum.nether_upgrade_plan": "Upgrade Plan",
+  "item.obsidanum.order_upgrade_plan": "Upgrade Plan",
   "item.obsidanum.un_order_scroll": "Un scroll",
   "item.obsidanum.un_nether_scroll": "Un scroll",
   "item.obsidanum.un_catacombs_scroll": "Un scroll",
+  "item.obsidanum.un_catacombs_scroll_up": "Un scroll",
+  "item.obsidanum.un_nether_scroll_up": "Un scroll",
+  "item.obsidanum.un_order_scroll_up": "Un scroll",
   "item.obsidanum.flame_crossbow": "Flame crossbow",
   "item.obsidanum.flame_bolt": "Flame bolt",
   "item.obsidanum.netherite_bolt": "Netherite Bolt (WIP)",
@@ -330,6 +335,8 @@
   "tooltip.scrolls.bonus_outputs": "Bonus Outputs",
   "tooltip.scrolls.ingredients": "Scrolls ingredients",
 
+  "tooltip.obsidanum.ingredients_header":"Ingredients: ",
+
   "upgrade.obsidanum.stone_breaker": "Stone Breaker",
   "upgrade.obsidanum.archaeologist": "Archaeologist",
   "upgrade.obsidanum.balancing": "Balancing",
@@ -341,18 +348,25 @@
   "upgrade.obsidanum.long_handle": "Long Handle",
 
   "command.obsidanum.too_many_upgrades": "Cannot add upgrade! Maximum %s slots exceeded",
-  "command.obsidanum.upgrade_failed": "Failed to add upgrade",
   "command.obsidanum.upgrade.not_upgradeable": "This item cannot be upgraded!",
   "command.obsidanum.upgrade.unknown_upgrade": "Unknown upgrade: %s",
   "command.obsidanum.upgrade.not_allowed": "This upgrade cannot be applied to this tool!",
   "command.obsidanum.upgrade.conflict": "Cannot add upgrade %s as it conflicts with existing %s",
   "command.obsidanum.upgrade.invalid_level": "Invalid level: %s. Must be between %s and %s.",
   "command.obsidanum.upgrade.added": "Added upgrade: %s (level %s)",
-  "command.obsidanum.upgrade.updated": "Update upgrade: %s (level %s)",
   "command.obsidanum.upgrade.removed": "Removed upgrade: %s",
   "command.obsidanum.upgrade.none": "No upgrades on this item",
   "command.obsidanum.upgrade.all_removed": "All upgrades removed (%s)",
 
+  "obsidanum.upgrade.success": "§aUpgrade§f \"%s\" §aapplied! Level %d",
+  "obsidanum.upgrade.error.no_tool": "§cNo valid item to upgrade.",
+  "obsidanum.upgrade.error.missing_ingredients": "§cNot enough ingredients.",
+  "obsidanum.upgrade.error.no_recipe": "§cNo upgrade recipe received.",
+  "obsidanum.upgrade.error.invalid_upgrade": "§cInvalid upgrade type.",
+  "obsidanum.upgrade.error.not_allowed": "§cThis upgrade cannot be applied to this item.",
+  "obsidanum.upgrade.error.max_level": "§cUpgrade§f %s §chas already reached maximum level %d.",
+  "obsidanum.upgrade.error.conflict": "§cUpgrade conflicts with an existing one.",
+  "obsidanum.upgrade.error.no_slots": "§cNot enough upgrade slots available.",
 
   "message.obsidanum.archaeologist_find": "You found a %s while digging!"
 }

@@ -448,7 +448,7 @@ public class SmolderingPickaxe extends PickaxeItem implements IUpgradeableItem {
         int balancingLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.BALANCING);
         int stoneBreakerLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.STONE_BREAKER);
         if (stoneBreakerLevel > 0 && isStoneBlock(state)) {
-            baseSpeed *= 10.0f;  // +50% за уровень
+            baseSpeed *= 13.0f;  // +50% за уровень
         }
         // Уменьшаем скорость от HARVESTER (например, на 10% за уровень)
         if (harvesterLevel > 0) {

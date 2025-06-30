@@ -17,7 +17,12 @@ public class ObsidanRecipes {
             SERIALIZERS.register("forge_scroll_order", () -> ForgeScrollOrderRecipe.Serializer.FORGE_SCROLL_ORDER);
     public static final RegistryObject<RecipeSerializer<ForgeScrollCatacombsRecipe>> FORGE_SCROLL_CATACOMBS_SERIALIZER =
             SERIALIZERS.register("forge_scroll_catacombs", () -> ForgeScrollCatacombsRecipe.Serializer.FORGE_SCROLL_CATACOMBS);
-    public static final RegistryObject<RecipeSerializer<ForgeScrollUpgradeRecipe>> FORGE_SCROLL_UPGRADE_SERIALIZER =
-            SERIALIZERS.register("forge_scroll_upgrade", () -> ForgeScrollUpgradeRecipe.Serializer.FORGE_SCROLL_UPGRADE);
+    public static final RegistryObject<RecipeSerializer<ForgeScrollCatacombsUpgradeRecipe>> FORGE_SCROLL_CATACOMBS_UP_SERIALIZER =
+            SERIALIZERS.register("forge_scroll_catacombs_up", () -> ForgeScrollCatacombsUpgradeRecipe.Serializer.FORGE_SCROLL_CATACOMBS_UPGRADE);
+
+    public static final RegistryObject<RecipeSerializer<ForgeScrollNetherUpgradeRecipe>> FORGE_SCROLL_NETHER_UP_SERIALIZER =
+            SERIALIZERS.register("forge_scroll_nether_up", () -> ForgeScrollNetherUpgradeRecipe.Serializer.FORGE_SCROLL_NETHER_UPGRADE);
+    public static final RegistryObject<RecipeSerializer<ForgeScrollOrderUpgradeRecipe>> FORGE_SCROLL_ORDER_UP_SERIALIZER =
+            SERIALIZERS.register("forge_scroll_order_up", () -> ForgeScrollOrderUpgradeRecipe.Serializer.FORGE_SCROLL_ORDER_UPGRADE);
 
 }

@@ -13,9 +13,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.item.ItemsObs;
-import net.rezolv.obsidanum.recipes.ForgeScrollCatacombsRecipe;
 import net.rezolv.obsidanum.recipes.ForgeScrollNetherRecipe;
-import net.rezolv.obsidanum.recipes.ForgeScrollOrderRecipe;
 import net.rezolv.obsidanum.sound.SoundsObs;
 
 import java.util.List;

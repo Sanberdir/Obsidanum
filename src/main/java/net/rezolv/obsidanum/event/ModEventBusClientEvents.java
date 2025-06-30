@@ -49,7 +49,6 @@ public class ModEventBusClientEvents {
         event.registerAboveAll("sword_cooldown", CooldownOverlaySword.COOLDOWN_OVERLAY);
         event.registerAboveAll("pickaxe_cooldown", CooldownOverlayPickaxe.COOLDOWN_OVERLAY);
     }
-
     @SubscribeEvent
     public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(ModModelLayersItem.OBSIDAN_BOAT_LAYER, BoatModel::createBodyModel);

@@ -1,24 +1,27 @@
-package net.rezolv.obsidanum.gui.forge_crucible.repair_render;
+package net.rezolv.obsidanum.gui.forge_crucible.upgrade_render;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.render_types.ScrollItemRenderer;
+import net.rezolv.obsidanum.gui.forge_crucible.upgrade_render.render_types.RecipeIngredientsRendererUpgrade;
 
 import java.util.HashMap;
 
-public class ForgeCrucibleRepairScreen extends AbstractContainerScreen<ForgeCrucibleRepairMenu> {
-    private final static HashMap<String, Object> guistate = ForgeCrucibleRepairMenu.guistate;
+public class ForgeCrucibleUpgradeScreen extends AbstractContainerScreen<ForgeCrucibleUpgradeMenu> {
+    private final static HashMap<String, Object> guistate = ForgeCrucibleUpgradeMenu.guistate;
     private final Level world;
     private final int x, y, z;
     private final Player entity;
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation("obsidanum:textures/gui/forge_crucible_menu_repair.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation("obsidanum:textures/gui/forge_crucible_menu_upgrade.png");
 
-    public ForgeCrucibleRepairScreen(ForgeCrucibleRepairMenu container, Inventory inventory, Component text) {
+    public ForgeCrucibleUpgradeScreen(ForgeCrucibleUpgradeMenu container, Inventory inventory, Component text) {
         super(container, inventory, text);
         this.world = container.world;
         this.x = container.x;
@@ -39,6 +42,10 @@ public class ForgeCrucibleRepairScreen extends AbstractContainerScreen<ForgeCruc
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
         guiGraphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
+        ScrollItemRenderer.render(guiGraphics, this.font, world, x, y, z, leftPos, topPos);
+        // Отрисовка ингредиентов улучшения
+        RecipeIngredientsRendererUpgrade.render(guiGraphics, this.font, menu, world,
+                new BlockPos(menu.x, menu.y, menu.z), leftPos, topPos);
     }
 
     @Override

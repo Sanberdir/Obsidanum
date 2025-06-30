@@ -223,8 +223,8 @@ public class SmolderingAxe extends AxeItem implements IUpgradeableItem {
     @Override
     public boolean onDroppedByPlayer(ItemStack stack, Player player) {
         // UUID-ы те же, что в inventoryTick
-        UUID reachUUID = generateUUID("obsidan_axe.long_handle_reach");
-        UUID attackRangeUUID = generateUUID("obsidan_axe.long_handle_attack_range");
+        UUID reachUUID = generateUUID("smoldering_axe.long_handle_reach");
+        UUID attackRangeUUID = generateUUID("smoldering_axe.long_handle_attack_range");
 
         // Снимаем модификаторы, если они остались
         var reachAttr = player.getAttribute(ForgeMod.BLOCK_REACH.get());
@@ -247,13 +247,13 @@ public class SmolderingAxe extends AxeItem implements IUpgradeableItem {
         // Обработка дальности взаимодействия с блоками
         var reachAttr = player.getAttribute(ForgeMod.BLOCK_REACH.get());
         if (reachAttr != null) {
-            reachAttr.removeModifier(generateUUID("obsidan_axe.long_handle_reach")); // Удаляем по сгенерированному UUID
+            reachAttr.removeModifier(generateUUID("smoldering_axe.long_handle_reach")); // Удаляем по сгенерированному UUID
         }
 
 // Обработка дальности атаки через Forge-специфичный атрибут
         var attackRangeAttr = player.getAttribute(ForgeMod.ENTITY_REACH.get());
         if (attackRangeAttr != null) {
-            attackRangeAttr.removeModifier(generateUUID("obsidan_axe.long_handle_attack_range")); // Удаляем по сгенерированному UUID
+            attackRangeAttr.removeModifier(generateUUID("smoldering_axe.long_handle_attack_range")); // Удаляем по сгенерированному UUID
         }
 
         // Проверяем, держит ли игрок именно этот инструмент в одной из рук
@@ -269,8 +269,8 @@ public class SmolderingAxe extends AxeItem implements IUpgradeableItem {
                 // Применяем бонус к дальности взаимодействия с блоками
                 if (reachAttr != null) {
                     AttributeModifier reachMod = new AttributeModifier(
-                            generateUUID("obsidan_axe.long_handle_reach"), // Динамически генерируемый UUID
-                            "obsidan_axe.long_handle_reach",
+                            generateUUID("smoldering_axe.long_handle_reach"), // Динамически генерируемый UUID
+                            "smoldering_axe.long_handle_reach",
                             bonus,
                             AttributeModifier.Operation.ADDITION
                     );
@@ -280,8 +280,8 @@ public class SmolderingAxe extends AxeItem implements IUpgradeableItem {
                 // Применяем бонус к дальности атаки мобов
                 if (attackRangeAttr != null) {
                     AttributeModifier attackRangeMod = new AttributeModifier(
-                            generateUUID("obsidan_axe.long_handle_attack_range"), // Динамически генерируемый UUID
-                            "obsidan_axe.long_handle_attack_range",
+                            generateUUID("smoldering_axe.long_handle_attack_range"), // Динамически генерируемый UUID
+                            "smoldering_axe.long_handle_attack_range",
                             bonus,
                             AttributeModifier.Operation.ADDITION
                     );

@@ -109,14 +109,24 @@ public class RecipeIngredientsRenderer {
 
     private static void renderIngredientItem(GuiGraphics guiGraphics, Font font, ItemStack displayStack,
                                              ItemStack slotStack, boolean satisfied,
-                                             int x, int y, int requiredCount) {
+                                             int x, int y, int count) {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 100);
 
         if (!satisfied) {
             guiGraphics.setColor(1.0f, 1.0f, 1.0f, 0.7f);
             guiGraphics.renderItem(displayStack, x, y);
-            renderCountText(guiGraphics, font, x, y, requiredCount);
+
+            // Показываем требуемое количество ТОЛЬКО если слот пуст или не удовлетворяет рецепту
+            if (count > 1 && slotStack.isEmpty()) {
+                renderCountText(guiGraphics, font, x, y, count);
+            }
+        } else {
+            guiGraphics.renderItem(slotStack, x, y);
+            // УДАЛЕНА отрисовка количества, если всё удовлетворено
+            // if (slotStack.getCount() > 1) {
+            //     renderCountText(guiGraphics, font, x, y, slotStack.getCount());
+            // }
         }
 
         guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);

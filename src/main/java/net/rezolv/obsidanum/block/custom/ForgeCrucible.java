@@ -19,14 +19,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 import net.rezolv.obsidanum.block.enum_blocks.ScrollType;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.AddTagsForgeCrucible;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRecipe;
+import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteUp;
 import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
-import net.rezolv.obsidanum.gui.forge_crucible.repair_render.ForgeCrucibleRepairMenu;
+import net.rezolv.obsidanum.gui.forge_crucible.upgrade_render.ForgeCrucibleUpgradeMenu;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -81,9 +81,10 @@ public class ForgeCrucible extends BaseEntityBlock {
                     if ((type == ScrollType.NETHER)||(type == ScrollType.CATACOMBS)||(type == ScrollType.ORDER)) {
                         return new ForgeCrucibleGuiMenu(id, inv, buf);
                     }
-                    else {
-                        return new ForgeCrucibleRepairMenu(id, inv, buf);
+                    else if ((type == ScrollType.UPDATE_CATACOMBS)||(type == ScrollType.UPDATE_NETHER||(type == ScrollType.UPDATE_ORDER))) {
+                        return new ForgeCrucibleUpgradeMenu(id, inv, buf);
                     }
+                    else return null;
                 }
             };
 
@@ -95,9 +96,24 @@ public class ForgeCrucible extends BaseEntityBlock {
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
         super.neighborChanged(state, level, pos, block, fromPos, isMoving);
-        AddTagsForgeCrucible.handleNeighborUpdate(state, level, pos, fromPos);
-        LeftCornerCompleteRecipe.handleNeighborUpdate(state, level, pos, fromPos);
+
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof ForgeCrucibleEntity crucible) {
+            // Get the scroll type
+            String typeName = crucible.getReceivedData().getString("TypeScroll");
+            ScrollType type = ScrollType.valueOf(typeName.isEmpty() ? "NONE" : typeName);
+            AddTagsForgeCrucible.handleNeighborUpdate(state, level, pos, fromPos);
+
+            // Only run these handlers for specific scroll types
+            if (type == ScrollType.NETHER || type == ScrollType.CATACOMBS || type == ScrollType.ORDER) {
+                LeftCornerCompleteRecipe.handleNeighborUpdate(state, level, pos, fromPos);
+            }
+            if (type == ScrollType.UPDATE_NETHER || type == ScrollType.UPDATE_CATACOMBS|| type == ScrollType.UPDATE_ORDER) {
+                LeftCornerCompleteUp.handleNeighborUpdate(state, level, pos, fromPos);
+            }
+        }
     }
+
     public BlockState mirror(BlockState state, Mirror mirrorIn) {
         return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
     }

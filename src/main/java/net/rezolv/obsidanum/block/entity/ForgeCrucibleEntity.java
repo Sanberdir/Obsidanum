@@ -50,7 +50,6 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
             }
         }
     };
-
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     private final LazyOptional<? extends IItemHandler>[] handlers = new LazyOptional[Direction.values().length];
 
