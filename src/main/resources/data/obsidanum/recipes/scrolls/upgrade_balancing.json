@@ -2,8 +2,12 @@
   "type": "obsidanum:forge_scroll_catacombs_up",
   "ingredients": [
     {
-      "item": "minecraft:redstone",
+      "item": "obsidanum:berilis",
       "count": 3
+    },
+    {
+      "item": "obsidanum:serpelis",
+      "count": 2
     }
   ],
   "upgrade": "balancing"

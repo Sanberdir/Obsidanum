@@ -2,8 +2,16 @@
   "type": "obsidanum:forge_scroll_order_up",
   "ingredients": [
     {
-      "item": "minecraft:emerald",
-      "count": 1
+      "item": "obsidanum:berilis",
+      "count": 2
+    },
+    {
+      "item": "obsidanum:patiras",
+      "count": 2
+    },
+    {
+      "item": "obsidanum:gitavro",
+      "count": 3
     }
   ],
   "upgrade": "woodcutter"

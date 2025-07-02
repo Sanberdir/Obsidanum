@@ -17,5 +17,47 @@
   "output": {
     "item": "obsidanum:obsidan_essence",
     "count": 5
-  }
+  },
+  "bonus_outputs": [
+    {
+      "item": {
+        "item": "obsidanum:berilis",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    },
+    {
+      "item": {
+        "item": "obsidanum:tahiro",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    },
+    {
+      "item": {
+        "item": "obsidanum:serpelis",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    },
+    {
+      "item": {
+        "item": "obsidanum:patiras",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    },
+    {
+      "item": {
+        "item": "obsidanum:gitavro",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    }
+  ]
 }

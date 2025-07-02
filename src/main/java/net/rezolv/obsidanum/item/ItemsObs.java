@@ -24,6 +24,17 @@ public class ItemsObs {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, Obsidanum.MOD_ID);
 
+    public static final RegistryObject<Item> BERILIS = ITEMS.register("berilis",
+            () -> new PotGrenadeItem(new Item.Properties()));
+    public static final RegistryObject<Item> TAHIRO = ITEMS.register("tahiro",
+            () -> new PotGrenadeItem(new Item.Properties()));
+    public static final RegistryObject<Item> SERPELIS = ITEMS.register("serpelis",
+            () -> new PotGrenadeItem(new Item.Properties()));
+    public static final RegistryObject<Item> PATIRAS = ITEMS.register("patiras",
+            () -> new PotGrenadeItem(new Item.Properties()));
+    public static final RegistryObject<Item> GITAVRO = ITEMS.register("gitavro",
+            () -> new PotGrenadeItem(new Item.Properties()));
+
     public static final RegistryObject<Item> POT_GRENADE = ITEMS.register("pot_grenade",
             () -> new PotGrenadeItem(new Item.Properties()));
     public static final RegistryObject<Item> VELNARIUM_ORE = ITEMS.register("velnarium_ore",
@@ -38,6 +49,13 @@ public class ItemsObs {
             () -> new ScrollText(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CATACOMBS_PLAN = ITEMS.register("catacombs_plan",
             () -> new ScrollText(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> NETHER_UPGRADE_PLAN = ITEMS.register("nether_upgrade_plan",
+            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CATACOMBS_UPGRADE_PLAN = ITEMS.register("catacombs_upgrade_plan",
+            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> ORDER_UPGRADE_PLAN = ITEMS.register("order_upgrade_plan",
+            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> UN_ORDER_SCROLL = ITEMS.register("un_order_scroll",
             () -> new Item(new Item.Properties().stacksTo(1)));
@@ -54,12 +72,7 @@ public class ItemsObs {
             () -> new Item(new Item.Properties().stacksTo(1)));
 
 
-    public static final RegistryObject<Item> NETHER_UPGRADE_PLAN = ITEMS.register("nether_upgrade_plan",
-            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> CATACOMBS_UPGRADE_PLAN = ITEMS.register("catacombs_upgrade_plan",
-            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> ORDER_UPGRADE_PLAN = ITEMS.register("order_upgrade_plan",
-            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
+
 
 
     public static final RegistryObject<Item> OBSIDAN_ESSENCE = ITEMS.register("obsidan_essence",

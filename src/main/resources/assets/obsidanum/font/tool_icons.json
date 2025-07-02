@@ -44,6 +44,13 @@
     },
     {
       "type": "bitmap",
+      "file": "obsidanum:tool_icon/type_upgrade.png",
+      "ascent": 8,
+      "height": 10,
+      "chars": ["\uE015"]
+    },
+    {
+      "type": "bitmap",
       "file": "obsidanum:tool_icon/result_lots.png",
       "ascent": 8,
       "height": 10,

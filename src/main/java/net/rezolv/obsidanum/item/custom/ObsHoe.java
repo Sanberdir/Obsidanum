@@ -214,7 +214,8 @@ public class ObsHoe extends HoeItem implements IUpgradeableItem{
 
         // Новая логика для RICH_HARVEST
         if (state.getBlock() instanceof CropBlock cropBlock) {
-            if (state.getValue(CropBlock.AGE) == cropBlock.getMaxAge()) {
+            // Используем isMaxAge() вместо ручной проверки
+            if (cropBlock.isMaxAge(state)) {
                 int harvestLevel = getUpgradeLevel(stack, ObsidanumToolUpgrades.RICH_HARVEST);
                 if (harvestLevel > 0) {
                     harvestCrop(world, pos, state, player, harvestLevel);
@@ -229,30 +230,29 @@ public class ObsHoe extends HoeItem implements IUpgradeableItem{
     }
     private void harvestCrop(Level world, BlockPos pos, BlockState state, Player player, int harvestLevel) {
         if (!world.isClientSide && world instanceof ServerLevel serverWorld && state.getBlock() instanceof CropBlock cropBlock) {
-            // Проверяем, достигло ли растение максимальной стадии
-            if (state.getValue(CropBlock.AGE) == cropBlock.getMaxAge()) {
-                // Получаем базовые дропы (1 предмет)
+            // Универсальная проверка зрелости через isMaxAge()
+            if (cropBlock.isMaxAge(state)) {
+                // Получаем базовые дропы
                 List<ItemStack> drops = Block.getDrops(state, serverWorld, pos, world.getBlockEntity(pos), player, player.getMainHandItem());
 
                 // Получаем случайное количество дополнительных предметов
                 RandomSource random = world.getRandom();
                 int bonusDrops = getRandomBonusCount(harvestLevel, random);
 
-                // Сбрасываем стадию роста только если растение было полностью выросшим
-                world.setBlock(pos, state.setValue(CropBlock.AGE, 0), 2);
+                // Сбрасываем стадию роста (универсальный метод)
+                world.setBlock(pos, cropBlock.getStateForAge(0), 2);
 
-                // Выдаем опыт (1-3 за базовый урожай + 1 за каждый бонусный предмет)
+                // Выдаем опыт
                 int xp = 1 + random.nextInt(3) + bonusDrops;
                 if (xp > 0) {
                     ExperienceOrb.award(serverWorld, Vec3.atCenterOf(pos), xp);
                 }
 
-                // Выдаем дропы (базовый + бонусные)
+                // Выдаем дропы
                 if (!drops.isEmpty()) {
                     ItemStack baseDrop = drops.get(0);
-                    int totalDrops = 1 + bonusDrops; // Базовый 1 + бонусные
+                    int totalDrops = 1 + bonusDrops;
 
-                    // Создаем один ItemStack с суммарным количеством
                     ItemStack resultDrop = baseDrop.copy();
                     resultDrop.setCount(totalDrops);
                     Block.popResource(world, pos, resultDrop);

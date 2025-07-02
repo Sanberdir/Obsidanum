@@ -2,12 +2,8 @@
   "type": "obsidanum:forge_scroll_nether_up",
   "ingredients": [
     {
-      "item": "minecraft:diamond",
-      "count": 1
-    },
-    {
-      "item": "minecraft:obsidian",
-      "count": 2
+      "item": "obsidanum:patiras",
+      "count": 3
     }
   ],
   "upgrade": "harvester"

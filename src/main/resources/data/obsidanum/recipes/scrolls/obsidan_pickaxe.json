@@ -25,11 +25,43 @@
   "bonus_outputs": [
     {
       "item": {
-        "item": "minecraft:obsidan_essence",
+        "item": "obsidanum:berilis",
         "min": 1,
-        "max": 1
+        "max": 4
       },
-      "chance": 0.1
+      "chance": 0.25
+    },
+    {
+      "item": {
+        "item": "obsidanum:tahiro",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.25
+    },
+    {
+      "item": {
+        "item": "obsidanum:serpelis",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.25
+    },
+    {
+      "item": {
+        "item": "obsidanum:patiras",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.25
+    },
+    {
+      "item": {
+        "item": "obsidanum:gitavro",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.25
     }
   ]
 }

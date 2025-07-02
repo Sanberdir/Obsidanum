@@ -38,6 +38,11 @@ public class FlameCrossbowItem extends CrossbowItem implements Vanishable {
     };
 
     @Override
+    public boolean isEnchantable(ItemStack pStack) {
+        return false;
+    }
+
+    @Override
     public Predicate<ItemStack> getAllSupportedProjectiles() {
         return PREDICATE_BOLTS;
     }

@@ -2,8 +2,8 @@
   "type": "obsidanum:forge_scroll_nether_up",
   "ingredients": [
     {
-      "item": "minecraft:diamond",
-      "count": 1
+      "item": "obsidanum:gitavro",
+      "count": 3
     }
   ],
   "upgrade": "strength"

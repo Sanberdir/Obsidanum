@@ -3,8 +3,14 @@
     "obsidanum:order_plan",
     "obsidanum:nether_plan",
     "obsidanum:catacombs_plan",
+    "obsidanum:nether_upgrade_plan",
+    "obsidanum:catacombs_upgrade_plan",
+    "obsidanum:order_upgrade_plan",
     "obsidanum:un_order_scroll",
     "obsidanum:un_nether_scroll",
-    "obsidanum:un_catacombs_scroll"
+    "obsidanum:un_catacombs_scroll",
+    "obsidanum:un_catacombs_scroll_up",
+    "obsidanum:un_nether_scroll_up",
+    "obsidanum:un_order_scroll_up"
   ]
 }

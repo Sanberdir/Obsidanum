@@ -199,6 +199,12 @@
   "entity.obsidanum.meet_beetle": "Мясной жук",
   "fluid_type.obsidanum.nether_fire_fluid": "Адская жижа",
 
+
+  "item.obsidanum.berilis": "Берлис",
+  "item.obsidanum.tahiro": "Тахиро",
+  "item.obsidanum.serpelis": "Серпелис",
+  "item.obsidanum.patiras": "Патирас",
+  "item.obsidanum.gitavro": "Гитавро",
   "item.obsidanum.azure_obsidian_bricks": "§4Лазурные обсидиановые кирпичи",
   "item.obsidanum.obsidian_bricks": "§4Обсидиановые кирпичи",
   "item.obsidanum.velnarium_ore": "Вельнариумовая руда",
@@ -305,6 +311,10 @@
 
   "obsidanum.press_shift": "Зажмите [§7Shift§8], чтобы увидеть описание",
   "obsidanum.press_shift2": "Зажмите [§fShift§8], чтобы увидеть описание",
+
+  "block.obsidanum.catacombs_jei_recipe":"Рецепт катакомб",
+  "block.obsidanum.nether_jei_recipe":"Рецепт незера",
+  "block.obsidanum.order_jei_recipe":"Рецепт ордена",
 
   "tag.obsidanum:scrolls": "Любой свиток",
 

@@ -47,6 +47,21 @@
             "model": "obsidanum:block/right_forge_update_catacombs_scroll",
             "y": 270
         },
+        "facing=north,type_scroll=update_order": {
+            "model": "obsidanum:block/right_forge_update_order_scroll"
+        },
+        "facing=east,type_scroll=update_order": {
+            "model": "obsidanum:block/right_forge_update_order_scroll",
+            "y": 90
+        },
+        "facing=south,type_scroll=update_order": {
+            "model": "obsidanum:block/right_forge_update_order_scroll",
+            "y": 180
+        },
+        "facing=west,type_scroll=update_order": {
+            "model": "obsidanum:block/right_forge_update_order_scroll",
+            "y": 270
+        },
 
         "facing=north,type_scroll=nether": {
             "model": "obsidanum:block/right_forge_nether_scroll"

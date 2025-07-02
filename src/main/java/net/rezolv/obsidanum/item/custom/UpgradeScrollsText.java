@@ -37,6 +37,7 @@ public class UpgradeScrollsText extends Item {
         // Main header
         tooltip.add(Component.translatable("tooltip.recipe_information").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 
+
         // Display localized upgrade name if present
         if (tag.contains("Upgrade")) {
             String upgradeId = tag.getString("Upgrade");
@@ -46,7 +47,13 @@ public class UpgradeScrollsText extends Item {
             ).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD);
             tooltip.add(upgradeName);
         }
-
+        MutableComponent typeScrollIcon = Component.literal("\uE015")
+                .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
+// Combine icons inline (after results)
+        MutableComponent iconsLine = Component.literal("")
+                .append(typeScrollIcon)
+                .append(" ");
+        tooltip.add(iconsLine);
         // Display ingredients (Ingredients)
         if (tag.contains("Ingredients")) {
             tooltip.add(Component.translatable("tooltip.scrolls.ingredients").withStyle(ChatFormatting.GOLD));

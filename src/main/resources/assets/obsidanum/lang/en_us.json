@@ -212,6 +212,7 @@
   "entity.obsidanum.mutated_gart": "Mutated gart",
   "entity.obsidanum.meet_beetle": "Meet Beetle",
   "fluid_type.obsidanum.nether_fire_fluid": "Nether Fire Fluid",
+
   "item.obsidan.description.axe": "\n§oAn axe made of obsidian. An axe awakened by the will can literally smash any tree into splinters. \n\n§2Properties: §fWhen ancient magic is activated, the axe can destroy a tree or the stems of a nezer entirely. CD 40 sec.",
   "item.obsidan.description.drilling_crystallizer": "\n§oThe bottle has a greenish glow. Peering into the greasy and worn glass of the vessel, you notice how this mysterious substance boils and sparkles. Turning the bottle over, you notice the label of the Alchemical Company and the composition of the potion... It was created according to the recipe of the disappeared Order of I... and it's diluted with water.",
   "item.obsidan.description.hoe": "\n§oA Hoe from.. Well, you've already figured it out. Awakened.. Yes... she really doesn't like when the beds are overgrown.  \n\n§2Properties: §fThe activated version of the Hoe clears the area within a radius of 20 blocks from the grass. CD 10 sec.",
@@ -228,6 +229,11 @@
   "item.obsidanum.azure_obsidian_bricks": "§4Azure Obsidian Bricks",
   "item.obsidanum.obsidian_bricks": "§4Obsidian Bricks",
   "item.obsidanum.crucible": "Crucible",
+  "item.obsidanum.berilis": "Berilis",
+  "item.obsidanum.tahiro": "Tahiro",
+  "item.obsidanum.serpelis": "Serpelis",
+  "item.obsidanum.patiras": "Petiras",
+  "item.obsidanum.gitavro": "Gitavro",
   "item.obsidanum.leaf_live": "The life-giving leaf",
   "item.obsidanum.prana_crystall_shard": "A fragment of the Prana crystal (WIP)",
   "item.obsidanum.obsidan_essence": "Obsidan Essence",
@@ -321,6 +327,11 @@
 
   "obsidanum.press_shift": "Hold down [§7Shift§8]§8, to see the description",
   "obsidanum.press_shift2": "Hold down [§fShift§8]§8, to see the description",
+
+  "block.obsidanum.catacombs_jei_recipe":"Catacombs Recipe",
+  "block.obsidanum.nether_jei_recipe":"Nether Recipe",
+  "block.obsidanum.order_jei_recipe":"Order Recipe",
+
 
   "tag.obsidanum:scrolls": "Any Scroll",
 

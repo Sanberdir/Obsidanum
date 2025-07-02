@@ -2,11 +2,11 @@
   "type": "obsidanum:forge_scroll_order_up",
   "ingredients": [
     {
-      "item": "minecraft:emerald",
+      "item": "obsidanum:serpelis",
       "count": 3
     },
     {
-      "item": "minecraft:redstone",
+      "item": "obsidanum:gitavro",
       "count": 3
     }
   ],

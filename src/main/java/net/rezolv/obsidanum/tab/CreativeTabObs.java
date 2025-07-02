@@ -222,6 +222,13 @@ public class CreativeTabObs extends CreativeModeTab {
                     .displayItems((pParameters, pOutput) -> {
                         //Items
 
+                        pOutput.accept(ItemsObs.BERILIS.get());
+                        pOutput.accept(ItemsObs.TAHIRO.get());
+                        pOutput.accept(ItemsObs.SERPELIS.get());
+                        pOutput.accept(ItemsObs.PATIRAS.get());
+                        pOutput.accept(ItemsObs.GITAVRO.get());
+
+
                         pOutput.accept(ItemsObs.OBSIDIAN_TEAR.get());
                         pOutput.accept(ItemsObs.PRANA_CRYSTALL_SHARD.get());
                         pOutput.accept(ItemsObs.FLAME_CROSSBOW.get());

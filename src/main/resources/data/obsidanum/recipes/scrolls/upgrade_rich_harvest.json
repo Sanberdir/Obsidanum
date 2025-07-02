@@ -2,11 +2,11 @@
   "type": "obsidanum:forge_scroll_catacombs_up",
   "ingredients": [
     {
-      "item": "minecraft:redstone",
+      "item": "obsidanum:serpelis",
       "count": 1
     },
     {
-      "item": "minecraft:obsidian",
+      "item": "obsidanum:patiras",
       "count": 2
     }
   ],

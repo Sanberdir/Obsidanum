@@ -2,11 +2,16 @@
   "type": "obsidanum:forge_scroll_catacombs_up",
   "ingredients": [
     {
-      "item": "minecraft:coal",
-      "count": 1
+      "item": "obsidanum:berilis",
+      "count": 2
     },
     {
-      "item": "minecraft:lapis_lazuli",
+      "item": "obsidanum:gitavro",
+      "count": 2
+    }
+  ,
+    {
+      "item": "obsidanum:serpelis",
       "count": 2
     }
   ],
