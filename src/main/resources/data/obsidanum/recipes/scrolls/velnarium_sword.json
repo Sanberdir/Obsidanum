@@ -1,0 +1,63 @@
+{
+  "type": "obsidanum:forge_scroll_nether",
+  "ingredients": [
+    {
+      "item": "minecraft:stick",
+      "count": 1
+    },
+    {
+      "item": "obsidanum:velnarium_ingot",
+      "count": 2
+    },
+    {
+      "item": "obsidanum:obsidan_essence",
+      "count": 14
+    }
+  ],
+  "output": {
+    "item": "obsidanum:order_sword",
+    "count": 1
+  },
+  "bonus_outputs": [
+    {
+      "item": {
+        "item": "obsidanum:berilis",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    },
+    {
+      "item": {
+        "item": "obsidanum:tahiro",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    },
+    {
+      "item": {
+        "item": "obsidanum:serpelis",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    },
+    {
+      "item": {
+        "item": "obsidanum:patiras",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    },
+    {
+      "item": {
+        "item": "obsidanum:gitavro",
+        "min": 1,
+        "max": 4
+      },
+      "chance": 0.15
+    }
+  ]
+}
