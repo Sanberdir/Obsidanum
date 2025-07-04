@@ -109,6 +109,21 @@
         "facing=west,type_scroll=catacombs": {
             "model": "obsidanum:block/right_forge_catacombs_scroll",
             "y": 270
+        },
+        "facing=north,type_scroll=repair": {
+            "model": "obsidanum:block/right_forge_order_scroll"
+        },
+        "facing=east,type_scroll=repair": {
+            "model": "obsidanum:block/right_forge_order_scroll",
+            "y": 90
+        },
+        "facing=south,type_scroll=repair": {
+            "model": "obsidanum:block/right_forge_order_scroll",
+            "y": 180
+        },
+        "facing=west,type_scroll=repair": {
+            "model": "obsidanum:block/right_forge_order_scroll",
+            "y": 270
         }
     }
 }

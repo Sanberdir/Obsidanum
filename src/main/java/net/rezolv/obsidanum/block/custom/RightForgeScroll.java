@@ -42,15 +42,23 @@ public class RightForgeScroll extends BaseEntityBlock {
 
         if (itemInHand.is(ItemsObs.NETHER_PLAN.get())) {
             newType = ScrollType.NETHER;
-        } else if (itemInHand.is(ItemsObs.ORDER_PLAN.get())) {
+        }
+        else if (itemInHand.is(ItemsObs.ORDER_PLAN.get())) {
             newType = ScrollType.ORDER;
-        } else if (itemInHand.is(ItemsObs.CATACOMBS_PLAN.get())) {
+        }
+        else if (itemInHand.is(ItemsObs.ORDER_REPAIR_PLAN.get())) {
+            newType = ScrollType.REPAIR;
+        }
+        else if (itemInHand.is(ItemsObs.CATACOMBS_PLAN.get())) {
             newType = ScrollType.CATACOMBS;
-        } else if (itemInHand.is(ItemsObs.NETHER_UPGRADE_PLAN.get())) {
+        }
+        else if (itemInHand.is(ItemsObs.NETHER_UPGRADE_PLAN.get())) {
             newType = ScrollType.UPDATE_NETHER;
-        } else if (itemInHand.is(ItemsObs.CATACOMBS_UPGRADE_PLAN.get())) {
+        }
+        else if (itemInHand.is(ItemsObs.CATACOMBS_UPGRADE_PLAN.get())) {
             newType = ScrollType.UPDATE_CATACOMBS;
-        } else if (itemInHand.is(ItemsObs.ORDER_UPGRADE_PLAN.get())) {
+        }
+        else if (itemInHand.is(ItemsObs.ORDER_UPGRADE_PLAN.get())) {
             newType = ScrollType.UPDATE_ORDER;
         }
 
@@ -83,6 +91,7 @@ public class RightForgeScroll extends BaseEntityBlock {
                     ItemStack scrollItem = null;
                     switch (currentType) {
                         case NETHER -> scrollItem = ItemsObs.NETHER_PLAN.get().getDefaultInstance();
+                        case REPAIR -> scrollItem = ItemsObs.ORDER_REPAIR_PLAN.get().getDefaultInstance();
                         case ORDER -> scrollItem = ItemsObs.ORDER_PLAN.get().getDefaultInstance();
                         case CATACOMBS -> scrollItem = ItemsObs.CATACOMBS_PLAN.get().getDefaultInstance();
                         case UPDATE_NETHER -> scrollItem = ItemsObs.NETHER_UPGRADE_PLAN.get().getDefaultInstance();

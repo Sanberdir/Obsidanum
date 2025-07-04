@@ -57,6 +57,12 @@ public class ItemsObs {
     public static final RegistryObject<Item> ORDER_UPGRADE_PLAN = ITEMS.register("order_upgrade_plan",
             () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> ORDER_REPAIR_PLAN = ITEMS.register("order_repair_plan",
+            () -> new RepairScrollsText(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> UN_ORDER_REPAIR_SCROLL = ITEMS.register("un_order_repair_scroll",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> UN_ORDER_SCROLL = ITEMS.register("un_order_scroll",
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> UN_NETHER_SCROLL = ITEMS.register("un_nether_scroll",

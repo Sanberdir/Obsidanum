@@ -245,12 +245,14 @@
   "item.obsidanum.catacombs_upgrade_plan": "Upgrade Plan",
   "item.obsidanum.nether_upgrade_plan": "Upgrade Plan",
   "item.obsidanum.order_upgrade_plan": "Upgrade Plan",
+  "item.obsidanum.order_repair_plan": "Repair Plan",
   "item.obsidanum.un_order_scroll": "Un scroll",
   "item.obsidanum.un_nether_scroll": "Un scroll",
   "item.obsidanum.un_catacombs_scroll": "Un scroll",
   "item.obsidanum.un_catacombs_scroll_up": "Un scroll",
   "item.obsidanum.un_nether_scroll_up": "Un scroll",
   "item.obsidanum.un_order_scroll_up": "Un scroll",
+  "item.obsidanum.un_order_repair_scroll": "Un scroll",
   "item.obsidanum.flame_crossbow": "Flame crossbow",
   "item.obsidanum.flame_bolt": "Flame bolt",
   "item.obsidanum.netherite_bolt": "Netherite Bolt (WIP)",
@@ -345,6 +347,7 @@
   "tooltip.scrolls.result": "Scrolls result",
   "tooltip.scrolls.bonus_outputs": "Bonus Outputs",
   "tooltip.scrolls.ingredients": "Scrolls ingredients",
+  "obsidanum:tools": "Tools from is Obsidanum",
 
   "tooltip.obsidanum.ingredients_header":"Ingredients: ",
 

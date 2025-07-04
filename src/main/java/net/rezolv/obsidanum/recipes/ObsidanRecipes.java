@@ -25,4 +25,6 @@ public class ObsidanRecipes {
     public static final RegistryObject<RecipeSerializer<ForgeScrollOrderUpgradeRecipe>> FORGE_SCROLL_ORDER_UP_SERIALIZER =
             SERIALIZERS.register("forge_scroll_order_up", () -> ForgeScrollOrderUpgradeRecipe.Serializer.FORGE_SCROLL_ORDER_UPGRADE);
 
+    public static final RegistryObject<RecipeSerializer<ForgeScrollOrderRepairRecipe>> FORGE_SCROLL_ORDER_REPAIR_SERIALIZER =
+            SERIALIZERS.register("forge_scroll_order_repair", () -> ForgeScrollOrderRepairRecipe.Serializer.FORGE_SCROLL_ORDER_REPAIR);
 }

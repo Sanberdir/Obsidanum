@@ -7,6 +7,7 @@ public enum ScrollType implements StringRepresentable {
     UPDATE_NETHER,
     UPDATE_CATACOMBS,
     UPDATE_ORDER,
+    REPAIR,
     NETHER,
     ORDER,
     CATACOMBS;

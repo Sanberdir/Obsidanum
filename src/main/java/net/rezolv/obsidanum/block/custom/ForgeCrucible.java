@@ -24,8 +24,10 @@ import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 import net.rezolv.obsidanum.block.enum_blocks.ScrollType;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.AddTagsForgeCrucible;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRecipe;
+import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRepair;
 import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteUp;
 import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
+import net.rezolv.obsidanum.gui.forge_crucible.repair_render.ForgeCrucibleRepairMenu;
 import net.rezolv.obsidanum.gui.forge_crucible.upgrade_render.ForgeCrucibleUpgradeMenu;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,8 +83,11 @@ public class ForgeCrucible extends BaseEntityBlock {
                     if ((type == ScrollType.NETHER)||(type == ScrollType.CATACOMBS)||(type == ScrollType.ORDER)) {
                         return new ForgeCrucibleGuiMenu(id, inv, buf);
                     }
-                    else if ((type == ScrollType.UPDATE_CATACOMBS)||(type == ScrollType.UPDATE_NETHER||(type == ScrollType.UPDATE_ORDER))) {
+                    if ((type == ScrollType.UPDATE_CATACOMBS)||(type == ScrollType.UPDATE_NETHER||(type == ScrollType.UPDATE_ORDER))) {
                         return new ForgeCrucibleUpgradeMenu(id, inv, buf);
+                    }
+                    if ((type == ScrollType.REPAIR)) {
+                        return new ForgeCrucibleRepairMenu(id, inv, buf);
                     }
                     else return null;
                 }
@@ -110,6 +115,9 @@ public class ForgeCrucible extends BaseEntityBlock {
             }
             if (type == ScrollType.UPDATE_NETHER || type == ScrollType.UPDATE_CATACOMBS|| type == ScrollType.UPDATE_ORDER) {
                 LeftCornerCompleteUp.handleNeighborUpdate(state, level, pos, fromPos);
+            }
+            if (type == ScrollType.REPAIR ) {
+                LeftCornerCompleteRepair.handleNeighborUpdate(state, level, pos, fromPos);
             }
         }
     }

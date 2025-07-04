@@ -7,6 +7,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
+import net.rezolv.obsidanum.gui.forge_crucible.repair_render.ForgeCrucibleRepairMenu;
 import net.rezolv.obsidanum.gui.forge_crucible.upgrade_render.ForgeCrucibleUpgradeMenu;
 
 public class ObsidanumMenus {
@@ -17,4 +18,7 @@ public class ObsidanumMenus {
 
     public static final RegistryObject<MenuType<ForgeCrucibleUpgradeMenu>> FORGE_CRUCIBLE_GUI_UPGRADE = REGISTRY.register("forge_crucible_gui_upgrade",
             () -> IForgeMenuType.create(ForgeCrucibleUpgradeMenu::new));
+
+    public static final RegistryObject<MenuType<ForgeCrucibleRepairMenu>> FORGE_CRUCIBLE_GUI_REPAIR = REGISTRY.register("forge_crucible_gui_repair",
+            () -> IForgeMenuType.create(ForgeCrucibleRepairMenu::new));
 }

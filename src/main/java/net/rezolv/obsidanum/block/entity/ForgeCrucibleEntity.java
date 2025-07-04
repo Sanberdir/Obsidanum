@@ -50,6 +50,11 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
             }
         }
     };
+    public void setReceivedData(CompoundTag data) {
+        System.out.println("Setting received data: " + data);
+        this.receivedScrollData = data;
+        setChanged();
+    }
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     private final LazyOptional<? extends IItemHandler>[] handlers = new LazyOptional[Direction.values().length];
 
@@ -248,6 +253,9 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
     public void invalidateCaps() {
         super.invalidateCaps();
         lazyItemHandler.invalidate();
+        for (LazyOptional<? extends IItemHandler> handler : handlers) {
+            handler.invalidate();
+        }
     }
     public ForgeCrucibleEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntities.FORGE_CRUCIBLE.get(), pPos, pBlockState);

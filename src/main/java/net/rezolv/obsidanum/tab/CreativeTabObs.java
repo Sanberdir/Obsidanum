@@ -247,6 +247,8 @@ public class CreativeTabObs extends CreativeModeTab {
                         pOutput.accept(ItemsObs.UN_ORDER_SCROLL_UP.get());
                         pOutput.accept(ItemsObs.UN_NETHER_SCROLL.get());
                         pOutput.accept(ItemsObs.UN_ORDER_SCROLL.get());
+                        pOutput.accept(ItemsObs.UN_ORDER_REPAIR_SCROLL.get());
+                        pOutput.accept(ItemsObs.ORDER_REPAIR_PLAN.get());
                         pOutput.accept(ItemsObs.OBSIDAN.get());
                         pOutput.accept(ItemsObs.RAW_MEET_BEETLE.get());
                         pOutput.accept(ItemsObs.COCKED_MEET_BEETLE.get());

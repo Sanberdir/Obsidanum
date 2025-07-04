@@ -26,6 +26,11 @@ public class VelnariumSword extends SwordItem {
     private static final String NBT_KEY = "VelnariumUUID";
     private final double extraDamage;
 
+    @Override
+    public boolean isEnchantable(ItemStack pStack) {
+        return false;
+    }
+
     public VelnariumSword(Tier tier,
                           int attackDamageModifier,
                           float attackSpeedModifier,

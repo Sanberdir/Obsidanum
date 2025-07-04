@@ -1,0 +1,13 @@
+{
+  "type": "obsidanum:forge_scroll_order_repair",
+  "ingredients": [
+    {
+      "item": "obsidanum:obsidan_essence",
+      "count": 1
+    },
+    {
+      "tag": "obsidanum:tools",
+      "count": 1
+    }
+  ]
+}
