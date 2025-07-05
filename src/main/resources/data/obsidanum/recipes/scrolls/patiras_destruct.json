@@ -1,0 +1,17 @@
+{
+  "type": "obsidanum:forge_scroll_order_destruction",
+  "ingredients": {
+    "tag": "minecraft:planks",
+    "count": 1
+  },
+  "multiple_output": [
+    {
+      "item": "obsidanum:patiras",
+      "count": 2
+    },
+    {
+      "item": "obsidanum:berilis",
+      "count": 1
+    }
+  ]
+}

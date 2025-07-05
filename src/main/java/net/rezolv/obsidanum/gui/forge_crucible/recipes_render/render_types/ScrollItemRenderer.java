@@ -81,6 +81,7 @@ public class ScrollItemRenderer {
             case NETHER -> ItemsObs.NETHER_PLAN.get().getDefaultInstance();
             case REPAIR -> ItemsObs.ORDER_REPAIR_PLAN.get().getDefaultInstance();
             case ORDER -> ItemsObs.ORDER_PLAN.get().getDefaultInstance();
+            case DESTRUCTION -> ItemsObs.ORDER_DESTRUCTION_PLAN.get().getDefaultInstance();
             case CATACOMBS -> ItemsObs.CATACOMBS_PLAN.get().getDefaultInstance();
             case UPDATE_NETHER -> ItemsObs.NETHER_UPGRADE_PLAN.get().getDefaultInstance();
             case UPDATE_CATACOMBS -> ItemsObs.CATACOMBS_UPGRADE_PLAN.get().getDefaultInstance();

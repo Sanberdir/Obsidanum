@@ -10,6 +10,7 @@ public enum ScrollType implements StringRepresentable {
     REPAIR,
     NETHER,
     ORDER,
+    DESTRUCTION,
     CATACOMBS;
 
     @Override

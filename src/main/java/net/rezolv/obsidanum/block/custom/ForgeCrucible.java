@@ -22,10 +22,8 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraftforge.network.NetworkHooks;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 import net.rezolv.obsidanum.block.enum_blocks.ScrollType;
-import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.AddTagsForgeCrucible;
-import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRecipe;
-import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRepair;
-import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteUp;
+import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.*;
+import net.rezolv.obsidanum.gui.forge_crucible.destruction_render.ForgeCrucibleDestructionMenu;
 import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
 import net.rezolv.obsidanum.gui.forge_crucible.repair_render.ForgeCrucibleRepairMenu;
 import net.rezolv.obsidanum.gui.forge_crucible.upgrade_render.ForgeCrucibleUpgradeMenu;
@@ -89,6 +87,9 @@ public class ForgeCrucible extends BaseEntityBlock {
                     if ((type == ScrollType.REPAIR)) {
                         return new ForgeCrucibleRepairMenu(id, inv, buf);
                     }
+                    if ((type == ScrollType.DESTRUCTION)) {
+                        return new ForgeCrucibleDestructionMenu(id, inv, buf);
+                    }
                     else return null;
                 }
             };
@@ -118,6 +119,9 @@ public class ForgeCrucible extends BaseEntityBlock {
             }
             if (type == ScrollType.REPAIR ) {
                 LeftCornerCompleteRepair.handleNeighborUpdate(state, level, pos, fromPos);
+            }
+            if (type == ScrollType.DESTRUCTION ) {
+                LeftCornerCompleteDestruction.handleNeighborUpdate(state, level, pos, fromPos);
             }
         }
     }

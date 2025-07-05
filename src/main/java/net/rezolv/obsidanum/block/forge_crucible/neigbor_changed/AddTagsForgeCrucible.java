@@ -52,27 +52,52 @@ public class AddTagsForgeCrucible {
                     CompoundTag scrollNBT = scrollEntity.getScrollNBT();
                     CompoundTag dataToSend = new CompoundTag();
 
-                    // <-- Вставляем сразу наш новый тег TypeScroll
+                    // Добавляем тип свитка
                     dataToSend.putString("TypeScroll", scrollType.name());
+
+                    // Копируем основные данные
                     if (scrollNBT.contains("Upgrade", Tag.TAG_STRING)) {
                         dataToSend.putString("Upgrade", scrollNBT.getString("Upgrade"));
                     }
-                    // Copy ingredients
                     if (scrollNBT.contains("Ingredients", Tag.TAG_LIST)) {
                         dataToSend.put("Ingredients", scrollNBT.getList("Ingredients", Tag.TAG_COMPOUND));
                     }
-
-                    // Copy main result
                     if (scrollNBT.contains("RecipeResult", Tag.TAG_LIST)) {
                         dataToSend.put("RecipeResult", scrollNBT.getList("RecipeResult", Tag.TAG_COMPOUND));
                     }
-
-                    // Copy recipe plans
                     if (scrollNBT.contains("RecipesPlans", Tag.TAG_STRING)) {
                         dataToSend.putString("RecipesPlans", scrollNBT.getString("RecipesPlans"));
                     }
 
-                    // Copy and process bonus outputs
+                    // Обработка Multiple Outputs
+                    if (scrollNBT.contains("MultipleOutputs", Tag.TAG_LIST)) {
+                        ListTag multipleOutputs = scrollNBT.getList("MultipleOutputs", Tag.TAG_COMPOUND);
+                        ListTag processedOutputs = new ListTag();
+
+                        for (Tag outputTag : multipleOutputs) {
+                            if (outputTag instanceof CompoundTag outputCompound) {
+                                CompoundTag processed = new CompoundTag();
+                                // Item
+                                if (outputCompound.contains("Item", Tag.TAG_COMPOUND)) {
+                                    processed.put("Item", outputCompound.getCompound("Item"));
+                                }
+                                // Count
+                                int count = outputCompound.contains("Count", Tag.TAG_INT)
+                                        ? outputCompound.getInt("Count")
+                                        : 1;
+                                processed.putInt("Count", count);
+                                // Chance (если есть)
+                                if (outputCompound.contains("Chance", Tag.TAG_FLOAT)) {
+                                    processed.putFloat("Chance", outputCompound.getFloat("Chance"));
+                                }
+                                processedOutputs.add(processed);
+                            }
+                        }
+                        dataToSend.put("MultipleOutputs", multipleOutputs); // оригинальные данные
+                        dataToSend.put("ProcessedMultipleOutputs", processedOutputs); // обработанные данные
+                    }
+
+                    // Обработка Bonus Outputs (оставлено без изменений)
                     if (scrollNBT.contains("BonusOutputs", Tag.TAG_LIST)) {
                         ListTag bonusOutputs = scrollNBT.getList("BonusOutputs", Tag.TAG_COMPOUND);
                         dataToSend.put("BonusOutputs", bonusOutputs);
@@ -81,16 +106,13 @@ public class AddTagsForgeCrucible {
                         for (Tag bonusTag : bonusOutputs) {
                             if (bonusTag instanceof CompoundTag bonusCompound) {
                                 CompoundTag processed = new CompoundTag();
-                                // Item
                                 if (bonusCompound.contains("Item", Tag.TAG_COMPOUND)) {
                                     processed.put("Item", bonusCompound.getCompound("Item"));
                                 }
-                                // Chance
                                 float chance = bonusCompound.contains("Chance", Tag.TAG_FLOAT)
                                         ? bonusCompound.getFloat("Chance")
                                         : 1.0f;
                                 processed.putFloat("Chance", chance);
-                                // Min/Max
                                 int min = bonusCompound.contains("Min", Tag.TAG_INT)
                                         ? bonusCompound.getInt("Min")
                                         : 1;
@@ -106,7 +128,7 @@ public class AddTagsForgeCrucible {
                         dataToSend.put("ProcessedBonuses", processedBonuses);
                     }
 
-                    // Шлём в сущность crucible
+                    // Отправляем данные в Crucible
                     crucible.receiveScrollData(dataToSend);
                     crucible.setChanged();
                     level.sendBlockUpdated(pos, state, state, 3);

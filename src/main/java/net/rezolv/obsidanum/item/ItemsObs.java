@@ -25,15 +25,15 @@ public class ItemsObs {
             DeferredRegister.create(ForgeRegistries.ITEMS, Obsidanum.MOD_ID);
 
     public static final RegistryObject<Item> BERILIS = ITEMS.register("berilis",
-            () -> new PotGrenadeItem(new Item.Properties()));
+            () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> TAHIRO = ITEMS.register("tahiro",
-            () -> new PotGrenadeItem(new Item.Properties()));
+            () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> SERPELIS = ITEMS.register("serpelis",
-            () -> new PotGrenadeItem(new Item.Properties()));
+            () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> PATIRAS = ITEMS.register("patiras",
-            () -> new PotGrenadeItem(new Item.Properties()));
+            () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> GITAVRO = ITEMS.register("gitavro",
-            () -> new PotGrenadeItem(new Item.Properties()));
+            () -> new Item(new Item.Properties()));
 
     public static final RegistryObject<Item> POT_GRENADE = ITEMS.register("pot_grenade",
             () -> new PotGrenadeItem(new Item.Properties()));
@@ -61,6 +61,12 @@ public class ItemsObs {
             () -> new RepairScrollsText(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> UN_ORDER_REPAIR_SCROLL = ITEMS.register("un_order_repair_scroll",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> ORDER_DESTRUCTION_PLAN = ITEMS.register("order_destruction_plan",
+            () -> new DestructionScrollsText(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> UN_ORDER_DESTRUCTION_SCROLL = ITEMS.register("un_order_destruction_scroll",
             () -> new Item(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> UN_ORDER_SCROLL = ITEMS.register("un_order_scroll",
