@@ -11,6 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,21 +20,25 @@ import net.minecraft.world.level.Level;
 import net.rezolv.obsidanum.Obsidanum;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ForgeScrollOrderDestructionRecipe implements Recipe<SimpleContainer> {
     private final Ingredient ingredient;
     private final JsonObject ingredientJson;
     private final NonNullList<ItemStack> multipleOutput;
     private final NonNullList<JsonObject> multipleOutputJsons;
+    private final List<Float> outputChances;
     private final ResourceLocation id;
 
     public ForgeScrollOrderDestructionRecipe(Ingredient ingredient, JsonObject ingredientJson,
                                              NonNullList<ItemStack> multipleOutput, NonNullList<JsonObject> multipleOutputJsons,
-                                             ResourceLocation id) {
+                                             List<Float> outputChances, ResourceLocation id) {
         this.ingredient = ingredient;
         this.ingredientJson = ingredientJson;
         this.multipleOutput = multipleOutput;
         this.multipleOutputJsons = multipleOutputJsons;
+        this.outputChances = outputChances;
         this.id = id;
     }
 
@@ -61,6 +66,16 @@ public class ForgeScrollOrderDestructionRecipe implements Recipe<SimpleContainer
         return multipleOutput.get(0).copy();
     }
 
+    public NonNullList<ItemStack> getRolledOutputs(RandomSource random) {
+        NonNullList<ItemStack> results = NonNullList.create();
+        for (int i = 0; i < multipleOutput.size(); i++) {
+            if (random.nextFloat() < outputChances.get(i)) {
+                results.add(multipleOutput.get(i).copy());
+            }
+        }
+        return results;
+    }
+
     @Override
     public boolean canCraftInDimensions(int width, int height) {
         return true;
@@ -73,6 +88,10 @@ public class ForgeScrollOrderDestructionRecipe implements Recipe<SimpleContainer
 
     public NonNullList<ItemStack> getMultipleOutput() {
         return multipleOutput;
+    }
+
+    public List<Float> getOutputChances() {
+        return outputChances;
     }
 
     @Override
@@ -116,13 +135,26 @@ public class ForgeScrollOrderDestructionRecipe implements Recipe<SimpleContainer
             JsonArray multipleOutputJson = GsonHelper.getAsJsonArray(json, "multiple_output");
             NonNullList<ItemStack> multipleOutput = NonNullList.create();
             NonNullList<JsonObject> multipleOutputJsons = NonNullList.create();
+            List<Float> outputChances = new ArrayList<>();
+
             for (JsonElement elem : multipleOutputJson) {
                 JsonObject outJson = elem.getAsJsonObject();
                 multipleOutputJsons.add(outJson.deepCopy());
                 multipleOutput.add(ShapedRecipe.itemStackFromJson(outJson));
+
+                // Read chance (default to 1.0 if not specified)
+                float chance = outJson.has("chance") ? outJson.get("chance").getAsFloat() : 1.0f;
+                outputChances.add(chance);
             }
 
-            return new ForgeScrollOrderDestructionRecipe(ingredient, ingJson.deepCopy(), multipleOutput, multipleOutputJsons, recipeId);
+            return new ForgeScrollOrderDestructionRecipe(
+                    ingredient,
+                    ingJson.deepCopy(),
+                    multipleOutput,
+                    multipleOutputJsons,
+                    outputChances,
+                    recipeId
+            );
         }
 
         @Nullable
@@ -136,13 +168,23 @@ public class ForgeScrollOrderDestructionRecipe implements Recipe<SimpleContainer
             int count = buffer.readVarInt();
             NonNullList<ItemStack> multipleOutput = NonNullList.withSize(count, ItemStack.EMPTY);
             NonNullList<JsonObject> multipleOutputJsons = NonNullList.create();
+            List<Float> outputChances = new ArrayList<>(count);
+
             for (int i = 0; i < count; i++) {
                 JsonObject outJson = JsonParser.parseString(buffer.readUtf()).getAsJsonObject();
                 multipleOutputJsons.add(outJson);
                 multipleOutput.set(i, buffer.readItem());
+                outputChances.add(buffer.readFloat());
             }
 
-            return new ForgeScrollOrderDestructionRecipe(ingredient, ingJson, multipleOutput, multipleOutputJsons, recipeId);
+            return new ForgeScrollOrderDestructionRecipe(
+                    ingredient,
+                    ingJson,
+                    multipleOutput,
+                    multipleOutputJsons,
+                    outputChances,
+                    recipeId
+            );
         }
 
         @Override
@@ -154,10 +196,16 @@ public class ForgeScrollOrderDestructionRecipe implements Recipe<SimpleContainer
             // Write output
             int size = recipe.multipleOutput.size();
             buffer.writeVarInt(size);
+            // В toNetwork():
             for (int i = 0; i < size; i++) {
                 JsonObject outJson = recipe.multipleOutputJsons.get(i);
                 buffer.writeUtf(outJson.toString());
                 buffer.writeItemStack(recipe.multipleOutput.get(i), true);
+                // Проверяем, что шанс существует, иначе пишем 1.0
+                float chance = (recipe.outputChances != null && i < recipe.outputChances.size())
+                        ? recipe.outputChances.get(i)
+                        : 1.0f;
+                buffer.writeFloat(chance);
             }
         }
     }

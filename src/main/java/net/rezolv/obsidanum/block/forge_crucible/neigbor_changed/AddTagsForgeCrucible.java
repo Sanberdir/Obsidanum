@@ -37,7 +37,7 @@ public class AddTagsForgeCrucible {
 
                 ScrollType scrollType = rightState.getValue(RightForgeScroll.TYPE_SCROLL);
 
-                // Если свиток деактивирован — сразу чистим
+                // If scroll is deactivated - clear immediately
                 if (scrollType == ScrollType.NONE) {
                     Player player = level.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 10, null);
                     if (player != null) {
@@ -46,16 +46,16 @@ public class AddTagsForgeCrucible {
                     return;
                 }
 
-                // Иначе копируем данные
+                // Otherwise copy data
                 BlockEntity rightBe = level.getBlockEntity(expectedRightPos);
                 if (rightBe instanceof RightForgeScrollEntity scrollEntity) {
                     CompoundTag scrollNBT = scrollEntity.getScrollNBT();
                     CompoundTag dataToSend = new CompoundTag();
 
-                    // Добавляем тип свитка
+                    // Add scroll type
                     dataToSend.putString("TypeScroll", scrollType.name());
 
-                    // Копируем основные данные
+                    // Copy basic data
                     if (scrollNBT.contains("Upgrade", Tag.TAG_STRING)) {
                         dataToSend.putString("Upgrade", scrollNBT.getString("Upgrade"));
                     }
@@ -69,35 +69,56 @@ public class AddTagsForgeCrucible {
                         dataToSend.putString("RecipesPlans", scrollNBT.getString("RecipesPlans"));
                     }
 
-                    // Обработка Multiple Outputs
+                    // Handle Multiple Outputs with chances
                     if (scrollNBT.contains("MultipleOutputs", Tag.TAG_LIST)) {
                         ListTag multipleOutputs = scrollNBT.getList("MultipleOutputs", Tag.TAG_COMPOUND);
                         ListTag processedOutputs = new ListTag();
 
-                        for (Tag outputTag : multipleOutputs) {
+                        // Get chances if they exist in a separate list
+                        ListTag chancesList = scrollNBT.contains("OutputChances", Tag.TAG_LIST)
+                                ? scrollNBT.getList("OutputChances", Tag.TAG_COMPOUND)
+                                : null;
+
+                        for (int i = 0; i < multipleOutputs.size(); i++) {
+                            Tag outputTag = multipleOutputs.get(i);
                             if (outputTag instanceof CompoundTag outputCompound) {
                                 CompoundTag processed = new CompoundTag();
-                                // Item
-                                if (outputCompound.contains("Item", Tag.TAG_COMPOUND)) {
-                                    processed.put("Item", outputCompound.getCompound("Item"));
+
+                                // Copy item data
+                                if (outputCompound.contains("id", Tag.TAG_STRING)) {
+                                    processed.putString("id", outputCompound.getString("id"));
                                 }
-                                // Count
+                                if (outputCompound.contains("tag", Tag.TAG_COMPOUND)) {
+                                    processed.put("tag", outputCompound.getCompound("tag"));
+                                }
+
+                                // Handle count
                                 int count = outputCompound.contains("Count", Tag.TAG_INT)
                                         ? outputCompound.getInt("Count")
                                         : 1;
                                 processed.putInt("Count", count);
-                                // Chance (если есть)
+
+                                // Handle chance - either from the output compound or from chances list
+                                float chance = outputCompound.contains("Chance", Tag.TAG_FLOAT)
+                                        ? Math.max(0.0f, Math.min(1.0f, outputCompound.getFloat("Chance"))) // Ограничение 0-1
+                                        : 1.0f;
                                 if (outputCompound.contains("Chance", Tag.TAG_FLOAT)) {
-                                    processed.putFloat("Chance", outputCompound.getFloat("Chance"));
+                                    chance = outputCompound.getFloat("Chance");
+                                } else if (chancesList != null && i < chancesList.size()) {
+                                    CompoundTag chanceTag = chancesList.getCompound(i);
+                                    chance = chanceTag.getFloat("Chance");
                                 }
+                                processed.putFloat("Chance", chance);
+
                                 processedOutputs.add(processed);
                             }
                         }
-                        dataToSend.put("MultipleOutputs", multipleOutputs); // оригинальные данные
-                        dataToSend.put("ProcessedMultipleOutputs", processedOutputs); // обработанные данные
+
+                        dataToSend.put("MultipleOutputs", multipleOutputs); // original data
+                        dataToSend.put("ProcessedMultipleOutputs", processedOutputs); // processed data with chances
                     }
 
-                    // Обработка Bonus Outputs (оставлено без изменений)
+                    // Handle Bonus Outputs (similar to multiple outputs but with min/max)
                     if (scrollNBT.contains("BonusOutputs", Tag.TAG_LIST)) {
                         ListTag bonusOutputs = scrollNBT.getList("BonusOutputs", Tag.TAG_COMPOUND);
                         dataToSend.put("BonusOutputs", bonusOutputs);
@@ -106,13 +127,22 @@ public class AddTagsForgeCrucible {
                         for (Tag bonusTag : bonusOutputs) {
                             if (bonusTag instanceof CompoundTag bonusCompound) {
                                 CompoundTag processed = new CompoundTag();
-                                if (bonusCompound.contains("Item", Tag.TAG_COMPOUND)) {
-                                    processed.put("Item", bonusCompound.getCompound("Item"));
+
+                                // Item data
+                                if (bonusCompound.contains("id", Tag.TAG_STRING)) {
+                                    processed.putString("id", bonusCompound.getString("id"));
                                 }
+                                if (bonusCompound.contains("tag", Tag.TAG_COMPOUND)) {
+                                    processed.put("tag", bonusCompound.getCompound("tag"));
+                                }
+
+                                // Chance
                                 float chance = bonusCompound.contains("Chance", Tag.TAG_FLOAT)
                                         ? bonusCompound.getFloat("Chance")
                                         : 1.0f;
                                 processed.putFloat("Chance", chance);
+
+                                // Quantity range
                                 int min = bonusCompound.contains("Min", Tag.TAG_INT)
                                         ? bonusCompound.getInt("Min")
                                         : 1;
@@ -122,13 +152,14 @@ public class AddTagsForgeCrucible {
                                 if (max < min) max = min;
                                 processed.putInt("Min", min);
                                 processed.putInt("Max", max);
+
                                 processedBonuses.add(processed);
                             }
                         }
                         dataToSend.put("ProcessedBonuses", processedBonuses);
                     }
 
-                    // Отправляем данные в Crucible
+                    // Send data to Crucible
                     crucible.receiveScrollData(dataToSend);
                     crucible.setChanged();
                     level.sendBlockUpdated(pos, state, state, 3);

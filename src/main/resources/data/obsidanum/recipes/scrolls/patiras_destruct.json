@@ -1,17 +1,19 @@
 {
   "type": "obsidanum:forge_scroll_order_destruction",
   "ingredients": {
-    "tag": "minecraft:planks",
+    "item": "minecraft:diamond",
     "count": 1
   },
   "multiple_output": [
     {
       "item": "obsidanum:patiras",
-      "count": 2
+      "count": 2,
+      "chance": 0.7
     },
     {
       "item": "obsidanum:berilis",
-      "count": 1
+      "count": 1,
+      "chance": 0.8
     }
   ]
 }
