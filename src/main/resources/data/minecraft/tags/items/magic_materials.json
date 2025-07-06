@@ -1,0 +1,24 @@
+{
+  "values": [
+    "obsidanum:obsidian_tear",
+    "obsidanum:prana_crystall_shard",
+    "obsidanum:drilling_crystallizer",
+    "obsidanum:relict_amethyst_shard",
+    "obsidanum:obsidan_essence",
+    "obsidanum:obsidian_totem_of_immortality",
+
+    "#minecraft:candles",
+    "minecraft:beacon",
+    "minecraft:end_crystal",
+    "minecraft:totem_of_undying",
+    "minecraft:blaze_powder",
+    "minecraft:brewing_stand",
+    "minecraft:ender_eye",
+    "minecraft:glistering_melon_slice",
+    "minecraft:experience_bottle",
+    "minecraft:heart_of_the_sea",
+    "minecraft:respawn_anchor",
+    "minecraft:echo_shard",
+    "minecraft:nether_star"
+  ]
+}

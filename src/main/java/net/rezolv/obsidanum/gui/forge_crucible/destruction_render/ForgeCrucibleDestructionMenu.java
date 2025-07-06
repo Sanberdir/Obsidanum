@@ -89,12 +89,7 @@ public class ForgeCrucibleDestructionMenu extends AbstractContainerMenu implemen
         }
 
         // Input slot (5)
-        this.addSlot(new SlotItemHandler(internal, 5, 119, 58) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return checkIngredient(stack);
-            }
-        });
+        this.addSlot(new SlotItemHandler(internal, 5, 119, 58));
 
         // Player inventory (6-32)
         for (int row = 0; row < 3; ++row) {
@@ -128,47 +123,6 @@ public class ForgeCrucibleDestructionMenu extends AbstractContainerMenu implemen
             case 3, 4, 5 -> 58;
             default -> 0;
         };
-    }
-
-    private boolean checkIngredient(ItemStack stack) {
-        ForgeCrucibleEntity blockEntity = getBlockEntity();
-        if (blockEntity == null) return false;
-
-        CompoundTag data = blockEntity.getReceivedData();
-        if (!data.contains("Ingredients", Tag.TAG_LIST)) return false;
-
-        ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
-        if (ingredients.isEmpty()) return false;
-
-        try {
-            // Assuming only one ingredient is needed in slot 5
-            CompoundTag entry = ingredients.getCompound(0);
-            if (!entry.contains("IngredientJson", Tag.TAG_STRING)) return false;
-
-            JsonObject json = JsonParser.parseString(entry.getString("IngredientJson")).getAsJsonObject();
-            return matchesIngredient(stack, json);
-        } catch (Exception e) {
-            Obsidanum.LOGGER.error("Error checking ingredient match", e);
-            return false;
-        }
-    }
-
-    private boolean matchesIngredient(ItemStack stack, JsonObject ingredientJson) {
-        if (stack.isEmpty()) return false;
-
-        if (ingredientJson.has("item")) {
-            ResourceLocation itemId = new ResourceLocation(ingredientJson.get("item").getAsString());
-            Item item = ForgeRegistries.ITEMS.getValue(itemId);
-            return item != null && stack.is(item);
-        }
-
-        if (ingredientJson.has("tag")) {
-            ResourceLocation tagId = new ResourceLocation(ingredientJson.get("tag").getAsString());
-            TagKey<Item> tag = TagKey.create(Registries.ITEM, tagId);
-            return stack.is(tag);
-        }
-
-        return false;
     }
 
     @Override

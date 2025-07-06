@@ -1,7 +1,9 @@
 package net.rezolv.obsidanum.block.forge_crucible.neigbor_changed;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -9,22 +11,63 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.rezolv.obsidanum.block.custom.ForgeCrucible;
 import net.rezolv.obsidanum.block.custom.LeftCornerLevel;
 import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
-import net.rezolv.obsidanum.Obsidanum;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class LeftCornerCompleteDestruction {
+    private static final Map<String, List<RecipeOutput>> RECIPES = new HashMap<>();
+    private static boolean recipesLoaded = false;
+
+    public static class RecipeOutput {
+        public String item;
+        public float chance;
+        public int min_count;
+        public int max_count;
+    }
+
+    public static class Recipe {
+        public String input_tag;
+        public List<RecipeOutput> outputs;
+    }
+
+    public static void loadRecipes(ResourceManager resourceManager) {
+        if (recipesLoaded) return;
+
+        try {
+            InputStream is = resourceManager.getResource(new ResourceLocation("obsidanum", "recipes/scrolls/destruction_recipes.json")).get().open();
+            InputStreamReader reader = new InputStreamReader(is);
+
+            List<Recipe> recipeList = new Gson().fromJson(reader, new TypeToken<List<Recipe>>(){}.getType());
+
+            for (Recipe recipe : recipeList) {
+                RECIPES.put(recipe.input_tag, recipe.outputs);
+            }
+
+            recipesLoaded = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void handleNeighborUpdate(BlockState state, Level level, BlockPos pos, BlockPos fromPos) {
+        if (!recipesLoaded) {
+            loadRecipes(level.getServer().getResourceManager());
+        }
+
         Direction facing = state.getValue(ForgeCrucible.FACING);
         BlockPos expectedLeftPos = getLeftPos(pos, facing);
 
@@ -61,149 +104,68 @@ public class LeftCornerCompleteDestruction {
         ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
         if (ingredients.isEmpty()) return false;
 
-        // Check slot 5 (input slot)
         ItemStack inputStack = crucible.itemHandler.getStackInSlot(5);
-        if (inputStack.isEmpty()) return false;
-
-        try {
-            CompoundTag ingredient = ingredients.getCompound(0);
-            JsonObject json = JsonParser.parseString(ingredient.getString("IngredientJson")).getAsJsonObject();
-
-            // Check required count if specified
-            int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
-            if (inputStack.getCount() < requiredCount) {
-                return false;
-            }
-
-            return matchesRecipeIngredient(inputStack, json);
-        } catch (Exception e) {
-            Obsidanum.LOGGER.error("Error validating input item: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    private static boolean matchesRecipeIngredient(ItemStack stack, JsonObject json) {
-        if (stack.isEmpty()) return false;
-
-        if (json.has("item")) {
-            ResourceLocation itemId = new ResourceLocation(json.get("item").getAsString());
-            Item item = ForgeRegistries.ITEMS.getValue(itemId);
-            return item != null && stack.is(item);
-        }
-
-        if (json.has("tag")) {
-            ResourceLocation tagId = new ResourceLocation(json.get("tag").getAsString());
-            TagKey<Item> tag = TagKey.create(Registries.ITEM, tagId);
-            return stack.is(tag);
-        }
-
-        return false;
+        return !inputStack.isEmpty();
     }
 
     private static void processDestructionRecipe(ForgeCrucibleEntity crucible, RandomSource random) {
-        if (!validateInputItem(crucible)) return;
+        ItemStack inputStack = crucible.itemHandler.getStackInSlot(5);
+        if (inputStack.isEmpty()) return;
 
-        CompoundTag data = crucible.getReceivedData();
-        if (!data.contains("MultipleOutputs", Tag.TAG_LIST)) return;
+        crucible.itemHandler.extractItem(5, 1, false);
 
-        ListTag multipleOutputs = data.getList("MultipleOutputs", Tag.TAG_COMPOUND);
-        if (multipleOutputs.isEmpty()) return;
-
-        // Debug output
-        System.out.println("[DEBUG] Starting recipe processing");
-        System.out.println("[DEBUG] Total outputs: " + multipleOutputs.size());
-
-        // Get ingredient info
-        CompoundTag ingredient = data.getList("Ingredients", Tag.TAG_COMPOUND).getCompound(0);
-        JsonObject json = JsonParser.parseString(ingredient.getString("IngredientJson")).getAsJsonObject();
-        int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
-
-        // Consume input item
-        crucible.itemHandler.extractItem(5, requiredCount, false);
-
-        // Process outputs with chances
         ListTag processedOutputs = new ListTag();
-        ListTag outputChances = data.contains("OutputChances", Tag.TAG_LIST)
-                ? data.getList("OutputChances", Tag.TAG_COMPOUND)
-                : new ListTag();
+        boolean hasMatchedRecipe = false;
 
-        // Fallback: Try to get chances from ProcessedMultipleOutputs if OutputChances is empty
-        if (outputChances.isEmpty() && data.contains("ProcessedMultipleOutputs", Tag.TAG_LIST)) {
-            ListTag processed = data.getList("ProcessedMultipleOutputs", Tag.TAG_COMPOUND);
-            for (int i = 0; i < processed.size(); i++) {
-                CompoundTag tag = processed.getCompound(i);
-                if (tag.contains("Chance", Tag.TAG_FLOAT)) {
-                    CompoundTag chanceTag = new CompoundTag();
-                    chanceTag.putFloat("Chance", tag.getFloat("Chance"));
-                    outputChances.add(chanceTag);
+        // Проверяем все теги предмета (кроме "default")
+        for (Map.Entry<String, List<RecipeOutput>> entry : RECIPES.entrySet()) {
+            String tagName = entry.getKey();
+            if (!tagName.equals("default") && inputStack.is(TagKey.create(Registries.ITEM, new ResourceLocation(tagName)))) {
+                hasMatchedRecipe = true;
+                for (RecipeOutput output : entry.getValue()) {
+                    if (random.nextFloat() <= output.chance) {
+                        CompoundTag outputTag = new CompoundTag();
+                        outputTag.putString("id", output.item);
+                        outputTag.putInt("Count", random.nextInt(output.max_count - output.min_count + 1) + output.min_count);
+                        processedOutputs.add(outputTag);
+                    }
                 }
             }
         }
 
-        for (int i = 0; i < multipleOutputs.size(); i++) {
-            CompoundTag outputTag = multipleOutputs.getCompound(i);
-            float chance = 1.0f;
-
-            // Priority 1: Chance from output tag itself
-            if (outputTag.contains("Chance", Tag.TAG_FLOAT)) {
-                chance = Math.max(0, Math.min(1, outputTag.getFloat("Chance")));
-                System.out.println("[DEBUG] Output " + i + " using direct chance: " + chance);
-            }
-            // Priority 2: Chance from OutputChances list
-            else if (i < outputChances.size()) {
-                CompoundTag chanceTag = outputChances.getCompound(i);
-                chance = Math.max(0, Math.min(1, chanceTag.getFloat("Chance")));
-                System.out.println("[DEBUG] Output " + i + " using list chance: " + chance);
-            }
-
-            float roll = random.nextFloat();
-            System.out.println("[DEBUG] Roll for output " + i + ": " + roll + " vs chance " + chance);
-
-            if (roll <= chance) {
-                // Remove chance to prevent stacking issues
-                CompoundTag resultTag = outputTag.copy();
-                resultTag.remove("Chance");
-                processedOutputs.add(resultTag);
-                System.out.println("[DEBUG] Output " + i + " SUCCESS");
-            } else {
-                System.out.println("[DEBUG] Output " + i + " FAILED");
+        // Если не нашли подходящего рецепта, применяем "default"
+        if (!hasMatchedRecipe && RECIPES.containsKey("default")) {
+            for (RecipeOutput output : RECIPES.get("default")) {
+                if (random.nextFloat() <= output.chance) {
+                    CompoundTag outputTag = new CompoundTag();
+                    outputTag.putString("id", output.item);
+                    outputTag.putInt("Count", random.nextInt(output.max_count - output.min_count + 1) + output.min_count);
+                    processedOutputs.add(outputTag);
+                }
             }
         }
 
-        // Distribute outputs
         distributeMultipleOutputs(crucible, processedOutputs);
-
         crucible.setChanged();
     }
 
     private static void distributeMultipleOutputs(ForgeCrucibleEntity crucible, ListTag multipleOutputs) {
-        // Don't clear slots, but add to existing items
-
-        // Distribute outputs to slots (0-4)
         for (int i = 0; i < Math.min(multipleOutputs.size(), 5); i++) {
             CompoundTag outputTag = multipleOutputs.getCompound(i);
             ItemStack resultStack = ItemStack.of(outputTag);
             ItemStack currentStack = crucible.itemHandler.getStackInSlot(i);
 
             if (currentStack.isEmpty()) {
-                // If slot is empty - just place the result
                 crucible.itemHandler.setStackInSlot(i, resultStack);
             } else if (ItemStack.isSameItemSameTags(currentStack, resultStack)) {
-                // If same item is already in slot - increase count
                 int newCount = currentStack.getCount() + resultStack.getCount();
                 int maxStackSize = currentStack.getMaxStackSize();
 
                 if (newCount <= maxStackSize) {
-                    // If fits in one stack - just increase
                     currentStack.setCount(newCount);
                 } else {
-                    // If doesn't fit - keep max, lose the rest
                     currentStack.setCount(maxStackSize);
-                    Obsidanum.LOGGER.warn("Output slot {} overflow for item {}", i, currentStack.getItem());
                 }
-            } else {
-                // If slot has different item - leave as is (don't replace)
-                Obsidanum.LOGGER.warn("Output slot {} already contains different item", i);
             }
         }
     }

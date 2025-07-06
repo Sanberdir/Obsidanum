@@ -1,0 +1,27 @@
+{
+  "values": [
+    {
+      "values": [
+        "minecraft:dirt",
+        "minecraft:grass_block",
+        "minecraft:podzol",
+        "minecraft:mycelium",
+        "minecraft:dirt_path",
+        "minecraft:farmland",
+        "minecraft:coarse_dirt",
+        "minecraft:rooted_dirt",
+        "minecraft:mud",
+        "minecraft:muddy_mangrove_roots",
+
+        "minecraft:sand",
+        "minecraft:red_sand",
+        "minecraft:suspicious_sand",
+
+        "obsidanum:crimson_grass_block",
+        "obsidanum:alchemical_dirt",
+
+        "minecraft:clay"
+      ]
+    }
+  ]
+}

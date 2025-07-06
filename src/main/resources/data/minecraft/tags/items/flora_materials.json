@@ -1,0 +1,79 @@
+{
+  "values": [
+    "#minecraft:leaves",
+
+    "minecraft:short_grass",
+    "minecraft:seagrass",
+    "minecraft:tall_grass",
+
+    "minecraft:fern",
+    "minecraft:dead_bush",
+    "minecraft:sea_pickle",
+
+    "obsidanum:crimson_grass",
+
+    "#minecraft:flowers",
+
+    "minecraft:crimson_fungus",
+    "minecraft:warped_fungus",
+    "minecraft:crimson_roots",
+    "minecraft:warped_roots",
+    "minecraft:crimson_vines",
+    "minecraft:warped_vines",
+    "minecraft:nether_wart",
+    "minecraft:warped_wart",
+    "minecraft:shroomlight",
+
+    "minecraft:sugar_cane",
+    "minecraft:kelp",
+    "minecraft:moss_carpet",
+    "minecraft:pink_petals",
+    "minecraft:moss_block",
+    "minecraft:hanging_roots",
+    "minecraft:big_dripleaf",
+    "minecraft:small_dripleaf",
+    "minecraft:bamboo",
+    "minecraft:dried_kelp",
+    "minecraft:dried_kelp_block",
+    "minecraft:cocoa_beans",
+    "minecraft:pumpkin_seeds",
+    "minecraft:melon_seeds",
+    "minecraft:carrot",
+    "minecraft:potato",
+    "minecraft:poisonous_potato",
+    "minecraft:torchflower_seeds",
+    "minecraft:beetroot_seeds",
+    "minecraft:pitcher_pod",
+    "minecraft:blaze_rod",
+    "minecraft:ghast_tear",
+
+    "minecraft:skeleton_skull",
+    "minecraft:wither_skeleton_skull",
+    "minecraft:player_head",
+    "minecraft:zombie_head",
+    "minecraft:creeper_head",
+    "minecraft:dragon_head",
+    "minecraft:piglin_head",
+
+    "minecraft:chorus_plant",
+    "minecraft:chorus_flower",
+
+    "minecraft:sculk",
+    "minecraft:sculk_vein",
+    "minecraft:sculk_catalyst",
+    "minecraft:sculk_shrieker",
+    "minecraft:calibrated_sculk_sensor",
+    "minecraft:sculk_sensor",
+
+    "minecraft:wheat",
+    "minecraft:wheat_seeds",
+    "minecraft:glow_lichen",
+    "minecraft:melon",
+    "minecraft:vine",
+    "minecraft:lily_pad",
+    "minecraft:pumpkin",
+    "minecraft:carved_pumpkin",
+
+    "#minecraft:saplings"
+  ]
+}
