@@ -25,9 +25,9 @@ import net.rezolv.obsidanum.block.BlocksObs;
 public class LeftCornerLevel extends Block {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty IS_PRESSED = BooleanProperty.create("is_pressed");
-
+    private static final int PRESSED_DURATION = 220; // 11 секунд (20 тиков/сек * 11)
     public LeftCornerLevel(Properties pProperties) {
-        super(pProperties.randomTicks()); // Включаем поддержку тиков
+        super(pProperties); // Включаем поддержку тиков
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(IS_PRESSED, false)
@@ -36,29 +36,21 @@ public class LeftCornerLevel extends Block {
 
     @Override
     public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
-        super.tick(pState, pLevel, pPos, pRandom);
-        if (!pLevel.isClientSide && pState.getValue(IS_PRESSED)) { // Проверяем только на серверной стороне
-            pLevel.setBlock(pPos, pState.setValue(IS_PRESSED, false), 3); // Сбрасываем состояние
+        if (!pLevel.isClientSide && pState.getValue(IS_PRESSED)) {
+            pLevel.setBlock(pPos, pState.setValue(IS_PRESSED, false), 3);
             pLevel.playSound(null, pPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 1.0F, 1.0F);
-
         }
     }
-
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (!pLevel.isClientSide) { // Выполняется только на серверной стороне
-            if (!pState.getValue(IS_PRESSED)&&pLevel.getBlockState(pPos.below(2)).is(BlocksObs.NETHER_FLAME_BLOCK.get())) { // Проверяем текущее состояние
-                // Устанавливаем IS_PRESSED в true
-                pLevel.setBlock(pPos, pState.setValue(IS_PRESSED, true), 3);
-
-                // Запланировать тик через 2 секунды (40 игровых тиков)
-                pLevel.scheduleTick(pPos, this, 40);
-                pLevel.playSound(null, pPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 1.0F, 1.0F);
-
-                return InteractionResult.SUCCESS;
-            }
+        if (!pLevel.isClientSide && !pState.getValue(IS_PRESSED) && pLevel.getBlockState(pPos.below(2)).is(BlocksObs.NETHER_FLAME_BLOCK.get())) {
+            pLevel.setBlock(pPos, pState.setValue(IS_PRESSED, true), 3);
+            // Запланировать тик через 220 тиков (11 секунд)
+            pLevel.scheduleTick(pPos, this, PRESSED_DURATION);
+            pLevel.playSound(null, pPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 1.0F, 1.0F);
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResult.CONSUME; // Указываем, что взаимодействие завершено, но ничего не изменено
+        return InteractionResult.CONSUME;
     }
 
     @Override
