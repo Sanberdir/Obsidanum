@@ -73,7 +73,7 @@ public class BlocksObs {
             () -> new ForgeCrucible(BlockBehaviour.Properties.of().noOcclusion().randomTicks().strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> LEFT_CORNER_LEVEL = registerBlock("left_corner_level",
             () -> new LeftCornerLevel(BlockBehaviour.Properties.of()
-                    .noOcclusion().strength(-1.0F, 3600000.0F).randomTicks().sound(SoundType.STONE).requiresCorrectToolForDrops()));
+                    .noOcclusion().strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> WALL_FORGE_L_CORNER = registerBlock("wall_forge_l_corner",
             () -> new WallForge(BlockBehaviour.Properties.of().noOcclusion().strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> SIDE_FORGE = registerBlock("side_forge",
