@@ -69,6 +69,12 @@ public class AddTagsForgeCrucible {
                         dataToSend.putString("RecipesPlans", scrollNBT.getString("RecipesPlans"));
                     }
 
+                    // Copy hammer strikes count (default to 1 if not present)
+                    int hammerStrikes = scrollNBT.contains("HammerStrikes", Tag.TAG_INT)
+                            ? scrollNBT.getInt("HammerStrikes")
+                            : 1;
+                    dataToSend.putInt("HammerStrikes", hammerStrikes);
+
                     // Handle Multiple Outputs with chances
                     if (scrollNBT.contains("MultipleOutputs", Tag.TAG_LIST)) {
                         ListTag multipleOutputs = scrollNBT.getList("MultipleOutputs", Tag.TAG_COMPOUND);

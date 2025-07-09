@@ -14,6 +14,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -32,8 +34,19 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.rezolv.obsidanum.block.custom.HammerForge;
+import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteDestruction;
+import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRecipe;
+import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteRepair;
+import net.rezolv.obsidanum.block.forge_crucible.neigbor_changed.LeftCornerCompleteUp;
 import net.rezolv.obsidanum.gui.forge_crucible.recipes_render.ForgeCrucibleGuiMenu;
+import net.rezolv.obsidanum.sound.SoundsObs;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animation.Animation;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,11 +63,69 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
             }
         }
     };
-    public void setReceivedData(CompoundTag data) {
-        System.out.println("Setting received data: " + data);
-        this.receivedScrollData = data;
-        setChanged();
+    private int remainingStrikes = 0;
+    private int totalStrikes = 0;
+    public boolean isCrafting = false;
+    private BlockPos lastHammerPos = null;
+    private int strikeCooldown = 0;
+    private final List<BlockPos> activeHammers = new ArrayList<>();
+
+    public void tick() {
+        if (level == null || level.isClientSide) return;
+
+        if (isCrafting) {
+            if (strikeCooldown > 0) {
+                strikeCooldown--;
+            } else {
+                processStrike();
+            }
+        }
     }
+
+    public void startHammerStrikes(int strikes) {
+        this.remainingStrikes = strikes;
+        this.strikeCooldown = 0;
+        this.activeHammers.clear();
+
+        // Находим все молоты в радиусе 4 блоков
+        Level level = getLevel();
+        BlockPos center = getBlockPos();
+
+        for (int x = -4; x <= 4; x++) {
+            for (int y = -4; y <= 4; y++) {
+                for (int z = -4; z <= 4; z++) {
+                    BlockPos pos = center.offset(x, y, z);
+                    if (level.getBlockState(pos).getBlock() instanceof HammerForge) {
+                        activeHammers.add(pos);
+                    }
+                }
+            }
+        }
+    }
+
+    // Метод для обработки ударов (вызывается каждый тик)
+    public void tickStrikes() {
+        if (remainingStrikes <= 0 || activeHammers.isEmpty()) return;
+
+        if (strikeCooldown <= 0) {
+            // Активируем все молоты
+            for (BlockPos pos : activeHammers) {
+                BlockState state = level.getBlockState(pos);
+                if (state.hasProperty(HammerForge.POWERED)) {
+                    level.setBlock(pos, state.setValue(HammerForge.POWERED, true), 3);
+
+                    // Запланировать деактивацию через 1 тик
+                    level.scheduleTick(pos, state.getBlock(), 1);
+                }
+            }
+
+            remainingStrikes--;
+            strikeCooldown = 220; // 11 секунд (220 тиков)
+        } else {
+            strikeCooldown--;
+        }
+    }
+
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     private final LazyOptional<? extends IItemHandler>[] handlers = new LazyOptional[Direction.values().length];
 
@@ -131,7 +202,8 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
                     itemHandler.setStackInSlot(i, ItemStack.EMPTY); // Очищаем слот
                 }
             }
-
+            this.remainingStrikes = 0;
+            this.activeHammers.clear();
             // Выбрасываем предметы в мир
             for (ItemStack stack : itemsToDrop) {
                 ItemEntity itemEntity = new ItemEntity(
@@ -173,6 +245,9 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
         super.saveAdditional(pTag);
         pTag.put("CrucibleData", receivedScrollData);
         pTag.put("Inventory", itemHandler.serializeNBT());
+        pTag.putInt("RemainingStrikes", remainingStrikes);
+        pTag.putInt("TotalStrikes", totalStrikes);
+        pTag.putBoolean("IsCrafting", isCrafting);
 
         ListTag depositedList = new ListTag();
         for (ItemStack stack : depositedItems) {
@@ -202,6 +277,9 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
         if (pTag.contains("Inventory")) {
             itemHandler.deserializeNBT(pTag.getCompound("Inventory"));
         }
+        remainingStrikes = pTag.getInt("RemainingStrikes");
+        totalStrikes = pTag.getInt("TotalStrikes");
+        isCrafting = pTag.getBoolean("IsCrafting");
 
         depositedItems.clear();
         if (pTag.contains("DepositedItems")) {
@@ -211,7 +289,96 @@ public class ForgeCrucibleEntity extends RandomizableContainerBlockEntity implem
             }
         }
     }
+    public void startCrafting(int hammerStrikes) {
+        this.remainingStrikes = hammerStrikes;
+        this.totalStrikes = hammerStrikes;
+        this.isCrafting = true;
+        this.strikeCooldown = 0; // Начинаем немедленно
+        setChanged();
+    }
 
+
+    public void processStrike() {
+        // Ищем ближайший молот в радиусе 4 блоков
+        int radius = 4;
+        BlockPos foundHammer = null;
+
+        for (BlockPos checkPos : BlockPos.withinManhattan(worldPosition, radius, radius, radius)) {
+            if (level.getBlockEntity(checkPos) instanceof HammerForgeEntity) {
+                BlockState state = level.getBlockState(checkPos);
+                if (!state.getValue(HammerForge.POWERED)) {
+                    foundHammer = checkPos;
+                    break;
+                }
+            }
+        }
+
+        if (foundHammer != null) {
+            // Активируем молот на 200 тиков
+            BlockState hammerState = level.getBlockState(foundHammer);
+            level.setBlock(foundHammer, hammerState
+                    .setValue(HammerForge.POWERED, true)
+                    .setValue(HammerForge.ANIMATION_TIME, 208), 3);
+
+            // Проигрываем звук удара
+            level.playSound(null, foundHammer,
+                    SoundsObs.HAMMER_FORGE.get(),
+                    SoundSource.BLOCKS, 1.5F, 1.0F);
+
+            remainingStrikes--;
+
+            if (remainingStrikes > 0) {
+                // Устанавливаем паузу в 1 тик до следующего удара
+                strikeCooldown = 1;
+            } else {
+                // Завершаем крафт после последнего удара
+                finishCrafting();
+            }
+        } else {
+            // Если молот не найден, пробуем снова через 20 тиков (1 секунда)
+            strikeCooldown = 20;
+        }
+
+        setChanged();
+    }
+
+    private void scheduleNextStrike() {
+        if (level != null) {
+            level.scheduleTick(worldPosition, getBlockState().getBlock(), 220); // 11 секунд
+        }
+    }
+
+    public void finishCrafting() {
+        isCrafting = false;
+
+        CompoundTag data = getReceivedData();
+        if (data.contains("RepairMode") && data.getBoolean("RepairMode")) {
+            LeftCornerCompleteRepair.completeRepair(this);
+        }
+        else if (data.contains("DestructionMode") && data.getBoolean("DestructionMode")) {
+            LeftCornerCompleteDestruction.completeDestruction(this);
+        }
+        else if (data.contains("UpgradeMode") && data.getBoolean("UpgradeMode")) {
+            LeftCornerCompleteUp.completeUpgrade(this);
+        }
+        else {
+            LeftCornerCompleteRecipe.createCraftingResult(this);
+        }
+    }
+    private static void startRepairProcess(ForgeCrucibleEntity crucible) {
+        CompoundTag data = crucible.getReceivedData();
+
+        // Помечаем как режим починки
+        data.putBoolean("RepairMode", true);
+        crucible.receiveScrollData(data);
+
+        int hammerStrikes = 3;
+        if (data.contains("HammerStrikes", Tag.TAG_INT)) {
+            hammerStrikes = data.getInt("HammerStrikes");
+        }
+
+        crucible.startCrafting(hammerStrikes);
+    }
     // Обновлённая синхронизация
     @Override
     public CompoundTag getUpdateTag() {

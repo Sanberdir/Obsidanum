@@ -14,7 +14,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.rezolv.obsidanum.block.BlocksObs;
+import net.rezolv.obsidanum.block.entity.ForgeCrucibleEntity;
 import net.rezolv.obsidanum.block.entity.HammerForgeEntity;
 import net.rezolv.obsidanum.sound.SoundsObs;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +31,8 @@ public class HammerForge extends BaseEntityBlock {
         super(pProperties);
         this.registerDefaultState(this.defaultBlockState()
                 .setValue(FACING, Direction.UP)
-                .setValue(POWERED, false));
+                .setValue(POWERED, false)
+                .setValue(ANIMATION_TIME, 0));
     }
 
     public RenderShape getRenderShape(BlockState pState) {
@@ -39,7 +42,7 @@ public class HammerForge extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, POWERED);
+        builder.add(FACING, POWERED, ANIMATION_TIME);
     }
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
@@ -67,30 +70,37 @@ public class HammerForge extends BaseEntityBlock {
         }
     }
     private static final Map<BlockPos, Integer> tickCounters = new HashMap<>();
-
+    public static final IntegerProperty ANIMATION_TIME = IntegerProperty.create("animation_time", 0, 208);
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        boolean isPowered = checkForPressedCorners(level, pos);
+        boolean isPowered = state.getValue(POWERED);
+        boolean shouldBePowered = checkForPressedCorners(level, pos);
 
-        // Обновляем состояние на всякий случай, если соседние углы изменились вне neighborChanged
-        if (state.getValue(POWERED) != isPowered) {
-            level.setBlock(pos, state.setValue(POWERED, isPowered), Block.UPDATE_ALL);
-            if (!isPowered) {
-                tickCounters.remove(pos);
+        if (isPowered) {
+            // Уменьшаем счетчик времени анимации
+            int animationTime = state.getValue(ANIMATION_TIME);
+            if (animationTime > 0) {
+                level.setBlock(pos, state.setValue(ANIMATION_TIME, animationTime - 1), 3);
             } else {
-                tickCounters.put(pos, 0);
+                level.setBlock(pos, state.setValue(POWERED, false), 3);
             }
         }
-        if (isPowered && tickCounters.containsKey(pos)) {
-                level.playSound(null, pos,
-                        SoundsObs.HAMMER_FORGE.get(),
-                        net.minecraft.sounds.SoundSource.BLOCKS,
-                        1.5F, 1.0F);
-                tickCounters.remove(pos);
-        }
+
         level.scheduleTick(pos, this, 1);
     }
 
+    private void processForgeStrike(ServerLevel level, BlockPos pos) {
+        // Ищем ближайший тигель в радиусе 4 блоков
+        int radius = 4;
+        for (BlockPos checkPos : BlockPos.withinManhattan(pos, radius, radius, radius)) {
+            BlockEntity be = level.getBlockEntity(checkPos);
+            if (be instanceof ForgeCrucibleEntity crucible && crucible.isCrafting) {
+                // Передаем удар в тигель
+                crucible.processStrike();
+                return;
+            }
+        }
+    }
     @Override
     public void onRemove(BlockState oldState, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!oldState.is(newState.getBlock())) {

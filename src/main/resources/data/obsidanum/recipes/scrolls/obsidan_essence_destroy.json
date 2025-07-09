@@ -1,5 +1,6 @@
 {
   "type": "obsidanum:forge_scroll_order",
+  "hammer_strikes": 2,
   "ingredients": [
     {
       "tag": "obsidanum:scrolls",

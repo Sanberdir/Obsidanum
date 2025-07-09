@@ -8,9 +8,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -26,6 +29,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.registries.DeferredRegister;
 import net.rezolv.obsidanum.block.BlocksObs;
 import net.rezolv.obsidanum.block.entity.ModBlockEntities;
 import net.rezolv.obsidanum.block.entity.renderer.PranaCrystallRenderer;
@@ -60,6 +64,7 @@ import net.rezolv.obsidanum.sound.SoundsObs;
 import net.rezolv.obsidanum.structures.WDAStructures;
 import net.rezolv.obsidanum.structures.processors.RSProcessors;
 import net.rezolv.obsidanum.tab.CreativeTabObs;
+import net.rezolv.obsidanum.world.custom_placer_trees.ObsidanumPlacers;
 import net.rezolv.obsidanum.world.features.ObsidanumFeatureRegistry;
 import net.rezolv.obsidanum.world.wood.ModWoodTypes;
 import org.slf4j.Logger;
@@ -80,6 +85,8 @@ public class Obsidanum {
 
     public Obsidanum() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        ObsidanumPlacers.TRUNK_PLACERS.register(modEventBus);
+        ObsidanumPlacers.FOLIAGE_PLACERS.register(modEventBus);
         RSProcessors.STRUCTURE_PROCESSOR.register(modEventBus);
         // Канал для анимации тотема
         CHANNEL.messageBuilder(TotemAnimationMessage.class, 0)
@@ -87,6 +94,7 @@ public class Obsidanum {
                 .encoder(TotemAnimationMessage::encode)
                 .consumerMainThread(TotemAnimationMessage::handle)
                 .add();
+
         ObsidanumFeatureRegistry.DEF_REG.register(modEventBus);
         WDAStructures.DEFERRED_REGISTRY_STRUCTURE.register(modEventBus);
         ObsidanumMenus.REGISTRY.register(modEventBus);

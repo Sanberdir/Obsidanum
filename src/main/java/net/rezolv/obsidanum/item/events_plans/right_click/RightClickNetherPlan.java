@@ -3,7 +3,6 @@ package net.rezolv.obsidanum.item.events_plans.right_click;
 import com.google.gson.JsonObject;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
@@ -50,10 +49,6 @@ public class RightClickNetherPlan {
                 1.0F,                  // Громкость (1.0 = 100%)
                 0.8F + RANDOM.nextFloat() * 0.4F); // Высота тона (случайное значение для естественности)
 
-        // Возвращаем успешный результат взаимодействия
-        event.setCancellationResult(InteractionResult.SUCCESS);
-        event.setCanceled(true);
-
         // Выбираем случайный рецепт
         ForgeScrollNetherRecipe randomRecipe = recipes.get(RANDOM.nextInt(recipes.size()));
 
@@ -82,6 +77,8 @@ public class RightClickNetherPlan {
             ingredientsList.add(ingredientTag);
         }
         tag.put("Ingredients", ingredientsList);
+
+        // Записываем бонусные выходы
         if (!randomRecipe.getBonusOutputs().isEmpty()) {
             ListTag bonusOutputsList = new ListTag();
             for (ForgeScrollNetherRecipe.BonusOutput bonus : randomRecipe.getBonusOutputs()) {
@@ -90,12 +87,16 @@ public class RightClickNetherPlan {
                 bonus.itemStack().save(itemTag);
                 bonusTag.put("Item", itemTag);
                 bonusTag.putFloat("Chance", bonus.chance());
-                bonusTag.putInt("Min", bonus.min());  // Сохраняем min
-                bonusTag.putInt("Max", bonus.max());  // Сохраняем max
+                bonusTag.putInt("Min", bonus.min());
+                bonusTag.putInt("Max", bonus.max());
                 bonusOutputsList.add(bonusTag);
             }
             tag.put("BonusOutputs", bonusOutputsList);
         }
+
+        // Записываем количество ударов молота
+        tag.putInt("HammerStrikes", randomRecipe.getHammerStrikes());
+
         // Применяем тег к новому предмету
         planItem.setTag(tag);
 

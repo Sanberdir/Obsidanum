@@ -78,12 +78,15 @@ public class RightClickOrderPlan {
                 bonus.itemStack().save(itemTag);
                 bonusTag.put("Item", itemTag);
                 bonusTag.putFloat("Chance", bonus.chance());
-                bonusTag.putInt("Min", bonus.min());  // Сохраняем min
-                bonusTag.putInt("Max", bonus.max());  // Сохраняем max
+                bonusTag.putInt("Min", bonus.min());
+                bonusTag.putInt("Max", bonus.max());
                 bonusOutputsList.add(bonusTag);
             }
             tag.put("BonusOutputs", bonusOutputsList);
         }
+
+        // Добавлено: Записываем количество ударов молота
+        tag.putInt("HammerStrikes", randomRecipe.getHammerStrikes());
 
         // Apply tag to the new item
         planItem.setTag(tag);

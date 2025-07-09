@@ -31,6 +31,15 @@ public class RightClickCatacombsPlan {
         if (heldItem.getItem() != ItemsObs.UN_CATACOMBS_SCROLL.get() || level.isClientSide()) {
             return;
         }
+
+        // Получаем список всех рецептов катакомб
+        List<ForgeScrollCatacombsRecipe> recipes = level.getRecipeManager()
+                .getAllRecipesFor(ForgeScrollCatacombsRecipe.Type.FORGE_SCROLL_CATACOMBS);
+
+        if (recipes.isEmpty()) {
+            return; // Нет доступных рецептов
+        }
+
         // Проигрываем звук колокола
         level.playSound(null,
                 event.getEntity().getX(),
@@ -40,16 +49,6 @@ public class RightClickCatacombsPlan {
                 SoundSource.PLAYERS,    // Категория звука (для игроков)
                 1.0F,                  // Громкость (1.0 = 100%)
                 0.95F + RANDOM.nextFloat() * 0.1F); // Узкий диапазон высоты тона (0.95-1.05)
-        // Возвращаем успешный результат взаимодействия
-        event.setCancellationResult(InteractionResult.SUCCESS);
-        event.setCanceled(true);
-        // Получаем список всех рецептов катакомб
-        List<ForgeScrollCatacombsRecipe> recipes = level.getRecipeManager()
-                .getAllRecipesFor(ForgeScrollCatacombsRecipe.Type.FORGE_SCROLL_CATACOMBS);
-
-        if (recipes.isEmpty()) {
-            return; // Нет доступных рецептов
-        }
 
         // Выбираем случайный рецепт
         ForgeScrollCatacombsRecipe randomRecipe = recipes.get(RANDOM.nextInt(recipes.size()));
@@ -79,6 +78,8 @@ public class RightClickCatacombsPlan {
             ingredientsList.add(ingredientTag);
         }
         tag.put("Ingredients", ingredientsList);
+
+        // Записываем бонусные выходы
         if (!randomRecipe.getBonusOutputs().isEmpty()) {
             ListTag bonusOutputsList = new ListTag();
             for (ForgeScrollCatacombsRecipe.BonusOutput bonus : randomRecipe.getBonusOutputs()) {
@@ -87,12 +88,16 @@ public class RightClickCatacombsPlan {
                 bonus.itemStack().save(itemTag);
                 bonusTag.put("Item", itemTag);
                 bonusTag.putFloat("Chance", bonus.chance());
-                bonusTag.putInt("Min", bonus.min());  // Сохраняем min
-                bonusTag.putInt("Max", bonus.max());  // Сохраняем max
+                bonusTag.putInt("Min", bonus.min());
+                bonusTag.putInt("Max", bonus.max());
                 bonusOutputsList.add(bonusTag);
             }
             tag.put("BonusOutputs", bonusOutputsList);
         }
+
+        // Добавляем количество ударов молота
+        tag.putInt("HammerStrikes", randomRecipe.getHammerStrikes());
+
         // Применяем тег к новому предмету
         planItem.setTag(tag);
 

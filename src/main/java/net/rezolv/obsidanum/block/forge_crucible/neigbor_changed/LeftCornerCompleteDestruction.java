@@ -42,6 +42,7 @@ public class LeftCornerCompleteDestruction {
     public static class Recipe {
         public String input_tag;
         public List<RecipeOutput> outputs;
+        public int hammerStrikes = 1;
     }
 
     public static void loadRecipes(ResourceManager resourceManager) {
@@ -53,6 +54,7 @@ public class LeftCornerCompleteDestruction {
 
             List<Recipe> recipeList = new Gson().fromJson(reader, new TypeToken<List<Recipe>>(){}.getType());
 
+            RECIPES.clear();
             for (Recipe recipe : recipeList) {
                 RECIPES.put(recipe.input_tag, recipe.outputs);
             }
@@ -80,11 +82,76 @@ public class LeftCornerCompleteDestruction {
 
                 if (crucibleEntity instanceof ForgeCrucibleEntity crucible) {
                     if (validateInputItem(crucible)) {
-                        processDestructionRecipe(crucible, level.getRandom());
+                        startDestructionProcess(crucible);
                     }
                 }
             }
         }
+    }
+
+    private static void startDestructionProcess(ForgeCrucibleEntity crucible) {
+        CompoundTag data = crucible.getReceivedData();
+        data.putBoolean("DestructionMode", true);
+        crucible.receiveScrollData(data);
+
+        ItemStack inputStack = crucible.itemHandler.getStackInSlot(5);
+        int stackSize = inputStack.getCount();
+        int hammerStrikes = 1; // Базовое количество ударов для одного предмета
+
+        crucible.startCrafting(hammerStrikes);
+    }
+
+    public static void completeDestruction(ForgeCrucibleEntity crucible) {
+        ItemStack inputStack = crucible.itemHandler.getStackInSlot(5);
+        if (inputStack.isEmpty()) return;
+
+        int stackSize = inputStack.getCount();
+        RandomSource random = crucible.getLevel().getRandom();
+
+        // Извлекаем весь стак сразу
+        crucible.itemHandler.extractItem(5, stackSize, false);
+
+        ListTag processedOutputs = new ListTag();
+        boolean hasMatchedRecipe = false;
+
+        // Обрабатываем каждый предмет в стаке
+        for (int i = 0; i < stackSize; i++) {
+            // Проверяем все теги предмета (кроме "default")
+            for (Map.Entry<String, List<RecipeOutput>> entry : RECIPES.entrySet()) {
+                String tagName = entry.getKey();
+                if (!tagName.equals("default") && inputStack.is(TagKey.create(Registries.ITEM, new ResourceLocation(tagName)))) {
+                    hasMatchedRecipe = true;
+                    for (RecipeOutput output : entry.getValue()) {
+                        if (random.nextFloat() <= output.chance) {
+                            CompoundTag outputTag = new CompoundTag();
+                            outputTag.putString("id", output.item);
+                            outputTag.putInt("Count", random.nextInt(output.max_count - output.min_count + 1) + output.min_count);
+                            processedOutputs.add(outputTag);
+                        }
+                    }
+                }
+            }
+
+            // Если не нашли подходящего рецепта, применяем "default"
+            if (!hasMatchedRecipe && RECIPES.containsKey("default")) {
+                for (RecipeOutput output : RECIPES.get("default")) {
+                    if (random.nextFloat() <= output.chance) {
+                        CompoundTag outputTag = new CompoundTag();
+                        outputTag.putString("id", output.item);
+                        outputTag.putInt("Count", random.nextInt(output.max_count - output.min_count + 1) + output.min_count);
+                        processedOutputs.add(outputTag);
+                    }
+                }
+            }
+        }
+
+        distributeMultipleOutputs(crucible, processedOutputs);
+
+        // Сбрасываем флаг разрушения
+        CompoundTag data = crucible.getReceivedData();
+        data.remove("DestructionMode");
+        crucible.receiveScrollData(data);
+        crucible.setChanged();
     }
 
     private static BlockPos getLeftPos(BlockPos pos, Direction facing) {
@@ -108,63 +175,62 @@ public class LeftCornerCompleteDestruction {
         return !inputStack.isEmpty();
     }
 
-    private static void processDestructionRecipe(ForgeCrucibleEntity crucible, RandomSource random) {
-        ItemStack inputStack = crucible.itemHandler.getStackInSlot(5);
-        if (inputStack.isEmpty()) return;
+    private static void distributeMultipleOutputs(ForgeCrucibleEntity crucible, ListTag multipleOutputs) {
+        // Сначала собираем все выходы в одну карту для объединения
+        Map<ItemStack, Integer> outputMap = new HashMap<>();
 
-        crucible.itemHandler.extractItem(5, 1, false);
+        for (int i = 0; i < multipleOutputs.size(); i++) {
+            CompoundTag outputTag = multipleOutputs.getCompound(i);
+            ItemStack resultStack = ItemStack.of(outputTag);
 
-        ListTag processedOutputs = new ListTag();
-        boolean hasMatchedRecipe = false;
+            boolean found = false;
+            for (ItemStack key : outputMap.keySet()) {
+                if (ItemStack.isSameItemSameTags(key, resultStack)) {
+                    outputMap.put(key, outputMap.get(key) + resultStack.getCount());
+                    found = true;
+                    break;
+                }
+            }
 
-        // Проверяем все теги предмета (кроме "default")
-        for (Map.Entry<String, List<RecipeOutput>> entry : RECIPES.entrySet()) {
-            String tagName = entry.getKey();
-            if (!tagName.equals("default") && inputStack.is(TagKey.create(Registries.ITEM, new ResourceLocation(tagName)))) {
-                hasMatchedRecipe = true;
-                for (RecipeOutput output : entry.getValue()) {
-                    if (random.nextFloat() <= output.chance) {
-                        CompoundTag outputTag = new CompoundTag();
-                        outputTag.putString("id", output.item);
-                        outputTag.putInt("Count", random.nextInt(output.max_count - output.min_count + 1) + output.min_count);
-                        processedOutputs.add(outputTag);
+            if (!found) {
+                outputMap.put(resultStack, resultStack.getCount());
+            }
+        }
+
+        // Теперь распределяем объединенные выходы по слотам
+        int slot = 0;
+        for (Map.Entry<ItemStack, Integer> entry : outputMap.entrySet()) {
+            if (slot >= 5) break; // Максимум 5 слотов для выходов
+
+            ItemStack resultStack = entry.getKey().copy();
+            resultStack.setCount(entry.getValue());
+
+            // Проверяем, можно ли добавить к существующему стаку
+            boolean addedToExisting = false;
+            for (int i = 0; i < 5; i++) {
+                ItemStack current = crucible.itemHandler.getStackInSlot(i);
+                if (ItemStack.isSameItemSameTags(current, resultStack)) {
+                    int canAdd = current.getMaxStackSize() - current.getCount();
+                    if (canAdd > 0) {
+                        int toAdd = Math.min(canAdd, resultStack.getCount());
+                        current.grow(toAdd);
+                        resultStack.shrink(toAdd);
+                        if (resultStack.isEmpty()) {
+                            addedToExisting = true;
+                            break;
+                        }
                     }
                 }
             }
-        }
 
-        // Если не нашли подходящего рецепта, применяем "default"
-        if (!hasMatchedRecipe && RECIPES.containsKey("default")) {
-            for (RecipeOutput output : RECIPES.get("default")) {
-                if (random.nextFloat() <= output.chance) {
-                    CompoundTag outputTag = new CompoundTag();
-                    outputTag.putString("id", output.item);
-                    outputTag.putInt("Count", random.nextInt(output.max_count - output.min_count + 1) + output.min_count);
-                    processedOutputs.add(outputTag);
-                }
-            }
-        }
-
-        distributeMultipleOutputs(crucible, processedOutputs);
-        crucible.setChanged();
-    }
-
-    private static void distributeMultipleOutputs(ForgeCrucibleEntity crucible, ListTag multipleOutputs) {
-        for (int i = 0; i < Math.min(multipleOutputs.size(), 5); i++) {
-            CompoundTag outputTag = multipleOutputs.getCompound(i);
-            ItemStack resultStack = ItemStack.of(outputTag);
-            ItemStack currentStack = crucible.itemHandler.getStackInSlot(i);
-
-            if (currentStack.isEmpty()) {
-                crucible.itemHandler.setStackInSlot(i, resultStack);
-            } else if (ItemStack.isSameItemSameTags(currentStack, resultStack)) {
-                int newCount = currentStack.getCount() + resultStack.getCount();
-                int maxStackSize = currentStack.getMaxStackSize();
-
-                if (newCount <= maxStackSize) {
-                    currentStack.setCount(newCount);
-                } else {
-                    currentStack.setCount(maxStackSize);
+            // Если осталось что-то добавить и есть свободные слоты
+            if (!addedToExisting && !resultStack.isEmpty()) {
+                for (int i = 0; i < 5; i++) {
+                    if (crucible.itemHandler.getStackInSlot(i).isEmpty()) {
+                        crucible.itemHandler.setStackInSlot(i, resultStack);
+                        slot++;
+                        break;
+                    }
                 }
             }
         }

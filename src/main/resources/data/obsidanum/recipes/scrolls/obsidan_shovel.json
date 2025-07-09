@@ -1,5 +1,6 @@
 {
   "type": "obsidanum:forge_scroll_catacombs",
+  "hammer_strikes": 1,
   "ingredients": [
     {
       "item": "minecraft:golden_shovel",

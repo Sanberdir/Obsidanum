@@ -40,7 +40,8 @@ public class HammerForgeEntity extends BaseContainerBlockEntity implements World
     public void onLoad() {
         super.onLoad();
         if (!level.isClientSide) {
-            level.scheduleTick(worldPosition, this.getBlockState().getBlock(), 1); // Принудительный тик после загрузки
+            // Увеличиваем частоту проверок
+            level.scheduleTick(worldPosition, this.getBlockState().getBlock(), 5);
         }
     }
     @Override
@@ -112,17 +113,14 @@ public class HammerForgeEntity extends BaseContainerBlockEntity implements World
     private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> state) {
         boolean isPowered = isPowered();
 
-        if (isPowered && !wasPowered) {
-            // Только при переходе из выключенного в включенное состояние
+        if (isPowered) {
+            // Проигрываем анимацию удара в цикле пока активно
             state.getController().setAnimation(RawAnimation.begin()
-                    .then("animation.down_move", Animation.LoopType.PLAY_ONCE));
-            wasPowered = true;
-        } else if (!isPowered) {
-            wasPowered = false;
+                    .then("animation.down_move", Animation.LoopType.LOOP));
+        } else {
             state.getController().setAnimation(RawAnimation.begin()
                     .then("animation.idle", Animation.LoopType.LOOP));
         }
-
         return PlayState.CONTINUE;
     }
     @Override

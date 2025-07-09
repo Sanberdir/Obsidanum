@@ -31,6 +31,8 @@ public class LeftCornerCompleteRecipe {
         Direction facing = state.getValue(ForgeCrucible.FACING);
         BlockPos expectedLeftPos = getLeftPos(pos, facing);
 
+
+
         if (expectedLeftPos != null && expectedLeftPos.equals(fromPos)) {
             BlockState leftBlockState = level.getBlockState(expectedLeftPos);
             BlockEntity crucibleEntity = level.getBlockEntity(pos);
@@ -39,8 +41,26 @@ public class LeftCornerCompleteRecipe {
                     leftBlockState.getValue(LeftCornerLevel.IS_PRESSED)) {
 
                 if (crucibleEntity instanceof ForgeCrucibleEntity crucible) {
-                    if (checkAllIngredientsWithCount(crucible)) { // Изменили название метода для ясности
-                        createCraftingResult(crucible);
+                    if (checkAllIngredientsWithCount(crucible)) {
+                        int hammerStrikes = crucible.getReceivedData().getInt("HammerStrikes");
+                        crucible.startCrafting(hammerStrikes);
+                    }
+                }
+            }
+            if (leftBlockState.getBlock() instanceof LeftCornerLevel &&
+                    leftBlockState.getValue(LeftCornerLevel.IS_PRESSED)) {
+
+                if (crucibleEntity instanceof ForgeCrucibleEntity crucible) {
+                    // Проверяем, не идет ли уже крафт
+                    if (!crucible.isCrafting && checkAllIngredientsWithCount(crucible)) {
+                        // Получаем количество ударов из рецепта
+                        int hammerStrikes = crucible.getReceivedData().getInt("HammerStrikes");
+
+                        // Начинаем процесс крафта
+                        crucible.startCrafting(hammerStrikes);
+
+                        // Немедленно обрабатываем первый удар
+                        crucible.processStrike();
                     }
                 }
             }
@@ -103,7 +123,7 @@ public class LeftCornerCompleteRecipe {
         return false;
     }
 
-    private static void createCraftingResult(ForgeCrucibleEntity crucible) {
+    public static void createCraftingResult(ForgeCrucibleEntity crucible) {
         // Проверка ингредиентов
         if (!checkAllIngredientsWithCount(crucible)) {
             return;
@@ -127,7 +147,13 @@ public class LeftCornerCompleteRecipe {
                 return;
             }
         }
+        int hammerStrikes = 1;
+        if (data.contains("HammerStrikes", Tag.TAG_INT)) {
+            hammerStrikes = data.getInt("HammerStrikes");
+        }
 
+        // Запускаем процесс ударов
+        crucible.startHammerStrikes(hammerStrikes);
         ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
         for (int i = 0; i < ingredients.size(); i++) {
             CompoundTag ingredient = ingredients.getCompound(i);

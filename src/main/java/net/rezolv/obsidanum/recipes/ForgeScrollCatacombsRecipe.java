@@ -32,14 +32,19 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
     private final ItemStack output;
     private final ResourceLocation id;
     private final List<BonusOutput> bonusOutputs;
+    private final int hammerStrikes; // Добавлено поле для количества ударов молота
 
     public ForgeScrollCatacombsRecipe(NonNullList<Ingredient> ingredients, ItemStack output, ResourceLocation id,
-                                      NonNullList<JsonObject> ingredientJsons, List<BonusOutput> bonusOutputs) {
+                                      NonNullList<JsonObject> ingredientJsons, List<BonusOutput> bonusOutputs, int hammerStrikes) {
         this.ingredients = ingredients;
         this.output = output != null ? output : ItemStack.EMPTY;
         this.id = id;
         this.ingredientJsons = ingredientJsons;
         this.bonusOutputs = bonusOutputs != null ? bonusOutputs : new ArrayList<>();
+        this.hammerStrikes = Math.max(1, hammerStrikes); // Гарантируем минимум 1 удар
+    }
+    public int getHammerStrikes() {
+        return hammerStrikes;
     }
 
     public NonNullList<JsonObject> getIngredientJsons() {
@@ -92,9 +97,13 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
             tag.put("BonusOutputs", bonusesTag);
         }
 
+        // Добавлено сохранение количества ударов молота
+        tag.putInt("HammerStrikes", hammerStrikes);
+
         result.setTag(tag);
         return result;
     }
+
 
     @Override
     public boolean canCraftInDimensions(int width, int height) {
@@ -192,7 +201,10 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
                 }
             }
 
-            return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs);
+            // Добавлено чтение количества ударов молота (по умолчанию 1)
+            int hammerStrikes = GsonHelper.getAsInt(serializedRecipe, "hammer_strikes", 1);
+
+            return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs, hammerStrikes);
         }
 
         @Override
@@ -227,7 +239,10 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
                 bonusOutputs.add(new BonusOutput(bonusStack, chance, min, max));
             }
 
-            return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs);
+            // Добавлено чтение количества ударов молота
+            int hammerStrikes = buffer.readVarInt();
+
+            return new ForgeScrollCatacombsRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs, hammerStrikes);
         }
 
         @Override
@@ -243,7 +258,7 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
             for (JsonObject json : recipe.ingredientJsons) {
                 buffer.writeUtf(json.toString());
             }
-
+            buffer.writeVarInt(recipe.hammerStrikes);
             // Write main output
             buffer.writeItemStack(recipe.output, true);
 

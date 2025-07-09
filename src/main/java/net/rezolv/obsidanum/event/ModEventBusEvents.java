@@ -14,11 +14,13 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -31,6 +33,7 @@ import net.rezolv.obsidanum.entity.meat_beetle.MeetBeetle;
 import net.rezolv.obsidanum.entity.mutated_gart.MutatedGart;
 import net.rezolv.obsidanum.entity.obsidian_elemental.ObsidianElemental;
 import net.rezolv.obsidanum.item.custom.ObsidanPickaxe;
+import net.rezolv.obsidanum.world.custom_placer_trees.ObsidanumPlacers;
 
 import java.util.UUID;
 
@@ -40,7 +43,6 @@ public class ModEventBusEvents {
     public static void registerAttributesElemental(EntityAttributeCreationEvent event) {
         event.put(ModEntities.OBSIDIAN_ELEMENTAL.get(), ObsidianElemental.createAttributes().build());
     }
-
 
     @SubscribeEvent
     public static void registerAttributesBeetle(EntityAttributeCreationEvent event) {

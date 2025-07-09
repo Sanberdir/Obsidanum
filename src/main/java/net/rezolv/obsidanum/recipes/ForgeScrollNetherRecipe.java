@@ -32,14 +32,16 @@ public class ForgeScrollNetherRecipe implements Recipe<SimpleContainer> {
     private final ItemStack output;
     private final ResourceLocation id;
     private final List<BonusOutput> bonusOutputs;
+    private final int hammerStrikes; // New field for hammer strikes count
 
     public ForgeScrollNetherRecipe(NonNullList<Ingredient> ingredients, ItemStack output, ResourceLocation id,
-                                   NonNullList<JsonObject> ingredientJsons, List<BonusOutput> bonusOutputs) {
+                                   NonNullList<JsonObject> ingredientJsons, List<BonusOutput> bonusOutputs, int hammerStrikes) {
         this.ingredients = ingredients;
         this.output = output != null ? output : ItemStack.EMPTY;
         this.id = id;
         this.ingredientJsons = ingredientJsons;
         this.bonusOutputs = bonusOutputs != null ? bonusOutputs : new ArrayList<>();
+        this.hammerStrikes = Math.max(1, hammerStrikes); // Ensure at least 1 strike
     }
 
     public NonNullList<JsonObject> getIngredientJsons() {
@@ -48,6 +50,10 @@ public class ForgeScrollNetherRecipe implements Recipe<SimpleContainer> {
 
     public List<BonusOutput> getBonusOutputs() {
         return bonusOutputs;
+    }
+
+    public int getHammerStrikes() {
+        return hammerStrikes;
     }
 
     @Override
@@ -91,6 +97,9 @@ public class ForgeScrollNetherRecipe implements Recipe<SimpleContainer> {
             }
             tag.put("BonusOutputs", bonusesTag);
         }
+
+        // Store hammer strikes count
+        tag.putInt("HammerStrikes", hammerStrikes);
 
         result.setTag(tag);
         return result;
@@ -192,7 +201,10 @@ public class ForgeScrollNetherRecipe implements Recipe<SimpleContainer> {
                 }
             }
 
-            return new ForgeScrollNetherRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs);
+            // Read hammer strikes count (default to 1 if not specified)
+            int hammerStrikes = GsonHelper.getAsInt(serializedRecipe, "hammer_strikes", 1);
+
+            return new ForgeScrollNetherRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs, hammerStrikes);
         }
 
         @Override
@@ -227,7 +239,10 @@ public class ForgeScrollNetherRecipe implements Recipe<SimpleContainer> {
                 bonusOutputs.add(new BonusOutput(bonusStack, chance, min, max));
             }
 
-            return new ForgeScrollNetherRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs);
+            // Read hammer strikes count
+            int hammerStrikes = buffer.readVarInt();
+
+            return new ForgeScrollNetherRecipe(ingredients, output, recipeId, ingredientJsons, bonusOutputs, hammerStrikes);
         }
 
         @Override
@@ -255,6 +270,9 @@ public class ForgeScrollNetherRecipe implements Recipe<SimpleContainer> {
                 buffer.writeVarInt(bonus.min());
                 buffer.writeVarInt(bonus.max());
             }
+
+            // Write hammer strikes count
+            buffer.writeVarInt(recipe.hammerStrikes);
         }
     }
 }

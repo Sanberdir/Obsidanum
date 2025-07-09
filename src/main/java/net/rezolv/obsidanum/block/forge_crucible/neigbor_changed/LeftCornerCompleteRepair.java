@@ -34,13 +34,69 @@ public class LeftCornerCompleteRepair {
                     leftBlockState.getValue(LeftCornerLevel.IS_PRESSED)) {
 
                 if (crucibleEntity instanceof ForgeCrucibleEntity crucible) {
-                    if (checkAllIngredientsWithCount(crucible)) {
-                        createCraftingResult(crucible);
+                    if (canRepair(crucible)) {
+                        startRepairProcess(crucible);
                     }
                 }
             }
         }
     }
+    private static boolean canRepair(ForgeCrucibleEntity crucible) {
+        ItemStack toRepair = crucible.itemHandler.getStackInSlot(1);
+        ItemStack ingredientsStack = crucible.itemHandler.getStackInSlot(0);
+
+        return !toRepair.isEmpty() &&
+                toRepair.isDamaged() &&
+                !ingredientsStack.isEmpty() &&
+                checkAllIngredientsWithCount(crucible);
+    }
+
+    private static void startRepairProcess(ForgeCrucibleEntity crucible) {
+        CompoundTag data = crucible.getReceivedData();
+        data.putBoolean("RepairMode", true); // Устанавливаем флаг починки
+        crucible.receiveScrollData(data); // Обновляем данные
+
+        int hammerStrikes = data.contains("HammerStrikes", Tag.TAG_INT) ?
+                data.getInt("HammerStrikes") : 3;
+
+        crucible.startCrafting(hammerStrikes);
+    }
+
+    public static void completeRepair(ForgeCrucibleEntity crucible) {
+        ItemStack toRepair = crucible.itemHandler.getStackInSlot(1);
+        ItemStack ingredientsStack = crucible.itemHandler.getStackInSlot(0);
+
+        if (!canRepair(crucible)) return;
+
+        int damageToRepair = toRepair.getDamageValue();
+        int repairPerIngredient = 20;
+        int availableIngredients = ingredientsStack.getCount();
+        int neededIngredients = (int) Math.ceil((double)damageToRepair / repairPerIngredient);
+        int usedIngredients = Math.min(availableIngredients, neededIngredients);
+
+        // Применяем починку
+        toRepair.setDamageValue(Math.max(damageToRepair - (usedIngredients * repairPerIngredient), 0));
+
+        // Удаляем использованные ингредиенты
+        crucible.itemHandler.extractItem(0, usedIngredients, false);
+
+        // Сбрасываем флаг починки
+        CompoundTag data = crucible.getReceivedData();
+        data.remove("RepairMode");
+        crucible.receiveScrollData(data);
+
+        // Обновляем блок
+        crucible.setChanged();
+        if (crucible.getLevel() != null) {
+            crucible.getLevel().sendBlockUpdated(
+                    crucible.getBlockPos(),
+                    crucible.getBlockState(),
+                    crucible.getBlockState(),
+                    3
+            );
+        }
+    }
+
 
     private static BlockPos getLeftPos(BlockPos pos, Direction facing) {
         return switch (facing) {
@@ -92,45 +148,6 @@ public class LeftCornerCompleteRepair {
         }
 
         return false;
-    }
-
-    private static void createCraftingResult(ForgeCrucibleEntity crucible) {
-        // Предмет для ремонта
-        ItemStack toRepair = crucible.itemHandler.getStackInSlot(1);
-
-        // Если нечего чинить — выходим и ничего не тратим
-        if (toRepair.isEmpty() || !toRepair.isDamaged()) {
-            return;
-        }
-
-        // Проверка ингредиентов
-        if (!checkAllIngredientsWithCount(crucible)) return;
-
-        CompoundTag data = crucible.getReceivedData();
-        ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
-
-        // Изъятие ингредиентов — кроме слота 1 (ремонтируемый предмет)
-        for (int i = 0; i < ingredients.size(); i++) {
-            if (i == 1) continue; // слот 1 не тратится
-            CompoundTag ingredient = ingredients.getCompound(i);
-            try {
-                JsonObject json = JsonParser.parseString(ingredient.getString("IngredientJson")).getAsJsonObject();
-                int requiredCount = json.has("count") ? json.get("count").getAsInt() : 1;
-                crucible.itemHandler.extractItem(i, requiredCount, false);
-            } catch (Exception ignored) {}
-        }
-
-        // Ремонтируем предмет
-        toRepair.setDamageValue(Math.max(toRepair.getDamageValue() - 20, 0));
-
-        // Обновление блока
-        crucible.getLevel().sendBlockUpdated(
-                crucible.getBlockPos(),
-                crucible.getBlockState(),
-                crucible.getBlockState(),
-                3
-        );
-        crucible.setChanged();
     }
 
 

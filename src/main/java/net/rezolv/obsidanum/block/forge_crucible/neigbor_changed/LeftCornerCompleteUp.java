@@ -39,54 +39,50 @@ public class LeftCornerCompleteUp {
             if (leftState.getBlock() instanceof LeftCornerLevel && leftState.getValue(LeftCornerLevel.IS_PRESSED)) {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof ForgeCrucibleEntity crucible) {
-                    processUpgrade(level, crucible);
+                    // Проверяем условия перед запуском процесса
+                    Player player = level.getNearestPlayer(crucible.getBlockPos().getX(), crucible.getBlockPos().getY(), crucible.getBlockPos().getZ(), 10, false);
+                    String error = checkUpgradeConditions(crucible);
+
+                    if (error != null) {
+                        sendMessage(player, Component.translatable(error));
+                    } else {
+                        startUpgradeProcess(crucible);
+                    }
                 }
             }
         }
     }
 
-    private static void processUpgrade(Level level, ForgeCrucibleEntity crucible) {
-        Player player = level.getNearestPlayer(crucible.getBlockPos().getX(), crucible.getBlockPos().getY(), crucible.getBlockPos().getZ(), 10, false);
-
+    private static String checkUpgradeConditions(ForgeCrucibleEntity crucible) {
         ItemStack toolStack = crucible.itemHandler.getStackInSlot(3);
         if (toolStack.isEmpty() || !(toolStack.getItem() instanceof IUpgradeableItem)) {
-            sendMessage(player, Component.translatable("obsidanum.upgrade.error.no_tool"));
-            return;
+            return "obsidanum.upgrade.error.no_tool";
         }
-        IUpgradeableItem upgradable = (IUpgradeableItem) toolStack.getItem();
 
         if (!checkAllIngredientsWithCount(crucible)) {
-            sendMessage(player, Component.translatable("obsidanum.upgrade.error.missing_ingredients"));
-            return;
+            return "obsidanum.upgrade.error.missing_ingredients";
         }
 
         CompoundTag data = crucible.getReceivedData();
         if (!data.contains("Upgrade", Tag.TAG_STRING)) {
-            sendMessage(player, Component.translatable("obsidanum.upgrade.error.no_recipe"));
-            return;
+            return "obsidanum.upgrade.error.no_recipe";
         }
 
         String name = data.getString("Upgrade");
         ObsidanumToolUpgrades upgrade = ObsidanumToolUpgrades.byName(name);
         if (upgrade == null) {
-            sendMessage(player, Component.translatable("obsidanum.upgrade.error.invalid_upgrade"));
-            return;
+            return "obsidanum.upgrade.error.invalid_upgrade";
         }
 
+        IUpgradeableItem upgradable = (IUpgradeableItem) toolStack.getItem();
         if (!upgradable.isUpgradeAllowed(upgrade)) {
-            sendMessage(player, Component.translatable("obsidanum.upgrade.error.not_allowed"));
-            return;
+            return "obsidanum.upgrade.error.not_allowed";
         }
 
         int current = upgradable.getUpgradeLevel(toolStack, upgrade);
         int max = UpgradeLibrary.getMaxLevel(upgrade);
         if (current >= max) {
-            sendMessage(player, Component.translatable(
-                    "obsidanum.upgrade.error.max_level",
-                    Component.translatable("upgrade.obsidanum." + upgrade.getName()),
-                    max
-            ));
-            return;
+            return "obsidanum.upgrade.error.max_level";
         }
 
         if (current == 0) {
@@ -94,19 +90,45 @@ public class LeftCornerCompleteUp {
             if (ex != null) {
                 for (ObsidanumToolUpgrades exist : upgradable.getUpgrades(toolStack).keySet()) {
                     if (ex.contains(exist) && exist != upgrade) {
-                        sendMessage(player, Component.translatable("obsidanum.upgrade.error.conflict"));
-                        return;
+                        return "obsidanum.upgrade.error.conflict";
                     }
                 }
             }
         }
 
         if (upgradable.getUsedSlots(toolStack) + 1 > IUpgradeableItem.MAX_UPGRADE_SLOTS) {
-            sendMessage(player, Component.translatable("obsidanum.upgrade.error.no_slots"));
-            return;
+            return "obsidanum.upgrade.error.no_slots";
         }
 
-        // Deduct ingredients
+        return null;
+    }
+
+    private static void startUpgradeProcess(ForgeCrucibleEntity crucible) {
+        CompoundTag data = crucible.getReceivedData();
+        data.putBoolean("UpgradeMode", true); // Устанавливаем флаг улучшения
+        crucible.receiveScrollData(data); // Обновляем данные
+
+        // Получаем количество ударов из рецепта (по умолчанию 3)
+        int hammerStrikes = 3;
+        if (data.contains("HammerStrikes", Tag.TAG_INT)) {
+            hammerStrikes = data.getInt("HammerStrikes");
+        }
+
+        crucible.startCrafting(hammerStrikes);
+    }
+
+    public static void completeUpgrade(ForgeCrucibleEntity crucible) {
+        Level level = crucible.getLevel();
+        Player player = level.getNearestPlayer(crucible.getBlockPos().getX(), crucible.getBlockPos().getY(), crucible.getBlockPos().getZ(), 10, false);
+
+        ItemStack toolStack = crucible.itemHandler.getStackInSlot(3);
+        IUpgradeableItem upgradable = (IUpgradeableItem) toolStack.getItem();
+
+        CompoundTag data = crucible.getReceivedData();
+        String name = data.getString("Upgrade");
+        ObsidanumToolUpgrades upgrade = ObsidanumToolUpgrades.byName(name);
+
+        // Вычитаем ингредиенты
         ListTag ingredients = data.getList("Ingredients", Tag.TAG_COMPOUND);
         for (int i = 0; i < ingredients.size(); i++) {
             CompoundTag tag = ingredients.getCompound(i);
@@ -116,14 +138,20 @@ public class LeftCornerCompleteUp {
             slot.shrink(count);
         }
 
-        // Apply upgrade
+        // Применяем улучшение
+        int current = upgradable.getUpgradeLevel(toolStack, upgrade);
         upgradable.addUpgrade(toolStack, upgrade, current + 1);
         crucible.itemHandler.setStackInSlot(3, toolStack);
         crucible.setChanged();
 
         sendMessage(player, Component.translatable("obsidanum.upgrade.success",
                 Component.translatable("upgrade.obsidanum." + upgrade.getName()),
-                current + 1));    }
+                current + 1));
+
+        // Сбрасываем флаг улучшения
+        data.remove("UpgradeMode");
+        crucible.receiveScrollData(data);
+    }
 
     private static void sendMessage(Player player, Component message) {
         if (player instanceof ServerPlayer serverPlayer) {

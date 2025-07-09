@@ -5,7 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -50,6 +52,22 @@ public class ForgeCrucible extends BaseEntityBlock {
     }
     public BlockState rotate(BlockState state, Rotation rot) {
         return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
+    }
+    @Override
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+        super.onPlace(state, level, pos, oldState, isMoving);
+        if (!level.isClientSide) {
+            level.scheduleTick(pos, this, 1);
+        }
+    }
+
+    @Override
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof ForgeCrucibleEntity) {
+            ((ForgeCrucibleEntity) be).tick();
+        }
+        level.scheduleTick(pos, this, 1);
     }
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos,

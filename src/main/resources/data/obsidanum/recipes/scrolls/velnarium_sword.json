@@ -1,5 +1,6 @@
 {
   "type": "obsidanum:forge_scroll_nether",
+  "hammer_strikes": 3,
   "ingredients": [
     {
       "item": "minecraft:stick",

@@ -23,6 +23,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.BlocksObs;
+import net.rezolv.obsidanum.world.custom_placer_trees.ObsidanFoliagePlacer;
+import net.rezolv.obsidanum.world.custom_placer_trees.ObsidanTrunkPlacer;
 
 import java.util.List;
 import java.util.OptionalInt;
@@ -34,21 +36,22 @@ public class ModConfiguredFeatures {
     public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> context) {
         RuleTest deepslateReplaceables = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
 
-        OreConfiguration.target(deepslateReplaceables, BlocksObs.ONYX.get().defaultBlockState());
-
         List<OreConfiguration.TargetBlockState> overworldOnyxOres = List.of(
                 OreConfiguration.target(deepslateReplaceables, BlocksObs.ONYX.get().defaultBlockState()));
 
         register(context, OVERWORLD_ONYX_KEY, Feature.ORE, new OreConfiguration(overworldOnyxOres, 60));
 
-        register(context, OBSIDAN_TREE, Feature.TREE, createFancyOak().build());
+        // 🔧 ВАЖНО: теперь дерево тоже регистрируется
+        register(context, OBSIDAN_TREE, Feature.TREE, createObsidanTree().build());
     }
-    private static TreeConfiguration.TreeConfigurationBuilder createFancyOak() {
-        return (
-                new TreeConfiguration.TreeConfigurationBuilder(BlockStateProvider.simple(BlocksObs.OBSIDAN_WOOD_LOG.get()),
-                new FancyTrunkPlacer(3, 11, 0), BlockStateProvider.simple(BlocksObs.OBSIDAN_WOOD_LEAVES.get()),
-                new FancyFoliagePlacer(ConstantInt.of(2), ConstantInt.of(4), 4),
-                new TwoLayersFeatureSize(0, 0, 0, OptionalInt.of(4)))).ignoreVines();
+    private static TreeConfiguration.TreeConfigurationBuilder createObsidanTree() {
+        return new TreeConfiguration.TreeConfigurationBuilder(
+                BlockStateProvider.simple(BlocksObs.OBSIDAN_WOOD_LOG.get()),
+                new ObsidanTrunkPlacer(7, 5, 0), // Базовая высота 7, +0-5 случайных
+                BlockStateProvider.simple(BlocksObs.OBSIDAN_WOOD_LEAVES.get()),
+                new ObsidanFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1), 3),
+                new TwoLayersFeatureSize(1, 0, 2)
+        ).ignoreVines();
     }
 
     public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
