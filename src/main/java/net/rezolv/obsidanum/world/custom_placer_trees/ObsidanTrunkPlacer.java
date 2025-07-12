@@ -1,5 +1,6 @@
 package net.rezolv.obsidanum.world.custom_placer_trees;
 
+import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
@@ -12,7 +13,6 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -34,80 +34,74 @@ public class ObsidanTrunkPlacer extends TrunkPlacer {
             LevelSimulatedReader level,
             BiConsumer<BlockPos, BlockState> blockSetter,
             RandomSource random,
-            int freeTreeHeight,
-            BlockPos pos,
+            int treeHeight,
+            BlockPos startPos,
             TreeConfiguration config
     ) {
-        setDirtAt(level, blockSetter, random, pos.below(), config);
+        List<FoliagePlacer.FoliageAttachment> foliageAttachments = Lists.newArrayList();
 
-        List<FoliagePlacer.FoliageAttachment> foliageAttachments = new ArrayList<>();
-        int height = freeTreeHeight + 2 + random.nextInt(5); // base +2–6 extra
+        // Подготовка земли под деревом (4 блока)
+        BlockPos dirtPos = startPos.below();
+        setDirtAt(level, blockSetter, random, dirtPos, config);
+        setDirtAt(level, blockSetter, random, dirtPos.east(), config);
+        setDirtAt(level, blockSetter, random, dirtPos.south(), config);
+        setDirtAt(level, blockSetter, random, dirtPos.south().east(), config);
 
-        // Main trunk
-        for (int i = 0; i < height; i++) {
-            placeLog(level, blockSetter, random, pos.above(i), config);
+        // Устанавливаем высоту дерева 4-5 блоков
+        int trunkHeight = 4 + random.nextInt(2);
+        int startX = startPos.getX();
+        int startY = startPos.getY();
+        int startZ = startPos.getZ();
+
+        // Генерация основного ствола (2x2)
+        for (int height = 0; height < trunkHeight; height++) {
+            BlockPos logPos = new BlockPos(startX, startY + height, startZ);
+            placeLog(level, blockSetter, random, logPos, config);
+            placeLog(level, blockSetter, random, logPos.east(), config);
+            placeLog(level, blockSetter, random, logPos.south(), config);
+            placeLog(level, blockSetter, random, logPos.east().south(), config);
         }
 
-        // Top foliage
-        BlockPos top = pos.above(height);
-        foliageAttachments.add(new FoliagePlacer.FoliageAttachment(top, 0, false));
+        BlockPos topCenter = startPos.above(trunkHeight - 1).offset(1, 0, 1);
+        foliageAttachments.add(new FoliagePlacer.FoliageAttachment(topCenter, 3, true));
 
-        // Four branch levels, branches start directly from trunk
-        int branchLevels = 4;
-        for (int lvl = 1; lvl <= branchLevels; lvl++) {
-            int y = height - lvl * (height / (branchLevels + 1)) - random.nextInt(2);
-            BlockPos trunkPoint = pos.above(y);
-            for (Direction dir : Direction.Plane.HORIZONTAL) {
-                generateBranch(level, blockSetter, random, trunkPoint, dir, foliageAttachments, config);
+        // Генерация 4-6 основных ветвей
+        int numBranches = 4 + random.nextInt(3);
+        for (int i = 0; i < numBranches; i++) {
+            Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+            int branchLength = 2 + random.nextInt(2); // Длина 2-3 блока
+
+            BlockPos branchStart = topCenter.below(random.nextInt(2));
+            BlockPos currentPos = branchStart;
+
+            // Строим изогнутую ветвь
+            for (int j = 0; j < branchLength; j++) {
+                // Плавный изгиб
+                if (j > 0 && random.nextFloat() < 0.3f) {
+                    direction = direction.getClockWise();
+                }
+
+                // Плавный подъем
+                int yOffset = (j == branchLength - 1) ? 0 : random.nextInt(2);
+                currentPos = currentPos.offset(
+                        direction.getStepX(),
+                        yOffset,
+                        direction.getStepZ()
+                );
+
+                placeLog(level, blockSetter, random, currentPos, config);
+
+                // Добавляем мини-кроны на концы ветвей
+                if (j == branchLength - 1) {
+                    foliageAttachments.add(new FoliagePlacer.FoliageAttachment(
+                            currentPos.above(),
+                            1 + random.nextInt(2),
+                            false
+                    ));
+                }
             }
         }
 
         return foliageAttachments;
-    }
-
-    private void generateBranch(
-            LevelSimulatedReader level,
-            BiConsumer<BlockPos, BlockState> blockSetter,
-            RandomSource random,
-            BlockPos start,
-            Direction dir,
-            List<FoliagePlacer.FoliageAttachment> foliageAttachments,
-            TreeConfiguration config
-    ) {
-        BlockPos current = start;
-        int length = 2 + random.nextInt(4); // 2–5 blocks long
-
-        // Grow branch with natural kinks
-        for (int i = 0; i < length; i++) {
-            current = current.relative(dir);
-            if (random.nextFloat() < 0.3f) {
-                current = current.above();
-            } else if (random.nextFloat() < 0.2f) {
-                current = current.below();
-            }
-            placeLog(level, blockSetter, random, current, config);
-        }
-
-        // Attach foliage at end
-        BlockPos leafPos = current.above();
-        placeLog(level, blockSetter, random, leafPos, config);
-        foliageAttachments.add(new FoliagePlacer.FoliageAttachment(leafPos, 0, false));
-
-        // Small side twig
-        if (random.nextBoolean()) {
-            Direction twigDir = Direction.Plane.HORIZONTAL.stream()
-                    .filter(d -> d != dir && d != dir.getOpposite())
-                    .skip(random.nextInt(2)).findFirst().orElse(dir);
-            BlockPos twigBase = start.relative(dir, (length / 2));
-            BlockPos twigCurrent = twigBase;
-            int twigLen = 1 + random.nextInt(2);
-            for (int i = 0; i < twigLen; i++) {
-                twigCurrent = twigCurrent.relative(twigDir);
-                placeLog(level, blockSetter, random, twigCurrent, config);
-            }
-            BlockPos twigLeaf = twigCurrent.above();
-            placeLog(level, blockSetter, random, twigLeaf, config);
-            foliageAttachments.add(new FoliagePlacer.FoliageAttachment(twigLeaf, 0, false));
-        }
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.featuresize.ThreeLayersFeatureSize;
 import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FancyFoliagePlacer;
@@ -47,12 +48,14 @@ public class ModConfiguredFeatures {
     private static TreeConfiguration.TreeConfigurationBuilder createObsidanTree() {
         return new TreeConfiguration.TreeConfigurationBuilder(
                 BlockStateProvider.simple(BlocksObs.OBSIDAN_WOOD_LOG.get()),
-                new ObsidanTrunkPlacer(7, 5, 0), // Базовая высота 7, +0-5 случайных
+                new ObsidanTrunkPlacer(4, 1, 0), // Высота 7 блоков, случайное отклонение +0-2
                 BlockStateProvider.simple(BlocksObs.OBSIDAN_WOOD_LEAVES.get()),
-                new ObsidanFoliagePlacer(ConstantInt.of(2), ConstantInt.of(1), 3),
-                new TwoLayersFeatureSize(1, 0, 2)
-        ).ignoreVines();
+                new ObsidanFoliagePlacer(
+                        ConstantInt.of(2), // радиус листвы
+                        ConstantInt.of(1)), // смещение листвы
+                new ThreeLayersFeatureSize(1, 1, 0, 1, 2, OptionalInt.empty()));
     }
+
 
     public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
         return ResourceKey.create(Registries.CONFIGURED_FEATURE, new ResourceLocation(Obsidanum.MOD_ID, name));
