@@ -253,11 +253,11 @@ public class ForgeScrollOrderRecipe implements Recipe<SimpleContainer> {
             for (JsonObject json : recipe.ingredientJsons) {
                 buffer.writeUtf(json.toString());
             }
-            buffer.writeVarInt(recipe.hammerStrikes);
-            // Write main output
-            buffer.writeItemStack(recipe.output, true);
 
-            // Write bonus outputs with min/max support
+            // Write main output (изменено на writeItem для совместимости)
+            buffer.writeItem(recipe.output);
+
+            // Write bonus outputs
             buffer.writeVarInt(recipe.bonusOutputs.size());
             for (BonusOutput bonus : recipe.bonusOutputs) {
                 buffer.writeItem(bonus.itemStack());
@@ -265,6 +265,9 @@ public class ForgeScrollOrderRecipe implements Recipe<SimpleContainer> {
                 buffer.writeVarInt(bonus.min());
                 buffer.writeVarInt(bonus.max());
             }
+
+            // Write hammer strikes count (перемещено в конец)
+            buffer.writeVarInt(recipe.hammerStrikes);
         }
     }
 }

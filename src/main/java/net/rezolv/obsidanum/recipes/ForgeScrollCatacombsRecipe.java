@@ -258,9 +258,9 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
             for (JsonObject json : recipe.ingredientJsons) {
                 buffer.writeUtf(json.toString());
             }
-            buffer.writeVarInt(recipe.hammerStrikes);
+
             // Write main output
-            buffer.writeItemStack(recipe.output, true);
+            buffer.writeItem(recipe.output);
 
             // Write bonus outputs
             buffer.writeVarInt(recipe.bonusOutputs.size());
@@ -270,6 +270,9 @@ public class ForgeScrollCatacombsRecipe implements Recipe<SimpleContainer> {
                 buffer.writeVarInt(bonus.min());
                 buffer.writeVarInt(bonus.max());
             }
+
+            // Write hammer strikes count (в том же порядке, что и в ForgeScrollNetherRecipe)
+            buffer.writeVarInt(recipe.hammerStrikes);
         }
     }
 }
