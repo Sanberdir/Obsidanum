@@ -2,7 +2,6 @@ package net.rezolv.obsidanum.entity.mutated_gart;// Made with Blockbench 4.10.4
 
 import net.minecraft.resources.ResourceLocation;
 import net.rezolv.obsidanum.Obsidanum;
-import net.rezolv.obsidanum.block.entity.HammerForgeEntity;
 import software.bernie.geckolib.model.GeoModel;
 
 public class MutatedGartModel extends GeoModel<MutatedGart> {

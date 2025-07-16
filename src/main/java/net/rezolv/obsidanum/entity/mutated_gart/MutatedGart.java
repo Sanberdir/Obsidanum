@@ -34,6 +34,7 @@ public class MutatedGart extends Monster implements GeoEntity {
     private static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("idle");
     private static final RawAnimation WALK_ANIM = RawAnimation.begin().thenLoop("walk");
     private static final RawAnimation PUNCH_ANIM = RawAnimation.begin().thenPlay("punch");
+    private static final RawAnimation MAGIC_PUNCH_ANIM = RawAnimation.begin().thenPlay("magic_punch");
     private static final EntityDataAccessor<Integer> ATTACK_TIMER = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.INT);
 
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
