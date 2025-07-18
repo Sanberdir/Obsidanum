@@ -23,7 +23,7 @@ public class MutatedGartRenderer extends GeoEntityRenderer<MutatedGart> {
         if(entity.isBaby()) {
             poseStack.scale(0.4f, 0.4f, 0.4f);
         }
-        poseStack.scale(2.0f, 2.0f, 2.0f);
+        poseStack.scale(1.5f, 1.5f, 1.5f);
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
     }
 }

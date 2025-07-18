@@ -25,7 +25,7 @@ import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInst
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.animation.AnimationState; // Исправленный импорт
+import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.RenderUtils;
 
@@ -39,6 +39,7 @@ public class MutatedGart extends Monster implements GeoEntity {
 
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
     private ServerBossEvent bossInfo;
+    private LivingEntity currentAttackTarget; // Храним цель для удара
 
     public MutatedGart(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
@@ -48,11 +49,6 @@ public class MutatedGart extends Monster implements GeoEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ATTACK_TIMER, 0);
-    }
-    // Обновление AI
-    @Override
-    public void aiStep() {
-        super.aiStep();
     }
 
     // Добавление игрока в полосу здоровья босса
@@ -98,33 +94,33 @@ public class MutatedGart extends Monster implements GeoEntity {
         }
 
         if (!this.level().isClientSide) {
-            this.entityData.set(ATTACK_TIMER, 20);
-            this.setLastHurtByMob((LivingEntity) target);
+            // Сохраняем цель атаки
+            this.currentAttackTarget = target instanceof LivingEntity ? (LivingEntity) target : null;
+            // Устанавливаем таймер на 70 тиков (20 анимация + 20 пауза)
+            this.entityData.set(ATTACK_TIMER, 35);
         }
 
         this.swing(InteractionHand.MAIN_HAND);
         return true;
     }
-    // Регистрация целей AI (только пассивное поведение)
+
+    // Регистрация целей AI
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        // Добавляем цель для ближнего боя
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true)); // Приоритет 2 - высокий
-
-        // Существующие цели
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, IronGolem.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Warden.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Villager.class, true));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, WitherBoss.class, true));
+        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Warden.class, true));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Villager.class, true));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, WitherBoss.class, true));
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 15.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1.2D));
         this.goalSelector.addGoal(6, new MoveTowardsRestrictionGoal(this, 1.0));
     }
 
-    // Создание атрибутов моба (сохранены оригинальные характеристики)
+    // Создание атрибутов моба
     public static AttributeSupplier.Builder createAttributes() {
         return createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 200)
@@ -149,10 +145,12 @@ public class MutatedGart extends Monster implements GeoEntity {
         controllerRegistrar.add(new AnimationController<>(this, "controller", 5, this::animate));
     }
 
-    // Исправленный метод без дженерика
+    // ИСПРАВЛЕННАЯ ЛОГИКА АНИМАЦИЙ
     private PlayState animate(AnimationState state) {
         int timer = this.entityData.get(ATTACK_TIMER);
-        if (timer > 0) {
+
+        // Проигрываем анимацию удара в течение 20 тиков (пока timer > 20)
+        if (timer > 20) {
             state.getController().setAnimation(PUNCH_ANIM);
             return PlayState.CONTINUE;
         }
@@ -174,14 +172,17 @@ public class MutatedGart extends Monster implements GeoEntity {
             int timer = this.entityData.get(ATTACK_TIMER);
 
             if (timer > 0) {
-                this.entityData.set(ATTACK_TIMER, timer - 1);
+                int newTimer = timer - 1;
+                this.entityData.set(ATTACK_TIMER, newTimer);
 
-                // Когда таймер дойдёт до 0 — наносим урон
-                if (timer == 1) {
-                    Entity target = this.getLastHurtByMob();
-                    if (target != null && this.distanceTo(target) < 4.0F && target.isAlive()) {
-                        // Урон и звук
-                        boolean result = super.doHurtTarget(target);
+                // Наносим удар на 20-м тике (когда таймер уменьшается с 20 до 34)
+                if (timer == 20) {
+                    if (currentAttackTarget != null &&
+                            this.distanceTo(currentAttackTarget) < 4.0F &&
+                            currentAttackTarget.isAlive()) {
+
+                        // Наносим фактический урон
+                        boolean result = super.doHurtTarget(currentAttackTarget);
                         if (result) {
                             this.playSound(SoundEvents.PLAYER_ATTACK_STRONG, 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
                         }
