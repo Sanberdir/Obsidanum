@@ -18,7 +18,9 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
@@ -45,11 +47,6 @@ public class MutatedGart extends Monster implements GeoEntity {
         super(entityType, level);
     }
 
-    @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ATTACK_TIMER, 0);
-    }
 
     // Добавление игрока в полосу здоровья босса
     @Override
@@ -148,14 +145,16 @@ public class MutatedGart extends Monster implements GeoEntity {
     // ИСПРАВЛЕННАЯ ЛОГИКА АНИМАЦИЙ
     private PlayState animate(AnimationState state) {
         int timer = this.entityData.get(ATTACK_TIMER);
-
-        // Проигрываем анимацию удара в течение 20 тиков (пока timer > 20)
-        if (timer > 20) {
-            state.getController().setAnimation(PUNCH_ANIM);
+        boolean magic = this.entityData.get(MAGIC_ATTACK);
+        if (magic && timer > 20) {
+            state.getController().setAnimation(MAGIC_PUNCH_ANIM); // проигрываем анимацию magic_punch
             return PlayState.CONTINUE;
         }
-
-        // Стандартные анимации
+        if (!magic && timer > 20) {
+            state.getController().setAnimation(PUNCH_ANIM);       // проигрываем обычный punch
+            return PlayState.CONTINUE;
+        }
+        // Когда нет атаки – стандартные анимации ходьбы/стояния
         if (state.isMoving()) {
             state.getController().setAnimation(WALK_ANIM);
         } else {
@@ -163,30 +162,62 @@ public class MutatedGart extends Monster implements GeoEntity {
         }
         return PlayState.CONTINUE;
     }
+    private static final EntityDataAccessor<Boolean> MAGIC_ATTACK = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.BOOLEAN);
 
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(ATTACK_TIMER, 0);
+        this.entityData.define(MAGIC_ATTACK, false);
+    }
+    private void spawnSnowballAtTarget() {
+        if (this.currentAttackTarget == null || !this.currentAttackTarget.isAlive()) return;
+
+        Snowball snowball = new Snowball(this.level(), this);
+
+        double dx = this.currentAttackTarget.getX() - this.getX();
+        double dy = this.currentAttackTarget.getY(0.5D) - snowball.getY(); // немного ниже глаз
+        double dz = this.currentAttackTarget.getZ() - this.getZ();
+
+        float velocity = 1.2F;       // скорость полета
+        float inaccuracy = 0.2F;     // разброс (можно 0 для точности)
+
+        snowball.shoot(dx, dy, dz, velocity, inaccuracy);
+
+        this.level().addFreshEntity(snowball);
+        this.playSound(SoundEvents.SNOWBALL_THROW, 1.0F, 1.0F);
+    }
     @Override
     public void tick() {
         super.tick();
-
         if (!this.level().isClientSide) {
+            LivingEntity target = this.getTarget();
+            // Если есть цель и она далеко
+            if (target != null && target.isAlive() && this.distanceTo(target) > 5.0F) {
+                // Если сейчас нет активной атаки
+                if (this.entityData.get(ATTACK_TIMER) == 0) {
+                    this.currentAttackTarget = target;
+                    this.entityData.set(MAGIC_ATTACK, true);      // флаг дальнего удара
+                    this.entityData.set(ATTACK_TIMER, 50);       // устанавливаем больший таймер
+                    this.swing(InteractionHand.MAIN_HAND);       // анимация взмаха рукой
+                }
+            }
+            // Существующий код по таймеру атаки
             int timer = this.entityData.get(ATTACK_TIMER);
-
             if (timer > 0) {
                 int newTimer = timer - 1;
                 this.entityData.set(ATTACK_TIMER, newTimer);
-
-                // Наносим удар на 20-м тике (когда таймер уменьшается с 20 до 34)
-                if (timer == 20) {
-                    if (currentAttackTarget != null &&
-                            this.distanceTo(currentAttackTarget) < 4.0F &&
-                            currentAttackTarget.isAlive()) {
-
-                        // Наносим фактический урон
-                        boolean result = super.doHurtTarget(currentAttackTarget);
-                        if (result) {
-                            this.playSound(SoundEvents.PLAYER_ATTACK_STRONG, 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
-                        }
-                    }
+                // На тике 20 кидаем снежок (поскольку установили 50, через 30 тиков от начала)
+                if (newTimer == 20 && this.entityData.get(MAGIC_ATTACK)) {
+                    spawnSnowballAtTarget();
+                    // Можно сбросить флаг после броска (или оставить, чтобы анимация нормально завершилась)
+                    this.entityData.set(MAGIC_ATTACK, false);
+                }
+                // Обычный урон в ближнем бою, если это не магическая атака
+                if (newTimer == 20 && !this.entityData.get(MAGIC_ATTACK)
+                        && this.currentAttackTarget != null && this.distanceTo(currentAttackTarget) < 4.0F) {
+                    super.doHurtTarget(this.currentAttackTarget);
+                    this.playSound(SoundEvents.PLAYER_ATTACK_STRONG, 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
                 }
             }
         }
