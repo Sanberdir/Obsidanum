@@ -21,6 +21,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.rezolv.obsidanum.entity.mutated_gart.ai.ConditionalMeleeAttackGoal;
+import net.rezolv.obsidanum.entity.mutated_gart.ai.ConditionalMoveGoal;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
@@ -37,7 +39,7 @@ public class MutatedGart extends Monster implements GeoEntity {
     private static final RawAnimation WALK_ANIM = RawAnimation.begin().thenLoop("walk");
     private static final RawAnimation PUNCH_ANIM = RawAnimation.begin().thenPlay("punch");
     private static final RawAnimation MAGIC_PUNCH_ANIM = RawAnimation.begin().thenPlay("magic_punch");
-    private static final EntityDataAccessor<Integer> ATTACK_TIMER = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> ATTACK_TIMER = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.INT);
 
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
     private ServerBossEvent bossInfo;
@@ -105,7 +107,9 @@ public class MutatedGart extends Monster implements GeoEntity {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
+        this.goalSelector.addGoal(0, new ConditionalMoveGoal(this));
+
+        this.goalSelector.addGoal(2, new ConditionalMeleeAttackGoal(this, 1.0D, true));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Warden.class, true));
@@ -162,7 +166,7 @@ public class MutatedGart extends Monster implements GeoEntity {
         }
         return PlayState.CONTINUE;
     }
-    private static final EntityDataAccessor<Boolean> MAGIC_ATTACK = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.BOOLEAN);
+    public static final EntityDataAccessor<Boolean> MAGIC_ATTACK = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.BOOLEAN);
 
     @Override
     protected void defineSynchedData() {
@@ -201,6 +205,15 @@ public class MutatedGart extends Monster implements GeoEntity {
                     this.entityData.set(ATTACK_TIMER, 50);       // устанавливаем больший таймер
                     this.swing(InteractionHand.MAIN_HAND);       // анимация взмаха рукой
                 }
+            }
+            if (this.entityData.get(MAGIC_ATTACK) && this.currentAttackTarget != null) {
+                this.getLookControl().setLookAt(
+                        this.currentAttackTarget.getX(),
+                        this.currentAttackTarget.getEyeY(),
+                        this.currentAttackTarget.getZ(),
+                        10.0F,  // maxYawChange — скорость поворота по горизонтали
+                        10.0F   // maxPitchChange — по вертикали
+                );
             }
             // Существующий код по таймеру атаки
             int timer = this.entityData.get(ATTACK_TIMER);
