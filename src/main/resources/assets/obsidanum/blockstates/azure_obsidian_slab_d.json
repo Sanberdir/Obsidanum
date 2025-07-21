@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "obsidanum:block/azure_obsidian_slab"
+    },
+    "type=double": {
+      "model": "obsidanum:block/azure_obsidian"
+    },
+    "type=top": {
+      "model": "obsidanum:block/azure_obsidian_slab_top"
+    }
+  }
+}

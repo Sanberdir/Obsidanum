@@ -1,6 +1,9 @@
 {
   "values": [
     "#minecraft:wooden_fences",
+    "obsidanum:azure_obsidian_fence",
+    "obsidanum:azure_obsidian_fence_d",
+    "obsidanum:azure_obsidian_bricks_fence_d",
     "obsidanum:obsidian_fence",
     "obsidanum:obsidian_fence_d",
     "obsidanum:obsidian_polished_fence",

@@ -61,6 +61,24 @@
     "obsidanum:cracked_obsidian_inlaid_column_d",
     "obsidanum:moldy_obsidian_inlaid_column_d",
     "obsidanum:obsidian_column_d",
-    "obsidanum:large_alchemical_tank"
+    "obsidanum:large_alchemical_tank",
+
+
+    "obsidanum:azure_obsidian_stairs_d",
+    "obsidanum:azure_obsidian_slab_d",
+    "obsidanum:azure_obsidian_wall_d",
+    "obsidanum:azure_obsidian_fence_d",
+    "obsidanum:azure_obsidian_d",
+
+    "obsidanum:azure_obsidian_bricks_d",
+    "obsidanum:azure_obsidian_bricks_fence_d",
+    "obsidanum:azure_obsidian_bricks_wall_d",
+    "obsidanum:azure_obsidian_bricks_slab_d",
+    "obsidanum:azure_obsidian_bricks_stairs_d",
+    "obsidanum:chiseled_azure_obsidian_bricks_d",
+    "obsidanum:azure_obsidian_column_d"
+
+
+
   ]
 }

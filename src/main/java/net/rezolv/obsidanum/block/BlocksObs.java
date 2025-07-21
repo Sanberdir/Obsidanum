@@ -283,6 +283,21 @@ public class BlocksObs {
     public static final RegistryObject<Block> AZURE_OBSIDIAN_COLUMN = registerBlock("azure_obsidian_column",
             () -> new ConnectedPillar(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
 
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_BRICKS_D = BLOCKS.register("azure_obsidian_bricks_d",
+            () -> new Block(BlockBehaviour.Properties.of().strength(35.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_BRICKS_SLAB_D = registerBlock("azure_obsidian_bricks_slab_d",
+            () -> new SlabBlock(BlockBehaviour.Properties.of().strength(35.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_BRICKS_STAIRS_D = registerBlock("azure_obsidian_bricks_stairs_d",
+            () -> new StairBlock(() -> BlocksObs.AZURE_OBSIDIAN_BRICKS_D.get().defaultBlockState(),BlockBehaviour.Properties.of().strength(35.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> CHISELED_AZURE_OBSIDIAN_BRICKS_D = registerBlock("chiseled_azure_obsidian_bricks_d",
+            () -> new Block(BlockBehaviour.Properties.of().strength(35.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_COLUMN_D = registerBlock("azure_obsidian_column_d",
+            () -> new ConnectedPillar(BlockBehaviour.Properties.of().strength(35.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_BRICKS_WALL_D = registerBlock("azure_obsidian_bricks_wall_d",
+            () -> new WallBlock(BlockBehaviour.Properties.of().strength(35.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_BRICKS_FENCE_D = registerBlock("azure_obsidian_bricks_fence_d",
+            () -> new FenceBlock(BlockBehaviour.Properties.of().strength(35.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
 
     public static final RegistryObject<Block> ONYX = registerBlock("onyx",
             () -> new Block(BlockBehaviour.Properties.of().strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE).requiresCorrectToolForDrops()));
@@ -333,8 +348,7 @@ public class BlocksObs {
             () -> new Block(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> OBSIDIAN = registerBlock("obsidian",
             () -> new Block(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
-    public static final RegistryObject<Block> AZURE_OBSIDIAN = registerBlock("azure_obsidian",
-            () -> new Block(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+
     public static final RegistryObject<Block> OBSIDIAN_STAIRS = registerBlock("obsidian_stairs",
             () -> new StairBlock(() -> BlocksObs.OBSIDIAN.get().defaultBlockState(),BlockBehaviour.Properties.of()
                     .strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
@@ -360,6 +374,38 @@ public class BlocksObs {
     public static final RegistryObject<Block> OBSIDIAN_FENCE_D = registerBlock("obsidian_fence_d",
             () -> new FenceBlock(BlockBehaviour.Properties.of()
                     .strength(35.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+
+    public static final RegistryObject<Block> AZURE_OBSIDIAN = registerBlock("azure_obsidian",
+            () -> new Block(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_STAIRS = registerBlock("azure_obsidian_stairs",
+            () -> new StairBlock(() -> BlocksObs.OBSIDIAN.get().defaultBlockState(),BlockBehaviour.Properties.of()
+                    .strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_SLAB = registerBlock("azure_obsidian_slab",
+            () -> new SlabBlock(BlockBehaviour.Properties.of()
+                    .strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_WALL = registerBlock("azure_obsidian_wall",
+            () -> new WallBlock(BlockBehaviour.Properties.of()
+                    .strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_FENCE = registerBlock("azure_obsidian_fence",
+            () -> new FenceBlock(BlockBehaviour.Properties.of()
+                    .strength(-1.0F, 3600000.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_D = registerBlock("azure_obsidian_d",
+            () -> new Block(BlockBehaviour.Properties.of().strength(40.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_STAIRS_D = registerBlock("azure_obsidian_stairs_d",
+            () -> new StairBlock(() -> BlocksObs.OBSIDIAN.get().defaultBlockState(),BlockBehaviour.Properties.of()
+                    .strength(40.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_SLAB_D = registerBlock("azure_obsidian_slab_d",
+            () -> new SlabBlock(BlockBehaviour.Properties.of()
+                    .strength(40.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_WALL_D = registerBlock("azure_obsidian_wall_d",
+            () -> new WallBlock(BlockBehaviour.Properties.of()
+                    .strength(40.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_FENCE_D = registerBlock("azure_obsidian_fence_d",
+            () -> new FenceBlock(BlockBehaviour.Properties.of()
+                    .strength(40.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));
 
     public static final RegistryObject<Block> MOLDY_CARVED_OBSIDIAN_BRICKS_D = registerBlock("moldy_carved_obsidian_bricks_d",
             () -> new Block(BlockBehaviour.Properties.of().strength(40.0F, 1200.0F).sound(SoundType.STONE).requiresCorrectToolForDrops()));

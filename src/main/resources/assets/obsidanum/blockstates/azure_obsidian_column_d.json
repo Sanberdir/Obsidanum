@@ -1,0 +1,136 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "axis": "x",
+        "connected_top": false,
+        "connected_bottom": false
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_horizontal",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "connected_top": true,
+        "connected_bottom": false
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_horizontal_connected_up",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "connected_top": false,
+        "connected_bottom": true
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_horizontal_connected_down",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "connected_top": true,
+        "connected_bottom": true
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_horizontal_connected",
+        "x": 90,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "connected_top": false,
+        "connected_bottom": false
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_horizontal",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "connected_top": true,
+        "connected_bottom": false
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_horizontal_connected_up",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "connected_top": false,
+        "connected_bottom": true
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_horizontal_connected_down",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "connected_top": true,
+        "connected_bottom": true
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_horizontal_connected",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "connected_top": false,
+        "connected_bottom": false
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "connected_top": true,
+        "connected_bottom": false
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_connected_up"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "connected_top": false,
+        "connected_bottom": true
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_connected_down"
+      }
+    },
+    {
+      "when": {
+        "axis": "y",
+        "connected_top": true,
+        "connected_bottom": true
+      },
+      "apply": {
+        "model": "obsidanum:block/azure_obsidian_column_connected"
+      }
+    }
+  ]
+}

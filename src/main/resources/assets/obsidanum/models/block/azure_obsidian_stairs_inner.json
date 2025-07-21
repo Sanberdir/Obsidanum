@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "obsidanum:block/azure_obsidian",
+    "side": "obsidanum:block/azure_obsidian",
+    "top": "obsidanum:block/azure_obsidian"
+  }
+}

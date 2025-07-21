@@ -32,10 +32,14 @@ public class CreativeTabObs extends CreativeModeTab {
                         pOutput.accept(BlocksObs.FLAME_DISPENSER.get());
                         pOutput.accept(BlocksObs.FLAME_PIPE.get());
                         pOutput.accept(BlocksObs.CHISELED_AZURE_OBSIDIAN_BRICKS.get());
+                        pOutput.accept(BlocksObs.CHISELED_AZURE_OBSIDIAN_BRICKS_D.get());
                         pOutput.accept(BlocksObs.AZURE_OBSIDIAN_COLUMN.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_COLUMN_D.get());
                         pOutput.accept(ItemsObs.AZURE_OBSIDIAN_BRICKS.get());
+
                         pOutput.accept(BlocksObs.AZURE_OBSIDIAN_BRICKS_SLAB.get());
                         pOutput.accept(BlocksObs.AZURE_OBSIDIAN_BRICKS_STAIRS.get());
+
                         pOutput.accept(BlocksObs.MOLDY_CARVED_OBSIDIAN_BRICKS.get());
                         pOutput.accept(BlocksObs.MOLDY_CARVED_OBSIDIAN_BRICKS_E.get());
                         pOutput.accept(BlocksObs.CRACKED_CARVED_OBSIDIAN_BRICKS.get());
@@ -58,9 +62,15 @@ public class CreativeTabObs extends CreativeModeTab {
                         pOutput.accept(BlocksObs.OBSIDIAN_HOLE_8.get());
                         pOutput.accept(BlocksObs.OBSIDIAN_HOLE_9.get());
                         pOutput.accept(BlocksObs.AZURE_OBSIDIAN.get());
+
                         pOutput.accept(BlocksObs.OBSIDIAN_STAIRS.get());
                         pOutput.accept(BlocksObs.OBSIDIAN_SLAB.get());
+
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_SLAB.get());
                         pOutput.accept(BlocksObs.OBSIDIAN_WALL.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_WALL.get());
+
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_FENCE.get());
                         pOutput.accept(BlocksObs.OBSIDIAN_FENCE.get());
                         pOutput.accept(BlocksObs.OBSIDIAN_INLAID_COLUMN.get());
                         pOutput.accept(BlocksObs.CRACKED_OBSIDIAN_INLAID_COLUMN.get());
@@ -118,7 +128,17 @@ public class CreativeTabObs extends CreativeModeTab {
                         pOutput.accept(BlocksObs.CRIMSON_GRASS.get());
                         pOutput.accept(BlocksObs.CRIMSON_GRASS_BLOCK.get());
                         pOutput.accept(BlocksObs.ALCHEMICAL_DIRT.get());
-
+                        pOutput.accept(ItemsObs.AZURE_OBSIDIAN_BRICKS_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_BRICKS_WALL_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_BRICKS_FENCE_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_STAIRS.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_STAIRS_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_WALL_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_FENCE_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_SLAB_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_BRICKS_STAIRS_D.get());
+                        pOutput.accept(BlocksObs.AZURE_OBSIDIAN_BRICKS_SLAB_D.get());
 
                         pOutput.accept(BlocksObs.PRANA_CRYSTALL.get());
                         pOutput.accept(BlocksObs.RITUAL_DRUM.get());
