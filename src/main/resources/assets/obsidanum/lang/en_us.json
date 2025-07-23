@@ -163,6 +163,7 @@
   "block.obsidanum.obsidan_wood_trapdoor": "Obsidan Wood Trapdoor",
 
   "block.obsidanum.obsidian_door": "Obsidian Door",
+  "block.obsidanum.azure_obsidian_scrollshelf": "Azure Obsidian Scrollshelf",
   "block.obsidanum.azure_obsidian": "§4Azure Obsidian",
   "block.obsidanum.azure_obsidian_d": "§4Azure Obsidian",
   "block.obsidanum.obsidian": "§4Obsidian",
@@ -252,6 +253,8 @@
   "item.obsidanum.patiras": "Petiras",
   "item.obsidanum.gitavro": "Gitavro",
   "item.obsidanum.leaf_live": "The life-giving leaf",
+  "item.obsidanum.ancient_scroll": "Ancient scroll",
+  "item.obsidanum.enchanted_scroll": "Enchanted scroll",
   "item.obsidanum.prana_crystall_shard": "A fragment of the Prana crystal (WIP)",
   "item.obsidanum.obsidan_essence": "Obsidan Essence",
   "item.obsidanum.velnarium_ore": "Velnaruim Ore",

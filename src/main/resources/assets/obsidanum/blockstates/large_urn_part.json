@@ -1,18 +1,18 @@
 {
     "variants": {
         "facing=south": {
-            "model": "obsidanum:block/large_urn"
+            "model": "obsidanum:block/large_urn_part"
         },
         "facing=west": {
-            "model": "obsidanum:block/large_urn",
+            "model": "obsidanum:block/large_urn_part",
             "y": 90
         },
         "facing=north": {
-            "model": "obsidanum:block/large_urn",
+            "model": "obsidanum:block/large_urn_part",
             "y": 180
         },
         "facing=east": {
-            "model": "obsidanum:block/large_urn",
+            "model": "obsidanum:block/large_urn_part",
             "y": 270
         }
     }

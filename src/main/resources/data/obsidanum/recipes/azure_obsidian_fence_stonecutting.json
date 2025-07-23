@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "count": 1,
+  "ingredient": {
+    "item": "obsidanum:azure_obsidian_d"
+  },
+  "result": "obsidanum:azure_obsidian_fence_d"
+}

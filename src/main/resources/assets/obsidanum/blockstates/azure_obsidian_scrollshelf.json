@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "has_scroll=false": [
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_1" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_2" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_3" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_4" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_5" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_6" }
+    ],
+    "has_scroll=true,scroll_present=true":[
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_with_scroll_1" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_with_scroll_2" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_with_scroll_3" }
+    ],
+    "has_scroll=true,scroll_present=false":[
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_without_scroll_1" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_without_scroll_2" },
+      { "model": "obsidanum:block/azure_obsidian_scrollshelf_without_scroll_3" }
+    ]
+  }
+}

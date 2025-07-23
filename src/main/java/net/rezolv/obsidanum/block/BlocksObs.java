@@ -450,10 +450,17 @@ public class BlocksObs {
             })));
 
     public static final RegistryObject<Block> LARGE_URN = registerBlock("large_urn",
-            () -> new LargeUrnOne(BlockBehaviour.Properties.of().noOcclusion().strength(0.2F, 1.0F)
+            () -> new LargeUrnMain(BlockBehaviour.Properties.of().noOcclusion().strength(0.2F, 1.0F)
                     .sound(SoundType.DECORATED_POT_CRACKED).lightLevel((p_152680_) -> {
                         return 5;
                     })));
+    public static final RegistryObject<Block> LARGE_URN_PART = registerBlock("large_urn_part",
+            () -> new LargeUrnPart(BlockBehaviour.Properties.of().noOcclusion().strength(0.2F, 1.0F)
+                    .sound(SoundType.DECORATED_POT_CRACKED).lightLevel((p_152680_) -> {
+                        return 5;
+                    })));
+    public static final RegistryObject<Block> AZURE_OBSIDIAN_SCROOLSHELF = registerBlock("azure_obsidian_scrollshelf",
+            () -> new Scroolshelf(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASS).strength(1.5F).sound(SoundType.WOOD).ignitedByLava()));
 
     public static final RegistryObject<Block> FLAME_BANNER_BAGGEL = registerBlock("flame_banner_baggel",
             () -> new FlameBannerBaggel(BlockBehaviour.Properties.of().noOcclusion().noCollission().instabreak()

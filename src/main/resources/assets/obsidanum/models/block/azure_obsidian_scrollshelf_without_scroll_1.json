@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "obsidanum:block/chiseled_azure_obsidian_bricks",
+    "side": "obsidanum:block/azure_obsidian_scrollshelf_without_scroll_1"
+  }
+}

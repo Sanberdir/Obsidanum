@@ -37,25 +37,32 @@ public class ItemsObs {
 
     public static final RegistryObject<Item> POT_GRENADE = ITEMS.register("pot_grenade",
             () -> new PotGrenadeItem(new Item.Properties()));
+
     public static final RegistryObject<Item> VELNARIUM_ORE = ITEMS.register("velnarium_ore",
             () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> ANCIENT_SCROLL  = ITEMS.register("ancient_scroll",
+            () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> ENCHANTED_SCROLL = ITEMS.register("enchanted_scroll",
+            () -> new Item(new Item.Properties()));
+
     public static final RegistryObject<Item> ORDER_SWORD = ITEMS.register("order_sword",
             () -> new VelnariumSword(ModToolTiers.VELNARIUM, 1, -1.8f, new Item.Properties()));
 
     // Свитки для печи
     public static final RegistryObject<Item> ORDER_PLAN = ITEMS.register("order_plan",
-            () -> new ScrollText(new Item.Properties().stacksTo(1)));
+            () -> new PlanText(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> NETHER_PLAN = ITEMS.register("nether_plan",
-            () -> new ScrollText(new Item.Properties().stacksTo(1)));
+            () -> new PlanText(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CATACOMBS_PLAN = ITEMS.register("catacombs_plan",
-            () -> new ScrollText(new Item.Properties().stacksTo(1)));
+            () -> new PlanText(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> NETHER_UPGRADE_PLAN = ITEMS.register("nether_upgrade_plan",
-            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
+            () -> new UpgradePlansText(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CATACOMBS_UPGRADE_PLAN = ITEMS.register("catacombs_upgrade_plan",
-            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
+            () -> new UpgradePlansText(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ORDER_UPGRADE_PLAN = ITEMS.register("order_upgrade_plan",
-            () -> new UpgradeScrollsText(new Item.Properties().stacksTo(1)));
+            () -> new UpgradePlansText(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> ORDER_REPAIR_PLAN = ITEMS.register("order_repair_plan",
             () -> new RepairScrollsText(new Item.Properties().stacksTo(1)));

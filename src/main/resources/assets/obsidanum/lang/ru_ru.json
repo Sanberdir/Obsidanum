@@ -198,6 +198,7 @@
   "block.obsidanum.azure_obsidian_chest": "Лазурный обсидиановый сундук",
   "block.obsidanum.runic_obsidian_chest": "Рунический обсидиановый сундук",
   "block.obsidanum.block_of_stitched_leather": "Блок сшитой кожи (WIP)",
+  "block.obsidanum.azure_obsidian_scrollshelf": "Свиточная полка из лазурного обсидиана",
 
   "obsidanum.container.obsidian_chest": "Обсидиановый сундук",
   "obsidanum.container.azure_obsidian_chest": "Лазурный обсидиановый сундук",
@@ -263,6 +264,8 @@
   "item.obsidanum.flame_crossbow": "Пламенный самострел",
   "item.obsidanum.flame_bolt": "Огненный болт",
   "item.obsidanum.leaf_live": "Живительный лист",
+  "item.obsidanum.ancient_scroll": "Древний свиток",
+  "item.obsidanum.enchanted_scroll": "Зачарованный свиток",
   "item.obsidanum.prana_crystall_shard": "Осколок прана кристалла (WIP)",
   "item.obsidanum.netherite_bolt": "Незеритовый болт (WIP)",
   "item.obsidanum.nether_flame": "§eПламя Незера",

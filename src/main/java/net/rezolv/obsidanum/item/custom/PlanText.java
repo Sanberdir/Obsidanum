@@ -22,8 +22,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UpgradeScrollsText extends Item {
-    public UpgradeScrollsText(Properties pProperties) {
+public class PlanText extends Item {
+    public PlanText(Properties pProperties) {
         super(pProperties);
     }
 
@@ -37,24 +37,49 @@ public class UpgradeScrollsText extends Item {
         // Main header
         tooltip.add(Component.translatable("tooltip.recipe_information").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 
-
-        // Display localized upgrade name if present
-        if (tag.contains("Upgrade")) {
-            String upgradeId = tag.getString("Upgrade");
-            MutableComponent upgradeName = Component.translatable(
-                    "upgrade.obsidanum." + upgradeId.toLowerCase(),
-                    upgradeId // Fallback if translation not found
-            ).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD);
-            tooltip.add(upgradeName);
-        }
-        MutableComponent typeScrollIcon = Component.literal("\uE015")
+        // Icon indicating scroll type
+        MutableComponent typeScrollIcon = Component.literal("\uE005")
                 .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
+
+        // Result icon depending on quantity
+        MutableComponent resultIcon = Component.literal("\uE007") // Default: single result
+                .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
+
+        if (tag.contains("RecipeResult")) {
+            ListTag resultList = tag.getList("RecipeResult", Tag.TAG_COMPOUND);
+            int totalCount = 0;
+            for (int i = 0; i < resultList.size(); i++) {
+                CompoundTag resultTag = resultList.getCompound(i);
+                ItemStack result = ItemStack.of(resultTag);
+                totalCount += result.getCount();
+            }
+            if (totalCount > 1) {
+                resultIcon = Component.literal("\uE006")
+                        .withStyle(style -> style.withFont(new ResourceLocation("obsidanum", "tool_icons")));
+            }
+        }
+
+        // Combine icons inline
+// Display results (RecipeResult)
+        if (tag.contains("RecipeResult")) {
+            ListTag resultList = tag.getList("RecipeResult", Tag.TAG_COMPOUND);
+            for (int i = 0; i < resultList.size(); i++) {
+                CompoundTag resultTag = resultList.getCompound(i);
+                ItemStack result = ItemStack.of(resultTag);
+                int count = result.getCount();
+
+                tooltip.add(result.getHoverName().copy().withStyle(ChatFormatting.WHITE));
+            }
+        }
+
 // Combine icons inline (after results)
         MutableComponent iconsLine = Component.literal("")
                 .append(typeScrollIcon)
-                .append(" ");
+                .append(" ")
+                .append(resultIcon);
         tooltip.add(iconsLine);
-        // Display ingredients (Ingredients)
+
+        // Display ingredients (RecipeIngredients)
         if (tag.contains("Ingredients")) {
             tooltip.add(Component.translatable("tooltip.scrolls.ingredients").withStyle(ChatFormatting.GOLD));
             ListTag ingredientList = tag.getList("Ingredients", Tag.TAG_COMPOUND);
@@ -72,6 +97,14 @@ public class UpgradeScrollsText extends Item {
                         line.append(getItemComponent(itemId, count));
                     }
                     tooltip.add(line);
+                } else if (ingredientTag.contains("ItemStack")) {
+                    ItemStack ingredient = ItemStack.of(ingredientTag.getCompound("ItemStack"));
+                    int count = ingredient.getCount();
+                    tooltip.add(
+                            Component.literal(" - ").withStyle(ChatFormatting.GRAY)
+                                    .append(Component.literal(count + "x ").withStyle(ChatFormatting.YELLOW))
+                                    .append(ingredient.getHoverName().copy().withStyle(ChatFormatting.WHITE))
+                    );
                 }
             }
         }
@@ -79,6 +112,7 @@ public class UpgradeScrollsText extends Item {
         // Final separator
         tooltip.add(Component.translatable("tooltip.recipe_end").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
     }
+
 
     private Component getTagComponent(ResourceLocation tagId, int count) {
         MutableComponent component = Component.literal(count + "x ")

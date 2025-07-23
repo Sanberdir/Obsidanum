@@ -15,4 +15,9 @@ public final class RSProcessors {
             "waterlogging_fix_processor",
             () -> () -> WaterloggingFixProcessor.CODEC
     );
+
+    public static final RegistryObject<StructureProcessorType<ScrollShelfProcessor>> SCROLL_SHELF_PROCESSOR = STRUCTURE_PROCESSOR.register(
+            "scroll_shelf_processor",
+            () -> () -> ScrollShelfProcessor.CODEC
+    );
 }
