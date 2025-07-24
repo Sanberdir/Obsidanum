@@ -8,7 +8,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.rezolv.obsidanum.block.custom.Scroolshelf;
+import net.rezolv.obsidanum.block.custom.ScrollShelf;
 
 public class ScrollShelfProcessor extends StructureProcessor {
     private static final float SCROLL_CHANCE = 0.15f;
@@ -25,13 +25,13 @@ public class ScrollShelfProcessor extends StructureProcessor {
         BlockState state = infoIn2.state();
 
         // Проверяем, что это блок Scroolshelf и в нем нет свитка
-        if (state.getBlock() instanceof Scroolshelf && !state.getValue(Scroolshelf.SCROLL_PRESENT)) {
+        if (state.getBlock() instanceof ScrollShelf && !state.getValue(ScrollShelf.SCROLL_PRESENT)) {
             // Используем рандом из настроек размещения
             if (settings.getRandom(infoIn2.pos()).nextFloat() < SCROLL_CHANCE) {
                 // Создаем новое состояние со свитком
                 BlockState newState = state
-                        .setValue(Scroolshelf.HAS_SCROLL, true)
-                        .setValue(Scroolshelf.SCROLL_PRESENT, true);
+                        .setValue(ScrollShelf.HAS_SCROLL, true)
+                        .setValue(ScrollShelf.SCROLL_PRESENT, true);
 
                 return new StructureTemplate.StructureBlockInfo(
                         infoIn2.pos(),

@@ -1,6 +1,9 @@
 package net.rezolv.obsidanum.event;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -15,18 +18,25 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.effect.EffectsObs;
+import net.rezolv.obsidanum.item.ItemsObs;
+import net.rezolv.obsidanum.item.custom.EnchantedScroll;
 import net.rezolv.obsidanum.item.custom.ObsAxe;
 import net.rezolv.obsidanum.item.custom.ObsidanAxe;
 import net.rezolv.obsidanum.item.custom.SmolderingAxe;
@@ -284,6 +294,110 @@ public class ForgeEventBusEvents {
             }
         }
     }
+
+    @SubscribeEvent
+    public static void onAnvilUpdate(AnvilUpdateEvent event) {
+        ItemStack left = event.getLeft();
+        ItemStack right = event.getRight();
+
+        // Только наш EnchantedScroll должен срабатывать
+        if (right.getItem() != ItemsObs.ENCHANTED_SCROLL.get()) return;
+
+        // Получаем список чар из свитка
+        ListTag stored = EnchantedScroll.getEnchantments(right);
+        if (stored.isEmpty()) return;
+        System.out.println("Scroll enchants: " + stored);
+
+        // Копируем левый предмет
+        ItemStack result = left.copy();
+
+        // Получаем текущие чары предмета
+        ListTag existingEnchants = result.getEnchantmentTags();
+        if (existingEnchants == null) {
+            existingEnchants = new ListTag();
+        }
+
+        // Собираем текущие Enchantment-объекты
+        List<Enchantment> appliedEnchantments = new ArrayList<>();
+        for (int i = 0; i < existingEnchants.size(); i++) {
+            CompoundTag tag = existingEnchants.getCompound(i);
+            Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(tag.getString("id")));
+            if (enchantment != null) {
+                appliedEnchantments.add(enchantment);
+            }
+        }
+
+        boolean enchantmentsAdded = false;
+
+        // Обрабатываем чары из свитка
+        for (int i = 0; i < stored.size(); i++) {
+            CompoundTag enchantmentTag = stored.getCompound(i);
+            String enchantId = enchantmentTag.getString("id");
+            int level = enchantmentTag.getInt("lvl");
+
+            Enchantment newEnchant = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantId));
+            if (newEnchant == null) continue;
+
+            // Проверка: применимость к предмету
+            if (!newEnchant.canApplyAtEnchantingTable(left) && !left.getItem().canApplyAtEnchantingTable(left, newEnchant)) {
+                continue;
+            }
+
+            boolean found = false;
+            boolean updated = false;
+
+            // Проверяем наличие и уровень существующего чара
+            for (int j = 0; j < existingEnchants.size(); j++) {
+                CompoundTag existingTag = existingEnchants.getCompound(j);
+                String existingId = existingTag.getString("id");
+
+                if (existingId.equals(enchantId)) {
+                    found = true;
+                    int existingLevel = existingTag.getInt("lvl");
+                    if (level > existingLevel) {
+                        existingTag.putInt("lvl", level);
+                        enchantmentsAdded = true;
+                        updated = true;
+                    }
+                    break;
+                }
+            }
+
+            // Если чар новый, проверяем на конфликты
+            if (!found) {
+                boolean hasConflict = false;
+                for (Enchantment existing : appliedEnchantments) {
+                    if (!newEnchant.isCompatibleWith(existing)) {
+                        hasConflict = true;
+                        break;
+                    }
+                }
+
+                if (hasConflict) continue;
+
+                CompoundTag newEnchantTag = new CompoundTag();
+                newEnchantTag.putString("id", enchantId);
+                newEnchantTag.putInt("lvl", level);
+                existingEnchants.add(newEnchantTag);
+                enchantmentsAdded = true;
+            }
+
+            // Если добавлен новый чар или улучшен — добавляем в список для проверки конфликтов следующих
+            if (!found || updated) {
+                appliedEnchantments.add(newEnchant);
+            }
+        }
+
+        // Только если из свитка были применены или обновлены чары — показываем результат
+        if (enchantmentsAdded) {
+            result.getOrCreateTag().put("Enchantments", existingEnchants);
+            event.setOutput(result);
+            event.setCost(1);
+            event.setMaterialCost(1);
+        }
+    }
+
+
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         LivingEntity entity = event.getEntity();

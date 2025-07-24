@@ -13,6 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.BlocksObs;
+import net.rezolv.obsidanum.block.custom.AncientScroll;
 import net.rezolv.obsidanum.entity.ModEntities;
 import net.rezolv.obsidanum.item.custom.*;
 import net.rezolv.obsidanum.item.entity.ModBoatEntity;
@@ -42,9 +43,9 @@ public class ItemsObs {
             () -> new Item(new Item.Properties()));
 
     public static final RegistryObject<Item> ANCIENT_SCROLL  = ITEMS.register("ancient_scroll",
-            () -> new Item(new Item.Properties()));
+            () -> new AncientScroll(new Item.Properties()));
     public static final RegistryObject<Item> ENCHANTED_SCROLL = ITEMS.register("enchanted_scroll",
-            () -> new Item(new Item.Properties()));
+            () -> new EnchantedScroll(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
     public static final RegistryObject<Item> ORDER_SWORD = ITEMS.register("order_sword",
             () -> new VelnariumSword(ModToolTiers.VELNARIUM, 1, -1.8f, new Item.Properties()));

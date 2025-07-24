@@ -10,6 +10,7 @@
     "BaseFireBlockMixin",
     "StructureProcessorAccessor",
     "StructureTemplateMixin",
+    "EnchantmentMenuMixin",
     "PortalShapeMixin"
   ],
   "injectors": {

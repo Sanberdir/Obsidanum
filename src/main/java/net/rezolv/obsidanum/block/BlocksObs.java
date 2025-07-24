@@ -460,7 +460,7 @@ public class BlocksObs {
                         return 5;
                     })));
     public static final RegistryObject<Block> AZURE_OBSIDIAN_SCROOLSHELF = registerBlock("azure_obsidian_scrollshelf",
-            () -> new Scroolshelf(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASS).strength(1.5F).sound(SoundType.WOOD).ignitedByLava()));
+            () -> new ScrollShelf(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASS).strength(1.5F).sound(SoundType.WOOD).ignitedByLava()));
 
     public static final RegistryObject<Block> FLAME_BANNER_BAGGEL = registerBlock("flame_banner_baggel",
             () -> new FlameBannerBaggel(BlockBehaviour.Properties.of().noOcclusion().noCollission().instabreak()
