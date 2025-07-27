@@ -328,6 +328,8 @@ public class ForgeEventBusEvents {
         }
 
         boolean enchantmentsAdded = false;
+        int totalAddedLevels = 0; // Суммарный уровень добавленных/улучшенных чар
+        int enchantmentsProcessed = 0; // Количество обработанных чар
 
         // Обрабатываем чары из свитка
         for (int i = 0; i < stored.size(); i++) {
@@ -355,9 +357,11 @@ public class ForgeEventBusEvents {
                     found = true;
                     int existingLevel = existingTag.getInt("lvl");
                     if (level > existingLevel) {
+                        totalAddedLevels += (level - existingLevel); // Учитываем разницу уровней
                         existingTag.putInt("lvl", level);
                         enchantmentsAdded = true;
                         updated = true;
+                        enchantmentsProcessed++;
                     }
                     break;
                 }
@@ -380,6 +384,8 @@ public class ForgeEventBusEvents {
                 newEnchantTag.putInt("lvl", level);
                 existingEnchants.add(newEnchantTag);
                 enchantmentsAdded = true;
+                totalAddedLevels += level;
+                enchantmentsProcessed++;
             }
 
             // Если добавлен новый чар или улучшен — добавляем в список для проверки конфликтов следующих
@@ -392,7 +398,24 @@ public class ForgeEventBusEvents {
         if (enchantmentsAdded) {
             result.getOrCreateTag().put("Enchantments", existingEnchants);
             event.setOutput(result);
-            event.setCost(1);
+
+            // Перерасчёт стоимости:
+            // Базовая стоимость: 1 уровень за операцию
+            int baseCost = 2;
+
+            // Дополнительная стоимость за каждый уровень чар
+            int levelsCost = totalAddedLevels;
+
+            // Дополнительная стоимость за количество чар (но меньше чем за уровни)
+            int countCost = enchantmentsProcessed * 2;
+
+            // Итоговая стоимость (выбираем максимальное между уровнями и количеством)
+            int totalCost = baseCost + Math.max(levelsCost, countCost);
+
+            // Ограничим максимальную стоимость (например, 40 уровней как в ваниле)
+            totalCost = Math.min(totalCost, 40);
+
+            event.setCost(totalCost);
             event.setMaterialCost(1);
         }
     }

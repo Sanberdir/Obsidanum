@@ -113,7 +113,7 @@ public class ScrollShelf extends Block {
             );
             // 90% шанс свитка при креативе
             if (player != null && player.isCreative()
-                    && level.random.nextFloat() < 0.9f) {
+                    && level.random.nextFloat() < 0.1f) {
                 newState = newState
                         .setValue(HAS_SCROLL, true)
                         .setValue(SCROLL_PRESENT, true);

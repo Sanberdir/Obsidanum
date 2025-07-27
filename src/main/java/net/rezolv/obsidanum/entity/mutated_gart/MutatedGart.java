@@ -18,11 +18,10 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.rezolv.obsidanum.entity.mutated_gart.ai.ConditionalMeleeAttackGoal;
 import net.rezolv.obsidanum.entity.mutated_gart.ai.ConditionalMoveGoal;
+import net.rezolv.obsidanum.entity.projectile_entity.magic_arrow.MagicArrow;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
@@ -69,13 +68,11 @@ public class MutatedGart extends Monster implements GeoEntity {
         }
     }
 
-    // Иммунитет к огню
     @Override
     public boolean fireImmune() {
         return true;
     }
 
-    // Обновление полосы здоровья босса
     @Override
     public void customServerAiStep() {
         super.customServerAiStep();
@@ -145,8 +142,6 @@ public class MutatedGart extends Monster implements GeoEntity {
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(new AnimationController<>(this, "controller", 5, this::animate));
     }
-
-    // ИСПРАВЛЕННАЯ ЛОГИКА АНИМАЦИЙ
     private PlayState animate(AnimationState state) {
         int timer = this.entityData.get(ATTACK_TIMER);
         boolean magic = this.entityData.get(MAGIC_ATTACK);
@@ -167,28 +162,27 @@ public class MutatedGart extends Monster implements GeoEntity {
         return PlayState.CONTINUE;
     }
     public static final EntityDataAccessor<Boolean> MAGIC_ATTACK = SynchedEntityData.defineId(MutatedGart.class, EntityDataSerializers.BOOLEAN);
-
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ATTACK_TIMER, 0);
         this.entityData.define(MAGIC_ATTACK, false);
     }
-    private void spawnSnowballAtTarget() {
+    private void spawnMagicArrowAtTarget() {
         if (this.currentAttackTarget == null || !this.currentAttackTarget.isAlive()) return;
 
-        Snowball snowball = new Snowball(this.level(), this);
+        MagicArrow magic_arrow = new MagicArrow(this.level(), this);
 
         double dx = this.currentAttackTarget.getX() - this.getX();
-        double dy = this.currentAttackTarget.getY(0.5D) - snowball.getY(); // немного ниже глаз
+        double dy = this.currentAttackTarget.getY(0.5D) - magic_arrow.getY(); // немного ниже глаз
         double dz = this.currentAttackTarget.getZ() - this.getZ();
 
         float velocity = 1.2F;       // скорость полета
         float inaccuracy = 0.2F;     // разброс (можно 0 для точности)
 
-        snowball.shoot(dx, dy, dz, velocity, inaccuracy);
+        magic_arrow.shoot(dx, dy, dz, velocity, inaccuracy);
 
-        this.level().addFreshEntity(snowball);
+        this.level().addFreshEntity(magic_arrow);
         this.playSound(SoundEvents.SNOWBALL_THROW, 1.0F, 1.0F);
     }
     @Override
@@ -222,7 +216,7 @@ public class MutatedGart extends Monster implements GeoEntity {
                 this.entityData.set(ATTACK_TIMER, newTimer);
                 // На тике 20 кидаем снежок (поскольку установили 50, через 30 тиков от начала)
                 if (newTimer == 20 && this.entityData.get(MAGIC_ATTACK)) {
-                    spawnSnowballAtTarget();
+                    spawnMagicArrowAtTarget();
                     // Можно сбросить флаг после броска (или оставить, чтобы анимация нормально завершилась)
                     this.entityData.set(MAGIC_ATTACK, false);
                 }
@@ -235,12 +229,10 @@ public class MutatedGart extends Monster implements GeoEntity {
             }
         }
     }
-
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
     }
-
     @Override
     public double getTick(Object o) {
         return RenderUtils.getCurrentTick();

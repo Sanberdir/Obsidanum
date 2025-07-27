@@ -8,12 +8,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.ComposterBlock;
-import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
-import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -29,7 +26,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.registries.DeferredRegister;
 import net.rezolv.obsidanum.block.BlocksObs;
 import net.rezolv.obsidanum.block.entity.ModBlockEntities;
 import net.rezolv.obsidanum.block.entity.renderer.PranaCrystallRenderer;
@@ -44,6 +40,7 @@ import net.rezolv.obsidanum.entity.gart.GartRenderer;
 import net.rezolv.obsidanum.entity.meat_beetle.MeetBeetleRenderer;
 import net.rezolv.obsidanum.entity.mutated_gart.MutatedGartRenderer;
 import net.rezolv.obsidanum.entity.obsidian_elemental.ObsidianElementalRenderer;
+import net.rezolv.obsidanum.entity.projectile_entity.magic_arrow.MagicArrowRenderer;
 import net.rezolv.obsidanum.event.BlockBreakEventHandler;
 import net.rezolv.obsidanum.event.TotemAnimationMessage;
 import net.rezolv.obsidanum.fluid.ModFluidTypes;
@@ -165,7 +162,7 @@ public class Obsidanum {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
 
-
+            EntityRenderers.register(ModItemEntities.MAGIC_ARROW_ENTITY.get(), MagicArrowRenderer::new);
 
             MenuScreens.register(ObsidanumChestsContainerTypes.OBSIDIAN_CHEST.get(), ObsidanumChestScreen::new);
             BlockEntityRenderers.register(ObsidanumChestsBlockEntityTypes.OBSIDIAN_CHEST.get(), ObsidanumChestRenderer::new);
