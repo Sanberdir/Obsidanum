@@ -8,11 +8,14 @@ import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.rezolv.obsidanum.Obsidanum;
 import net.rezolv.obsidanum.block.custom.*;
+import net.rezolv.obsidanum.block.custom.large_urn.LargeUrnMultiBlock;
+import net.rezolv.obsidanum.block.custom.ritual_drum.RitualDrum;
 import net.rezolv.obsidanum.chests.block.AzureObsidianChestBlock;
 import net.rezolv.obsidanum.chests.block.ObsidanumChestsTypes;
 import net.rezolv.obsidanum.chests.block.ObsidianChestBlock;
@@ -20,9 +23,12 @@ import net.rezolv.obsidanum.chests.block.RunicObsidianChestBlock;
 import net.rezolv.obsidanum.chests.item.ObsidanumChestBlockItem;
 import net.rezolv.obsidanum.fluid.ModFluids;
 import net.rezolv.obsidanum.item.ItemsObs;
+import net.rezolv.obsidanum.item.MultiblockItem;
 import net.rezolv.obsidanum.world.tree.ObsidanOak;
 import net.rezolv.obsidanum.world.wood.ModWoodTypes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -60,11 +66,9 @@ public class BlocksObs {
             () -> new LightPranaCrystall(BlockBehaviour.Properties.of().noOcclusion().strength(-1.0F, 3600000.8F).noLootTable().noOcclusion().replaceable().lightLevel(((state -> 15)))));
 
 
-    public static final RegistryObject<Block> INVISIBLE_PART_DRUM = registerBlock("invisible_part_drum",
-            () -> new InvisiblePartDrum(BlockBehaviour.Properties.of().noOcclusion().strength(-1.0F, 3600000.0F)
-                    .sound(SoundType.AMETHYST)));
+
     public static final RegistryObject<Block> RITUAL_DRUM = registerBlock("ritual_drum",
-            () -> new RitualDrum(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F)
+            () -> new RitualDrum(BlockBehaviour.Properties.of().noCollission().strength(-1.0F, 3600000.0F)
                     .sound(SoundType.AMETHYST)));
 
     public static final RegistryObject<Block> RIGHT_FORGE_SCROLL = registerBlock("right_forge_scroll",
@@ -449,18 +453,15 @@ public class BlocksObs {
                 return 5;
             })));
 
-    public static final RegistryObject<Block> LARGE_URN = registerBlock("large_urn",
-            () -> new LargeUrnMain(BlockBehaviour.Properties.of().noOcclusion().strength(0.2F, 1.0F)
-                    .sound(SoundType.DECORATED_POT_CRACKED).lightLevel((p_152680_) -> {
-                        return 5;
-                    })));
-    public static final RegistryObject<Block> LARGE_URN_PART = registerBlock("large_urn_part",
-            () -> new LargeUrnPart(BlockBehaviour.Properties.of().noOcclusion().strength(0.2F, 1.0F)
-                    .sound(SoundType.DECORATED_POT_CRACKED).lightLevel((p_152680_) -> {
-                        return 5;
-                    })));
+    public static final RegistryObject<Block> LARGE_URN = registerWithMultiblockItem(
+            "large_urn",() -> new LargeUrnMultiBlock(BlockBehaviour.Properties.of().mapColor(MapColor.CLAY).sound(SoundType.DECORATED_POT)
+                    .instrument(NoteBlockInstrument.FLUTE).noOcclusion().strength(0.3F, 3.0F)
+            )
+    );
+
     public static final RegistryObject<Block> AZURE_OBSIDIAN_SCROOLSHELF = registerBlock("azure_obsidian_scrollshelf",
-            () -> new ScrollShelf(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASS).strength(1.5F).sound(SoundType.WOOD).ignitedByLava()));
+            () -> new ScrollShelf(BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASS).strength(1.5F)
+                    .sound(SoundType.WOOD).ignitedByLava()));
 
     public static final RegistryObject<Block> FLAME_BANNER_BAGGEL = registerBlock("flame_banner_baggel",
             () -> new FlameBannerBaggel(BlockBehaviour.Properties.of().noOcclusion().noCollission().instabreak()
@@ -605,7 +606,47 @@ public class BlocksObs {
     private static <T extends Block> RegistryObject<T> registerNoItem(String name, Supplier<? extends T> sup) {
         return BLOCKS.register(name, sup);
     }
+    private static RegistryObject<Block> registerWithMultiblockItem(final String name, final Supplier<Block> supplier) {
+        return registerWithItem(name, supplier, block -> ItemReg.register(block.getId().getPath(), () -> new MultiblockItem(block.get(), new Item.Properties().stacksTo(1))));
+    }
+    private static RegistryObject<Block> registerWithItem(final String name, final Supplier<Block> supplier) {
+        return registerWithItem(name, supplier, ItemReg::registerBlockItem);
+    }
+    private static RegistryObject<Block> registerWithItem(final String name, final Supplier<Block> blockSupplier, final Function<RegistryObject<Block>, RegistryObject<Item>> itemSupplier) {
+        final RegistryObject<Block> block = BLOCKS.register(name, blockSupplier);
+        final RegistryObject<Item> item = itemSupplier.apply(block);
+        return block;
+    }
 
+    public static final class ItemReg {
+
+        private static final List<RegistryObject<Item>> ALL_ITEMS = new ArrayList<>();
+
+        private static void register() {
+            ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        }
+
+        /**
+         * Creates a registry object for a block item and adds it to the mod creative tab
+         * @param block the block
+         * @return the registry object
+         */
+        private static RegistryObject<Item> registerBlockItem(final RegistryObject<Block> block) {
+            return register(block.getId().getPath(), () -> new BlockItem(block.get(), new Item.Properties()));
+        }
+
+        /**
+         * Creates a registry object for the given item and adds it to the mod creative tab
+         * @param name the registry name
+         * @param supplier the item supplier
+         * @return the item registry object
+         */
+        private static RegistryObject<Item> register(final String name, final Supplier<Item> supplier) {
+            final RegistryObject<Item> item = ITEMS.register(name, supplier);
+            ALL_ITEMS.add(item);
+            return item;
+        }
+    }
     private static Supplier<BlockItem> item(final RegistryObject<? extends Block> block, Supplier<Callable<ObsidanumChestsTypes>> chestType) {
         return () -> new ObsidanumChestBlockItem(block.get(), new Item.Properties(), chestType);
     }

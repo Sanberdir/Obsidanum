@@ -1,19 +1,140 @@
 {
-    "variants": {
-        "facing=north": {
-            "model": "obsidanum:block/ritual_drum"
+    "multipart": [
+        {
+            "apply": { "model": "obsidanum:block/empty_drum" }
         },
-        "facing=east": {
-            "model": "obsidanum:block/ritual_drum",
-            "y": 90
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 1 }, { "depth": 2 }, { "facing": "north" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 0 }
         },
-        "facing=south": {
-            "model": "obsidanum:block/ritual_drum",
-            "y": 180
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 1 }, { "depth": 2 }, { "facing": "north" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 90 }
         },
-        "facing=west": {
-            "model": "obsidanum:block/ritual_drum",
-            "y": 270
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 1 }, { "depth": 1 }, { "facing": "north" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 180 }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 1 }, { "depth": 1 }, { "facing": "north" } ] },
+            "apply": { "model": "obsidanum:block/ritual_drum","y": 270 }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 2 }, { "depth": 2 }, { "facing": "north" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 0,"translation": [0, -0.1875, 0] }
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 2 }, { "depth": 2 }, { "facing": "north" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 90, "translation": [0, -0.1875, 0]}
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 2 }, { "depth": 1 }, { "facing": "north" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 180,"translation": [0, -0.1875, 0] }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 2 }, { "depth": 1 }, { "facing": "north" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum","y": 270, "translation": [0, -0.1875, 0]}
+        },
+
+
+
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 1 }, { "depth": 2 }, { "facing": "east" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 90 }
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 1 }, { "depth": 2 }, { "facing": "east" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 180 }
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 1 }, { "depth": 1 }, { "facing": "east" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 270 }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 1 }, { "depth": 1 }, { "facing": "east" } ] },
+            "apply": { "model": "obsidanum:block/ritual_drum", "y": 0 }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 2 }, { "depth": 2 }, { "facing": "east" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 90, "translation": [0, -0.1875, 0]}
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 2 }, { "depth": 2 }, { "facing": "east" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 180, "translation": [0, -0.1875, 0]}
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 2 }, { "depth": 1 }, { "facing": "east" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 270,"translation": [0, -0.1875, 0] }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 2 }, { "depth": 1 }, { "facing": "east" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 0, "translation": [0, -0.1875, 0]}
+        },
+
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 1 }, { "depth": 2 }, { "facing": "south" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 180 }
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 1 }, { "depth": 2 }, { "facing": "south" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 270 }
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 1 }, { "depth": 1 }, { "facing": "south" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 0 }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 1 }, { "depth": 1 }, { "facing": "south" } ] },
+            "apply": { "model": "obsidanum:block/ritual_drum","y": 90 }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 2 }, { "depth": 2 }, { "facing": "south" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 180, "translation": [0, -0.1875, 0]}
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 2 }, { "depth": 2 }, { "facing": "south" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 270, "translation": [0, -0.1875, 0]}
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 2 }, { "depth": 1 }, { "facing": "south" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 0, "translation": [0, -0.1875, 0]}
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 2 }, { "depth": 1 }, { "facing": "south" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum","y": 90, "translation": [0, -0.1875, 0]}
+        },
+
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 1 }, { "depth": 2 }, { "facing": "west" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 270 }
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 1 }, { "depth": 2 }, { "facing": "west" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 0 }
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 1 }, { "depth": 1 }, { "facing": "west" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 90 }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 1 }, { "depth": 1 }, { "facing": "west" } ] },
+            "apply": { "model": "obsidanum:block/ritual_drum","y": 180 }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 2 }, { "depth": 2 }, { "facing": "west" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 270, "translation": [0, -0.1875, 0]}
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 2 }, { "depth": 2 }, { "facing": "west" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 0,"translation": [0, -0.1875, 0] }
+        },
+        {
+            "when": { "AND": [ { "width": 2 }, { "height": 2 }, { "depth": 1 }, { "facing": "west" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum", "y": 90,"translation": [0, -0.1875, 0] }
+        },
+        {
+            "when": { "AND": [ { "width": 1 }, { "height": 2 }, { "depth": 1 }, { "facing": "west" } ] },
+            "apply": { "model": "obsidanum:block/empty_drum","y": 180,"translation": [0, -0.1875, 0] }
         }
-    }
+    ]
 }

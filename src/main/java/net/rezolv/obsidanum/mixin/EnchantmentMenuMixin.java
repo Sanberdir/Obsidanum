@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
@@ -29,64 +30,76 @@ import java.util.Map;
 
 @Mixin(EnchantmentMenu.class)
 public abstract class EnchantmentMenuMixin {
-    @Shadow
-    private Container enchantSlots;
-
+    @Shadow @Final private Container enchantSlots;
     @Shadow @Final private DataSlot enchantmentSeed;
-
-    @Shadow protected abstract List<EnchantmentInstance> getEnchantmentList(ItemStack pStack, int pEnchantSlot, int pLevel);
+    @Shadow @Final private net.minecraft.world.inventory.ContainerLevelAccess access;
+    @Shadow @Final private int[] costs;
+    @Shadow protected abstract List<EnchantmentInstance> getEnchantmentList(ItemStack stack, int slot, int level);
 
     @Inject(
-            method = "lambda$clickMenuButton$1",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/item/ItemStack;enchant(Lnet/minecraft/world/item/enchantment/Enchantment;I)V",
-                    shift = At.Shift.AFTER
-            ),
-            cancellable = true,
-            locals = LocalCapture.NO_CAPTURE
+            method = "clickMenuButton(Lnet/minecraft/world/entity/player/Player;I)Z",
+            at = @At("HEAD"),
+            cancellable = true
     )
-    private void handleScrollTransfer(ItemStack itemstack, int enchantSlot, Player player, int cost, ItemStack lapisStack, Level level, BlockPos pos, CallbackInfo ci) {
-        ItemStack scroll = this.enchantSlots.getItem(0);
-
-        if (scroll.getItem() instanceof AncientScroll) {
-            // Получаем список чар, которые были бы применены к предмету (как в оригинальном коде)
-            List<EnchantmentInstance> enchantmentsToApply = this.getEnchantmentList(itemstack, enchantSlot, cost);
-
-            if (!enchantmentsToApply.isEmpty()) {
-                // Создаем зачарованный свиток (аналогично созданию зачарованной книги)
-                ItemStack enchantedScroll = new ItemStack(ItemsObs.ENCHANTED_SCROLL.get());
-                CompoundTag compoundtag = scroll.getTag();
-                if (compoundtag != null) {
-                    enchantedScroll.setTag(compoundtag.copy());
-                }
-
-                // Применяем только те чары, которые были бы наложены на предмет
-                for (EnchantmentInstance enchantment : enchantmentsToApply) {
-                    EnchantedScroll.addEnchantment(enchantedScroll, enchantment);
-                }
-
-                // Уменьшаем количество лазурита (если не творческий режим)
-                if (!player.getAbilities().instabuild) {
-                    lapisStack.shrink(enchantSlot + 1);
-                    if (lapisStack.isEmpty()) {
-                        this.enchantSlots.setItem(1, ItemStack.EMPTY);
-                    }
-                }
-
-                // Обновляем опыт игрока
-                player.onEnchantmentPerformed(itemstack, enchantSlot + 1);
-
-                // Воспроизводим звук
-                level.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0F, level.random.nextFloat() * 0.1F + 0.9F);
-
-                // Заменяем свиток в слоте
-                this.enchantSlots.setItem(0, enchantedScroll);
-                this.enchantSlots.setChanged();
-                this.enchantmentSeed.set(player.getEnchantmentSeed());
-
-                ci.cancel();
+    private void handleScrollTransfer(Player player, int buttonId, CallbackInfoReturnable<Boolean> cir) {
+        try {
+            // 1) Гарантируем, что ид кнопки валиден
+            if (buttonId < 0 || this.costs == null || buttonId >= this.costs.length) {
+                return;
             }
+
+            ItemStack scroll     = enchantSlots.getItem(0);
+            ItemStack lapisStack = enchantSlots.getItem(1);
+
+            if (!(scroll.getItem() instanceof AncientScroll)) {
+                return; // не наш случай — отдать стандартную логику дальше
+            }
+
+            int cost = this.costs[buttonId];
+
+            // 2) Список чар
+            List<EnchantmentInstance> enchToApply =
+                    this.getEnchantmentList(scroll, buttonId, cost);
+            if (enchToApply.isEmpty()) {
+                return;
+            }
+
+            // 3) Собираем зачарованный свиток
+            ItemStack enchantedScroll = new ItemStack(ItemsObs.ENCHANTED_SCROLL.get());
+            CompoundTag tag = scroll.getTag();
+            if (tag != null) enchantedScroll.setTag(tag.copy());
+            enchToApply.forEach(e -> EnchantedScroll.addEnchantment(enchantedScroll, e));
+
+            // 4) Тратим лазурит
+            if (!player.getAbilities().instabuild) {
+                lapisStack.shrink(cost);
+                if (lapisStack.isEmpty()) {
+                    enchantSlots.setItem(1, ItemStack.EMPTY);
+                }
+            }
+
+            // 5) Опыт и звук
+            player.onEnchantmentPerformed(scroll, cost);
+            access.execute((lvl, pos) -> {
+                lvl.playSound(
+                        null, pos,
+                        SoundEvents.ENCHANTMENT_TABLE_USE,
+                        SoundSource.BLOCKS,
+                        1.0F,
+                        lvl.random.nextFloat() * 0.1F + 0.9F
+                );
+            });
+
+            // 6) Вставляем результат, синхронизируем и отменяем стандарт
+            enchantSlots.setItem(0, enchantedScroll);
+            enchantSlots.setChanged();
+            enchantmentSeed.set(player.getEnchantmentSeed());
+            cir.setReturnValue(true);
+
+        } catch (Throwable t) {
+            // Пробросим реальное исключение в лог, чтобы не терять стек
+            t.printStackTrace();
+            // и позволим Миксину продолжить штатно (или упасть после этого)
         }
     }
 }

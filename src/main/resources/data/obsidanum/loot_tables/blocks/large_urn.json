@@ -14,6 +14,15 @@
             {
               "condition": "minecraft:random_chance",
               "chance": 0.1
+            },
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "obsidanum:large_urn",
+              "properties": {
+                "width": "1",
+                "height": "1",
+                "depth": "1"
+              }
             }
           ]
         }
@@ -32,6 +41,15 @@
             {
               "condition": "minecraft:random_chance",
               "chance": 0.3
+            },
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "obsidanum:large_urn",
+              "properties": {
+                "width": "1",
+                "height": "1",
+                "depth": "1"
+              }
             }
           ]
         }
@@ -50,6 +68,15 @@
             {
               "condition": "minecraft:random_chance",
               "chance": 0.05
+            },
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "obsidanum:large_urn",
+              "properties": {
+                "width": "1",
+                "height": "1",
+                "depth": "1"
+              }
             }
           ]
         }
@@ -68,6 +95,15 @@
             {
               "condition": "minecraft:random_chance",
               "chance": 0.01
+            },
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "obsidanum:large_urn",
+              "properties": {
+                "width": "1",
+                "height": "1",
+                "depth": "1"
+              }
             }
           ]
         }
@@ -86,6 +122,15 @@
             {
               "condition": "minecraft:random_chance",
               "chance": 0.05
+            },
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "obsidanum:large_urn",
+              "properties": {
+                "width": "1",
+                "height": "1",
+                "depth": "1"
+              }
             }
           ]
         }
@@ -106,6 +151,15 @@
         {
           "condition": "minecraft:random_chance",
           "chance": 0.1
+        },
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "obsidanum:large_urn",
+          "properties": {
+            "width": "1",
+            "height": "1",
+            "depth": "1"
+          }
         }
       ]
     },
@@ -124,6 +178,15 @@
         {
           "condition": "minecraft:random_chance",
           "chance": 0.01
+        },
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "obsidanum:large_urn",
+          "properties": {
+            "width": "1",
+            "height": "1",
+            "depth": "1"
+          }
         }
       ]
     },
@@ -142,6 +205,15 @@
         {
           "condition": "minecraft:random_chance",
           "chance": 0.15
+        },
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "obsidanum:large_urn",
+          "properties": {
+            "width": "1",
+            "height": "1",
+            "depth": "1"
+          }
         }
       ]
     }

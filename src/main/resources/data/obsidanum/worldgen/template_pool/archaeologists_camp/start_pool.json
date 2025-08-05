@@ -1,26 +1,13 @@
 {
-
   "name": "obsidanum:archaeologists_camp/start_pool",
-
   "fallback": "minecraft:empty",
-
-
   "elements": [
     {
-
-
       "weight": 1,
       "element": {
-
-
         "location": "obsidanum:archaeologists_camp",
-
-
         "processors": "minecraft:empty",
-
-
         "projection": "rigid",
-
         "element_type": "minecraft:single_pool_element"
       }
     }

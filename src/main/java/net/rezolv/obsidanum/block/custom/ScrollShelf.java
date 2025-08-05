@@ -58,13 +58,25 @@ public class ScrollShelf extends Block {
             // Убираем свиток из полки
             level.setBlock(pos, state.setValue(SCROLL_PRESENT, false), 3);
 
-            // Генерируем случайный свиток
+            // Генерируем случайный свиток (25% шанс для каждого типа)
             ItemStack stack;
-            if (level.random.nextBoolean()) {
-                stack = new ItemStack(ItemsObs.ANCIENT_SCROLL.get());
-            } else {
-                stack = new ItemStack(ItemsObs.ENCHANTED_SCROLL.get());
-                addRandomEnchantments(stack, level.random);
+            int roll = level.random.nextInt(10); // 0-3
+
+            switch (roll) {
+                case 0 -> stack = new ItemStack(ItemsObs.ANCIENT_SCROLL.get());
+                case 1 -> {
+                    stack = new ItemStack(ItemsObs.ENCHANTED_SCROLL.get());
+                    addRandomEnchantments(stack, level.random);
+                }
+                case 2 -> stack = new ItemStack(ItemsObs.UN_ORDER_REPAIR_SCROLL.get());
+                case 3 -> stack = new ItemStack(ItemsObs.UN_ORDER_DESTRUCTION_SCROLL.get());
+                case 4 -> stack = new ItemStack(ItemsObs.UN_ORDER_SCROLL.get());
+                case 5 -> stack = new ItemStack(ItemsObs.UN_NETHER_SCROLL.get());
+                case 6 -> stack = new ItemStack(ItemsObs.UN_CATACOMBS_SCROLL.get());
+                case 7 -> stack = new ItemStack(ItemsObs.UN_ORDER_SCROLL_UP.get());
+                case 8 -> stack = new ItemStack(ItemsObs.UN_NETHER_SCROLL_UP.get());
+                case 9 -> stack = new ItemStack(ItemsObs.UN_CATACOMBS_SCROLL_UP.get());
+                default -> stack = ItemStack.EMPTY; // На всякий случай
             }
 
             // Отдаём игроку
